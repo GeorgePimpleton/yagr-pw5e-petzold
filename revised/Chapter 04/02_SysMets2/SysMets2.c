@@ -8,7 +8,7 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include "SysMets.h"
+#include "SysMets.h"  // from 01_SysMets1
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
