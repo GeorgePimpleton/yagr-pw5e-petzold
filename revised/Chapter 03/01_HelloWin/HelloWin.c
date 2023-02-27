@@ -3,6 +3,8 @@
              (c) Charles Petzold, 1998
   ------------------------------------------------------------*/
 
+#define WIN32_MEAN_AND_LEAN
+
 #include <windows.h>
 #include <windowsx.h>
 #include <mmsystem.h>
@@ -20,28 +22,29 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
    UNREFERENCED_PARAMETER(hPrevInstance);
    UNREFERENCED_PARAMETER(pCmdLine);
 
-   static WCHAR app_name[] = L"HelloWin";
-   WNDCLASSEX   wndclassex;
+   static PCWSTR clsName  = L"HelloWin";
+   static PCWSTR appTitle = L"The Hello Program";
+   WNDCLASSEX    wc;
 
-   wndclassex.cbSize        = sizeof(WNDCLASSEXW);
-   wndclassex.hInstance     = hInstance;
-   wndclassex.lpszClassName = app_name;
-   wndclassex.lpfnWndProc   = WndProc;
-   wndclassex.style         = 0;
-   wndclassex.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
-   wndclassex.hIconSm       = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
-   wndclassex.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
-   wndclassex.lpszMenuName  = NULL;
-   wndclassex.cbClsExtra    = 0;
-   wndclassex.cbWndExtra    = 0;
-   wndclassex.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
+   wc.cbSize        = sizeof(WNDCLASSEXW);
+   wc.hInstance     = hInstance;
+   wc.lpszClassName = clsName;
+   wc.lpfnWndProc   = WndProc;
+   wc.style         = 0;
+   wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hIconSm       = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
+   wc.lpszMenuName  = NULL;
+   wc.cbClsExtra    = 0;
+   wc.cbWndExtra    = 0;
+   wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
 
-   ATOM atom = RegisterClassExW(&wndclassex);
+   ATOM atom = RegisterClassExW(&wc);
 
  if ( 0 == atom ) { return 0;  /* premature exit */ }
 
    HWND hwnd = CreateWindowW((PCWSTR) atom,        // window class name or atom
-                             L"The Hello Program", // window caption
+                             appTitle,             // window caption
                              WS_OVERLAPPEDWINDOW,  // window style
                              CW_USEDEFAULT,        // initial x position
                              CW_USEDEFAULT,        // initial y position
@@ -72,9 +75,10 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
       else
       {
          TranslateMessage(&msg);
-         (void) DispatchMessageW(&msg);
+         DispatchMessageW(&msg);
       }
    }
+
    return (int) msg.wParam;  // WM_QUIT
 }
 
@@ -83,7 +87,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    switch ( message )
    {
    case WM_CREATE:
-      (void) PlaySoundW(L"HelloWin.wav", NULL, SND_FILENAME | SND_ASYNC);
+      PlaySoundW(L"HelloWin.wav", NULL, SND_FILENAME | SND_ASYNC);
       return 0;  // message processed
 
    case WM_PAINT:
@@ -91,12 +95,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       PAINTSTRUCT ps;
       HDC         hdc = BeginPaint(hwnd, &ps);
       RECT        rect;
-      (void) GetClientRect(hwnd, &rect);
 
-      (void) DrawTextW(hdc, L"Hello, Windows 98!", -1, &rect,
-                       DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+      GetClientRect(hwnd, &rect);
 
-      (void) EndPaint(hwnd, &ps);
+      DrawTextW(hdc, L"Hello, Windows 98!", -1, &rect,
+                DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
+      EndPaint(hwnd, &ps);
    }
    return 0;  // message processed
 
