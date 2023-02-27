@@ -3,6 +3,8 @@
              (c) Charles Petzold, 1998
   ----------------------------------------------------*/
 
+#define WIN32_MEAN_AND_LEAN
+
 #include <windows.h>
 #include <windowsx.h>
 
@@ -18,30 +20,31 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
    UNREFERENCED_PARAMETER(hPrevInstance);
    UNREFERENCED_PARAMETER(pCmdLine);
 
-   static WCHAR szAppName[] = L"SysMets3";
-   HWND         hwnd;
-   MSG          msg;
-   WNDCLASSW    wndclass;
+   static PCWSTR appName  = L"SysMets3";
+   static PCWSTR appTitle = L"Get System Metrics No. 3";
+   HWND          hwnd;
+   MSG           msg;
+   WNDCLASSW     wc;
 
-   wndclass.style         = CS_HREDRAW | CS_VREDRAW;
-   wndclass.lpfnWndProc   = WndProc;
-   wndclass.cbClsExtra    = 0;
-   wndclass.cbWndExtra    = 0;
-   wndclass.hInstance     = hInstance;
-   wndclass.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
-   wndclass.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
-   wndclass.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
-   wndclass.lpszMenuName  = NULL;
-   wndclass.lpszClassName = szAppName;
+   wc.style         = CS_HREDRAW | CS_VREDRAW;
+   wc.lpfnWndProc   = WndProc;
+   wc.cbClsExtra    = 0;
+   wc.cbWndExtra    = 0;
+   wc.hInstance     = hInstance;
+   wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
+   wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
+   wc.lpszMenuName  = NULL;
+   wc.lpszClassName = appName;
 
-   if ( !RegisterClassW(&wndclass) )
+   if ( !RegisterClassW(&wc) )
    {
       MessageBoxW(NULL, L"Program requires Windows NT!",
-                  szAppName, MB_ICONERROR);
+                  appName, MB_ICONERROR);
       return 0;
    }
 
-   hwnd = CreateWindowW(szAppName, L"Get System Metrics No. 3",
+   hwnd = CreateWindowW(appName, appTitle,
                         WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
@@ -55,7 +58,7 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
       TranslateMessage(&msg);
       DispatchMessageW(&msg);
    }
-   return (int) msg.wParam;  // WM_QUIT
+   return (int) msg.wParam;
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -77,7 +80,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    PAINTSTRUCT ps;
    SCROLLINFO  si;
    WCHAR       szBuffer[ 10 ];
-   TEXTMETRIC  tm;
+   TEXTMETRICW tm;
 
    switch ( message )
    {
@@ -85,13 +88,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       hdc = GetDC(hwnd);
 
       GetTextMetricsW(hdc, &tm);
+
       cxChar = tm.tmAveCharWidth;
       cxCaps = (tm.tmPitchAndFamily & 1 ? 3 : 2) * cxChar / 2;
       cyChar = tm.tmHeight + tm.tmExternalLeading;
 
       ReleaseDC(hwnd, hdc);
 
-      // Save the width of the three columns
+      // save the width of the three columns
       iMaxWidth = 40 * cxChar + 22 * cxCaps;
       return 0;
 
@@ -99,8 +103,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       cxClient = GET_X_LPARAM(lParam);
       cyClient = GET_Y_LPARAM(lParam);
 
-      // Set vertical scroll bar range and page size
-
+      // set vertical scroll bar range and page size
       si.cbSize = sizeof(si);
       si.fMask  = SIF_RANGE | SIF_PAGE;
       si.nMin   = 0;
@@ -108,7 +111,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       si.nPage  = cyClient / cyChar;
       SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
 
-      // Set horizontal scroll bar range and page size
+      // set horizontal scroll bar range and page size
       si.cbSize = sizeof(si);
       si.fMask  = SIF_RANGE | SIF_PAGE;
       si.nMin   = 0;
@@ -118,12 +121,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
 
    case WM_VSCROLL:
-      // Get all the vertial scroll bar information
+      // get all the vertial scroll bar information
       si.cbSize = sizeof(si);
-      si.fMask = SIF_ALL;
+      si.fMask  = SIF_ALL;
       GetScrollInfo(hwnd, SB_VERT, &si);
 
-      // Save the position for comparison later on
+      // save the position for comparison later on
       iVertPos = si.nPos;
 
       switch ( LOWORD(wParam) )
@@ -159,14 +162,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       default:
          break;
       }
-      // Set the position and then retrieve it.  Due to adjustments
+      // set the position and then retrieve it.  due to adjustments
       //   by Windows it may not be the same as the value set.
 
       si.fMask = SIF_POS;
       SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
       GetScrollInfo(hwnd, SB_VERT, &si);
 
-      // If the position has changed, scroll the window and update it
+      // if the position has changed, scroll the window and update it
       if ( si.nPos != iVertPos )
       {
          ScrollWindow(hwnd, 0, cyChar * (iVertPos - si.nPos), NULL, NULL);
@@ -175,11 +178,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
 
    case WM_HSCROLL:
-      // Get all the vertial scroll bar information
+      // get all the vertial scroll bar information
       si.cbSize = sizeof(si);
       si.fMask  = SIF_ALL;
 
-      // Save the position for comparison later on
+      // save the position for comparison later on
       GetScrollInfo(hwnd, SB_HORZ, &si);
       iHorzPos = si.nPos;
 
@@ -208,7 +211,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       default:
          break;
       }
-      // Set the position and then retrieve it.  Due to adjustments
+      // set the position and then retrieve it.  due to adjustments
       //   by Windows it may not be the same as the value set.
       si.fMask = SIF_POS;
       SetScrollInfo(hwnd, SB_HORZ, &si, TRUE);
@@ -226,17 +229,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    case WM_PAINT:
       hdc = BeginPaint(hwnd, &ps);
 
-      // Get vertical scroll bar position
+      // get vertical scroll bar position
       si.cbSize = sizeof(si);
       si.fMask  = SIF_POS;
       GetScrollInfo(hwnd, SB_VERT, &si);
       iVertPos  = si.nPos;
 
-      // Get horizontal scroll bar position
+      // get horizontal scroll bar position
       GetScrollInfo(hwnd, SB_HORZ, &si);
       iHorzPos = si.nPos;
 
-      // Find painting limits
+      // find painting limits
       iPaintBeg = max(0, iVertPos + ps.rcPaint.top / cyChar);
       iPaintEnd = min(NUMLINES - 1,
                       iVertPos + ps.rcPaint.bottom / cyChar);

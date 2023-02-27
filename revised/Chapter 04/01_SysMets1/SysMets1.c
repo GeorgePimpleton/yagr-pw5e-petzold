@@ -3,8 +3,11 @@
              (c) Charles Petzold, 1998
   ----------------------------------------------------*/
 
+  #define WIN32_MEAN_AND_LEAN
+
 #include <windows.h>
 #include <windowsx.h>
+
 #include "SysMets.h"
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -17,29 +20,30 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
    UNREFERENCED_PARAMETER(hPrevInstance);
    UNREFERENCED_PARAMETER(pCmdLine);
 
-   static WCHAR szAppName[] = L"SysMets1";
-   HWND         hwnd;
-   MSG          msg;
-   WNDCLASSW    wndclass;
+   static PCWSTR appName  = L"SysMets1";
+   static PCWSTR appTitle = L"Get System Metrics No. 1";
+   HWND          hwnd;
+   MSG           msg;
+   WNDCLASSW     wc;
 
-   wndclass.style         = CS_HREDRAW | CS_VREDRAW;
-   wndclass.lpfnWndProc   = WndProc;
-   wndclass.cbClsExtra    = 0;
-   wndclass.cbWndExtra    = 0;
-   wndclass.hInstance     = hInstance;
-   wndclass.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
-   wndclass.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
-   wndclass.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
-   wndclass.lpszMenuName  = NULL;
-   wndclass.lpszClassName = szAppName;
+   wc.style         = CS_HREDRAW | CS_VREDRAW;
+   wc.lpfnWndProc   = WndProc;
+   wc.cbClsExtra    = 0;
+   wc.cbWndExtra    = 0;
+   wc.hInstance     = hInstance;
+   wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
+   wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
+   wc.lpszMenuName  = NULL;
+   wc.lpszClassName = appName;
 
-   if ( !RegisterClassW(&wndclass) )
+   if ( !RegisterClassW(&wc) )
    {
-      MessageBoxW(NULL, L"This program requires Windows NT!", szAppName, MB_ICONERROR);
+      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
       return 0;
    }
 
-   hwnd = CreateWindowW(szAppName, L"Get System Metrics No. 1",
+   hwnd = CreateWindowW(appName, appTitle,
                         WS_OVERLAPPEDWINDOW,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
@@ -53,7 +57,7 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
       TranslateMessage(&msg);
       DispatchMessageW(&msg);
    }
-   return (int) msg.wParam;  // WM_QUIT
+   return (int) msg.wParam;
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -64,7 +68,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    HDC         hdc;
    PAINTSTRUCT ps;
    WCHAR       szBuffer[ 10 ];
-   TEXTMETRIC  tm;
+   TEXTMETRICW tm;
 
    switch ( message )
    {
@@ -72,6 +76,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       hdc = GetDC(hwnd);
 
       GetTextMetricsW(hdc, &tm);
+
       cxChar = tm.tmAveCharWidth;
       cxCaps = (tm.tmPitchAndFamily & 1 ? 3 : 2) * cxChar / 2;
       cyChar = tm.tmHeight + tm.tmExternalLeading;
@@ -84,17 +89,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
       for ( unsigned i = 0; i < NUMLINES; i++ )
       {
-         TextOutW(hdc, 0, cyChar * i,
+         TextOutW(hdc, 1, cyChar * i,
                   sysmetrics[ i ].szLabel,
                   lstrlenW(sysmetrics[ i ].szLabel));
 
-         TextOutW(hdc, 22 * cxCaps, cyChar * i,
+         TextOutW(hdc, 22 * cxCaps + 1, cyChar * i,
                   sysmetrics[ i ].szDesc,
                   lstrlenW(sysmetrics[ i ].szDesc));
 
          SetTextAlign(hdc, TA_RIGHT | TA_TOP);
 
-         TextOutW(hdc, 22 * cxCaps + 40 * cxChar, cyChar * i, szBuffer,
+         TextOutW(hdc, 22 * cxCaps + 40 * cxChar + 1, cyChar * i, szBuffer,
                   wsprintfW(szBuffer, L"%5d",
                             GetSystemMetrics(sysmetrics[ i ].iIndex)));
 
