@@ -3,6 +3,8 @@
                  (c) Charles Petzold, 1998
   -----------------------------------------------------*/
 
+#define WIN32_MEAN_AND_LEAN
+
 #include <windows.h>
 #include <stdio.h>
 #include <stdarg.h>
