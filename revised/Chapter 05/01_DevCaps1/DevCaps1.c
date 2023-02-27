@@ -43,7 +43,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 int WINAPI wWinMain(_In_     HINSTANCE hInstance,
                     _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PTSTR     pCmdLine,
+                    _In_     PWSTR     pCmdLine,
                     _In_     int       nShowCmd)
 {
    UNREFERENCED_PARAMETER(hPrevInstance);
