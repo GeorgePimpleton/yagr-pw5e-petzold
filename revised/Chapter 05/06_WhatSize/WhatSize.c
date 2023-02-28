@@ -9,15 +9,15 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE hInstance,
-                    _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PWSTR     pCmdLine,
+int WINAPI wWinMain(_In_     HINSTANCE instance,
+                    _In_opt_ HINSTANCE prevInstance,
+                    _In_     PWSTR     cmdLine,
                     _In_     int       nShowCmd)
 {
-   UNREFERENCED_PARAMETER(hPrevInstance);
-   UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  szAppName = L"WhatSize";
+   static PCWSTR  appName = L"WhatSize";
    HWND           hwnd;
    MSG            msg;
    WNDCLASSW      wc;
@@ -26,25 +26,25 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = hInstance;
+   wc.hInstance     = instance;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
    wc.lpszMenuName  = NULL;
-   wc.lpszClassName = szAppName;
+   wc.lpszClassName = appName;
 
    if ( !RegisterClassW(&wc) )
    {
       MessageBoxW(NULL, L"This program requires Windows NT!",
-                  szAppName, MB_ICONERROR);
+                  appName, MB_ICONERROR);
       return 0;
    }
 
-   hwnd = CreateWindowW(szAppName, L"What Size is the Window?",
+   hwnd = CreateWindowW(appName, L"What Size is the Window?",
                         WS_OVERLAPPEDWINDOW,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, hInstance, NULL);
+                        NULL, NULL, instance, NULL);
 
    ShowWindow(hwnd, nShowCmd);
    UpdateWindow(hwnd);
@@ -59,7 +59,7 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
 
 void Show(HWND hwnd, HDC hdc, int xText, int yText, int iMapMode, PCWSTR szMapMode)
 {
-   WCHAR szBuffer[ 60 ];
+   WCHAR buffer[ 60 ];
    RECT  rect;
 
    SaveDC(hdc);
@@ -70,8 +70,8 @@ void Show(HWND hwnd, HDC hdc, int xText, int yText, int iMapMode, PCWSTR szMapMo
 
    RestoreDC(hdc, -1);
 
-   TextOutW(hdc, xText, yText, szBuffer,
-            wsprintfW(szBuffer, L"%-20s %7d %7d %7d %7d", szMapMode,
+   TextOutW(hdc, xText, yText, buffer,
+            wsprintfW(buffer, L"%-20s %7d %7d %7d %7d", szMapMode,
             rect.left, rect.right, rect.top, rect.bottom));
 }
 

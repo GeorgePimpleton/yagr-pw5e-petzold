@@ -15,15 +15,15 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE hInstance,
-                    _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PWSTR     pCmdLine,
-                    _In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE instance,
+                    _In_opt_ HINSTANCE prevInstance,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(hPrevInstance);
-   UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  szAppName = L"Clover";
+   static PCWSTR  appName = L"Clover";
    HWND           hwnd;
    MSG            msg;
    WNDCLASSW      wc;
@@ -32,27 +32,27 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = hInstance;
+   wc.hInstance     = instance;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
    wc.lpszMenuName  = NULL;
-   wc.lpszClassName = szAppName;
+   wc.lpszClassName = appName;
 
    if ( !RegisterClassW(&wc) )
    {
       MessageBoxW(NULL, L"This program requires Windows NT!",
-                  szAppName, MB_ICONERROR);
+                  appName, MB_ICONERROR);
       return 0;
    }
 
-   hwnd = CreateWindowW(szAppName, L"Draw a Clover",
+   hwnd = CreateWindowW(appName, L"Draw a Clover",
                         WS_OVERLAPPEDWINDOW,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, hInstance, NULL);
+                        NULL, NULL, instance, NULL);
 
-   ShowWindow(hwnd, nShowCmd);
+   ShowWindow(hwnd, showCmd);
    UpdateWindow(hwnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
@@ -65,14 +65,14 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
-   static HRGN hRgnClip;
+   static HRGN rgnClip;
    static int  cxClient;
    static int  cyClient;
-   double      fAngle;
-   double      fRadius;
-   HCURSOR     hCursor;
+   double      angle;
+   double      radius;
+   HCURSOR     cursor;
    HDC         hdc;
-   HRGN        hRgnTemp[ 6 ];
+   HRGN        rgnTemp[ 6 ];
    int         i;
    PAINTSTRUCT ps;
 
@@ -82,48 +82,48 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
       cxClient = GET_X_LPARAM(lParam);
       cyClient = GET_Y_LPARAM(lParam);
 
-      hCursor = SetCursor(LoadCursor(NULL, IDC_WAIT));
+      cursor = SetCursor((HCURSOR) LoadImageW(NULL, IDC_WAIT, IMAGE_CURSOR, 0, 0, LR_SHARED));
       ShowCursor(TRUE);
 
-      if ( hRgnClip )
-         DeleteObject(hRgnClip);
+      if ( rgnClip )
+         DeleteObject(rgnClip);
 
-      hRgnTemp[ 0 ] = CreateEllipticRgn(0, cyClient / 3, cxClient / 2, 2 * cyClient / 3);
-      hRgnTemp[ 1 ] = CreateEllipticRgn(cxClient / 2, cyClient / 3, cxClient, 2 * cyClient / 3);
-      hRgnTemp[ 2 ] = CreateEllipticRgn(cxClient / 3, 0, 2 * cxClient / 3, cyClient / 2);
-      hRgnTemp[ 3 ] = CreateEllipticRgn(cxClient / 3, cyClient / 2, 2 * cxClient / 3, cyClient);
-      hRgnTemp[ 4 ] = CreateRectRgn(0, 0, 1, 1);
-      hRgnTemp[ 5 ] = CreateRectRgn(0, 0, 1, 1);
-      hRgnClip      = CreateRectRgn(0, 0, 1, 1);
+      rgnTemp[ 0 ] = CreateEllipticRgn(0, cyClient / 3, cxClient / 2, 2 * cyClient / 3);
+      rgnTemp[ 1 ] = CreateEllipticRgn(cxClient / 2, cyClient / 3, cxClient, 2 * cyClient / 3);
+      rgnTemp[ 2 ] = CreateEllipticRgn(cxClient / 3, 0, 2 * cxClient / 3, cyClient / 2);
+      rgnTemp[ 3 ] = CreateEllipticRgn(cxClient / 3, cyClient / 2, 2 * cxClient / 3, cyClient);
+      rgnTemp[ 4 ] = CreateRectRgn(0, 0, 1, 1);
+      rgnTemp[ 5 ] = CreateRectRgn(0, 0, 1, 1);
+      rgnClip      = CreateRectRgn(0, 0, 1, 1);
 
-      CombineRgn(hRgnTemp[ 4 ], hRgnTemp[ 0 ], hRgnTemp[ 1 ], RGN_OR);
-      CombineRgn(hRgnTemp[ 5 ], hRgnTemp[ 2 ], hRgnTemp[ 3 ], RGN_OR);
-      CombineRgn(hRgnClip, hRgnTemp[ 4 ], hRgnTemp[ 5 ], RGN_XOR);
+      CombineRgn(rgnTemp[ 4 ], rgnTemp[ 0 ], rgnTemp[ 1 ], RGN_OR);
+      CombineRgn(rgnTemp[ 5 ], rgnTemp[ 2 ], rgnTemp[ 3 ], RGN_OR);
+      CombineRgn(rgnClip, rgnTemp[ 4 ], rgnTemp[ 5 ], RGN_XOR);
 
       for ( i = 0; i < 6; i++ )
-         DeleteObject(hRgnTemp[ i ]);
+         DeleteObject(rgnTemp[ i ]);
 
-      SetCursor(hCursor);
+      SetCursor(cursor);
       ShowCursor(FALSE);
       return 0;
 
    case WM_PAINT: hdc = BeginPaint(hwnd, &ps);
 
       SetViewportOrgEx(hdc, cxClient / 2, cyClient / 2, NULL);
-      SelectClipRgn(hdc, hRgnClip);
+      SelectClipRgn(hdc, rgnClip);
 
-      fRadius = _hypot(cxClient / 2.0, cyClient / 2.0);
+      radius = _hypot(cxClient / 2.0, cyClient / 2.0);
 
-      for ( fAngle = 0.0; fAngle < TWO_PI; fAngle += TWO_PI / 360 )
+      for ( angle = 0.0; angle < TWO_PI; angle += TWO_PI / 360 )
       {
          MoveToEx(hdc, 0, 0, NULL);
-         LineTo(hdc, (int) (fRadius * cos(fAngle) + 0.5),
-                     (int) (-fRadius * sin(fAngle) + 0.5));
+         LineTo(hdc, (int) (radius * cos(angle) + 0.5),
+                     (int) (-radius * sin(angle) + 0.5));
       }
       EndPaint(hwnd, &ps);
       return 0;
 
-   case WM_DESTROY: DeleteObject(hRgnClip);
+   case WM_DESTROY: DeleteObject(rgnClip);
       PostQuitMessage(0);
       return 0;
    }

@@ -9,17 +9,17 @@
 #include <windowsx.h>
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-void DrawBezier(HDC, POINT[]);
+void             DrawBezier(HDC, POINT[]);
 
-int WINAPI wWinMain(_In_     HINSTANCE hInstance,
-                    _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PWSTR     pCmdLine,
-                    _In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE instance,
+                    _In_opt_ HINSTANCE prevInstance,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(hPrevInstance);
-   UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  szAppName = L"Bezier";
+   static PCWSTR  appName = L"Bezier";
    HWND           hwnd;
    MSG            msg;
    WNDCLASSW      wc;
@@ -28,27 +28,27 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = hInstance;
+   wc.hInstance     = instance;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
-   wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
+   wc.hbrBackground = (HBRUSH)  GetStockObject(WHITE_BRUSH);
    wc.lpszMenuName  = NULL;
-   wc.lpszClassName = szAppName;
+   wc.lpszClassName = appName;
 
    if ( !RegisterClassW(&wc) )
    {
       MessageBoxW(NULL, L"Program requires Windows NT!",
-                  szAppName, MB_ICONERROR);
+                  appName, MB_ICONERROR);
       return 0;
    }
 
-   hwnd = CreateWindowW(szAppName, L"Bezier Splines",
+   hwnd = CreateWindowW(appName, L"Bezier Splines",
                         WS_OVERLAPPEDWINDOW,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, hInstance, NULL);
+                        NULL, NULL, instance, NULL);
 
-   ShowWindow(hwnd, nShowCmd);
+   ShowWindow(hwnd, showCmd);
    UpdateWindow(hwnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )

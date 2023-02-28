@@ -11,9 +11,9 @@
 
 struct
 {
-   int    iIndex;
-   PCWSTR szLabel;
-   PCWSTR szDesc;
+   int    index;
+   PCWSTR label;
+   PCWSTR desc;
 }
 devcaps[] =
 {
@@ -41,42 +41,42 @@ devcaps[] =
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-int WINAPI wWinMain(_In_     HINSTANCE hInstance,
-                    _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PWSTR     pCmdLine,
-                    _In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE instance,
+                    _In_opt_ HINSTANCE prevInstance,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(hPrevInstance);
-   UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR szAppName = L"DevCaps1";
+   static PCWSTR appName = L"DevCaps1";
    WNDCLASSW     wc;
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = hInstance;
+   wc.hInstance     = instance;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
    wc.lpszMenuName  = NULL;
-   wc.lpszClassName = szAppName;
+   wc.lpszClassName = appName;
 
    if ( !RegisterClassW(&wc) )
    {
       MessageBoxW(NULL, L"This program requires Windows NT!",
-                  szAppName, MB_ICONERROR);
+                  appName, MB_ICONERROR);
       return 0;
    }
 
-   HWND hwnd = CreateWindowW(szAppName, L"Device Capabilities",
+   HWND hwnd = CreateWindowW(appName, L"Device Capabilities",
                              WS_OVERLAPPEDWINDOW,
                              CW_USEDEFAULT, CW_USEDEFAULT,
                              CW_USEDEFAULT, CW_USEDEFAULT,
-                             NULL, NULL, hInstance, NULL);
+                             NULL, NULL, instance, NULL);
 
-   ShowWindow(hwnd, nShowCmd);
+   ShowWindow(hwnd, showCmd);
    UpdateWindow(hwnd);
 
    MSG msg;
@@ -94,7 +94,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    static int  cxChar;
    static int  cxCaps;
    static int  cyChar;
-   WCHAR       szBuffer[ 10 ];
+   WCHAR       buffer[ 10 ];
    HDC         hdc;
    PAINTSTRUCT ps;
    TEXTMETRICW tm;
@@ -119,18 +119,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       for ( unsigned i = 0; i < _countof(devcaps); i++ )
       {
          TextOutW(hdc, 1, cyChar * i,
-                  devcaps[ i ].szLabel,
-                  lstrlenW(devcaps[ i ].szLabel));
+                  devcaps[ i ].label,
+                  lstrlenW(devcaps[ i ].label));
 
          TextOutW(hdc, 14 * cxCaps + 1, cyChar * i,
-                  devcaps[ i ].szDesc,
-                  lstrlenW(devcaps[ i ].szDesc));
+                  devcaps[ i ].desc,
+                  lstrlenW(devcaps[ i ].desc));
 
          SetTextAlign(hdc, TA_RIGHT | TA_TOP);
 
-         TextOutW(hdc, 14 * cxCaps + 35 * cxChar + 1, cyChar * i, szBuffer,
-                  wsprintfW(szBuffer, L"%5d",
-                            GetDeviceCaps(hdc, devcaps[ i ].iIndex)));
+         TextOutW(hdc, 14 * cxCaps + 35 * cxChar + 1, cyChar * i, buffer,
+                  wsprintfW(buffer, L"%5d",
+                            GetDeviceCaps(hdc, devcaps[ i ].index)));
 
          SetTextAlign(hdc, TA_LEFT | TA_TOP);
       }
