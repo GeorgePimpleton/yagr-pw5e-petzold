@@ -7,7 +7,9 @@ A github repository of revised C source code for Charles Petzold's Programming W
 
 A lot has changed since then, including the underlying core Windows API technology and programming philosophy.  This repository is an attempt to update the code to modern coding practices, while still retaining the Desktop programming idea.
 
-A newer edition (6th) was published that was targeted for newer WinAPI technologies, devices other than desktop PCs and Windows 8.  Using XAML and C#.  The 5th Edition was the last to be pure C based.
+A newer edition (6th) was published that was targeted for newer WinAPI technologies, devices other than desktop PCs and Windows 8.  Using XAML and C#, with several examples rewritten in C++.  The 5th Edition was the last to be pure C based.
+
+Many programmers learned Windows programming using these books, and are still used as a decent start for learning.
 
 ## Changes to sources
 Win9X was a hybrid OS that combined 16-bit functionality with 32-bit.  WinNT was pure 32-bit.  16-bit functions are ANSI, 32-bit are now classified as Unicode.  Modern Windows is now pure Unicode, running on both 32- and 64-bit CPUs.  The two biggest changes I make are:
@@ -16,7 +18,9 @@ Win9X was a hybrid OS that combined 16-bit functionality with 32-bit.  WinNT was
 2. Adapting the code so it compiles (and runs) on x86 & x64 CPUs.  Leveraging a modern multi-core CPU is obviously not addressed since such a CPU didn't exist, even though Windows can and did utilize multitasking and multithreading.
 
 ## Considerations on adapting old source code
-Most of the samples after modernizing still work, a credit on Microsoft and and their emphasis on backwards compatibility.  Several of the samples require a bit more work, some samples won't execute no matter what.  Chapter 16 in particular because of the use of 256-bit display palletes, a bygone relic of archaic computing hardware that was common in the Win9X days.
+Most of the samples after modernizing still work, a credit on Microsoft and and their emphasis on backwards and forwards compatibility.
+
+Several of the samples require a bit more work, some samples AFAIK won't execute no matter what.  Chapter 16 in particular because of the use of 256-bit display palletes, a bygone relic of archaic computing hardware that was common in the Win9X days.
 
 The sources were adapted and compiled using Visual Studio 2022, the Community edition.  It is free for non-commercial use.
 
