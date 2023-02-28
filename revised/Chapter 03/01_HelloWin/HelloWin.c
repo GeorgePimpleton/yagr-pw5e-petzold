@@ -14,20 +14,20 @@
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-int WINAPI wWinMain(_In_     HINSTANCE hInstance,
-                    _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PWSTR     pCmdLine,
-                    _In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE instance,
+                    _In_opt_ HINSTANCE prevInstance,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(hPrevInstance);
-   UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR clsName  = L"HelloWin";
    static PCWSTR appTitle = L"The Hello Program";
    WNDCLASSEX    wc;
 
    wc.cbSize        = sizeof(WNDCLASSEXW);
-   wc.hInstance     = hInstance;
+   wc.hInstance     = instance;
    wc.lpszClassName = clsName;
    wc.lpfnWndProc   = WndProc;
    wc.style         = 0;
@@ -52,12 +52,12 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
                              CW_USEDEFAULT,        // initial y size
                              NULL,                 // parent window handle
                              NULL,                 // window menu handle
-                             hInstance,            // program instance handle
+                             instance,            // program instance handle
                              NULL);                // creation parameters
 
    if ( 0 == hwnd ) { return 0;  /* premature exit*/ }
 
-   ShowWindow(hwnd, nShowCmd);
+   ShowWindow(hwnd, showCmd);
 
    if ( 0 == UpdateWindow(hwnd) ) { return 0;  /* premature exit*/ }
 
