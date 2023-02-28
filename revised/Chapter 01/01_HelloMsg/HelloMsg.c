@@ -7,15 +7,15 @@
 
 #include <windows.h>
 
-int WINAPI wWinMain(_In_     HINSTANCE hInstance,
-                    _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PWSTR     pCmdLine,
-                    _In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE instance,
+                    _In_opt_ HINSTANCE prevInstance,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(hInstance);
-   UNREFERENCED_PARAMETER(hPrevInstance);
-   UNREFERENCED_PARAMETER(pCmdLine);
-   UNREFERENCED_PARAMETER(nShowCmd);
+   UNREFERENCED_PARAMETER(instance);
+   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(cmdLine);
+   UNREFERENCED_PARAMETER(showCmd);
 
    MessageBoxW(NULL, L"Hello, Windows 98!", L"HelloMsg", MB_OK);
 
