@@ -12,13 +12,13 @@
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-int WINAPI wWinMain(_In_     HINSTANCE hInstance,
-                    _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PWSTR     pCmdLine,
-                    _In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE instance,
+                    _In_opt_ HINSTANCE prevInstance,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(hPrevInstance);
-   UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR appName  = L"SysMets1";
    static PCWSTR appTitle = L"Get System Metrics No. 1";
@@ -30,7 +30,7 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = hInstance;
+   wc.hInstance     = instance;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -47,9 +47,9 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
                         WS_OVERLAPPEDWINDOW,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, hInstance, NULL);
+                        NULL, NULL, instance, NULL);
 
-   ShowWindow(hwnd, nShowCmd);
+   ShowWindow(hwnd, showCmd);
    UpdateWindow(hwnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
@@ -67,7 +67,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    static int  cyChar;
    HDC         hdc;
    PAINTSTRUCT ps;
-   WCHAR       szBuffer[ 10 ];
+   WCHAR       buffer [ 10 ];
    TEXTMETRICW tm;
 
    switch ( message )
@@ -90,18 +90,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       for ( unsigned i = 0; i < NUMLINES; i++ )
       {
          TextOutW(hdc, 1, cyChar * i,
-                  sysmetrics[ i ].szLabel,
-                  lstrlenW(sysmetrics[ i ].szLabel));
+                  sysmetrics[ i ].label,
+                  lstrlenW(sysmetrics[ i ].label));
 
          TextOutW(hdc, 22 * cxCaps + 1, cyChar * i,
-                  sysmetrics[ i ].szDesc,
-                  lstrlenW(sysmetrics[ i ].szDesc));
+                  sysmetrics[ i ].desc,
+                  lstrlenW(sysmetrics[ i ].desc));
 
          SetTextAlign(hdc, TA_RIGHT | TA_TOP);
 
-         TextOutW(hdc, 22 * cxCaps + 40 * cxChar + 1, cyChar * i, szBuffer,
-                  wsprintfW(szBuffer, L"%5d",
-                            GetSystemMetrics(sysmetrics[ i ].iIndex)));
+         TextOutW(hdc, 22 * cxCaps + 40 * cxChar + 1, cyChar * i, buffer,
+                  wsprintfW(buffer, L"%5d",
+                            GetSystemMetrics(sysmetrics[ i ].index)));
 
          SetTextAlign(hdc, TA_LEFT | TA_TOP);
       }

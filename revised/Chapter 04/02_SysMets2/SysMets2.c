@@ -12,14 +12,14 @@
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-int WINAPI wWinMain(_In_     HINSTANCE hInstance,
-                    _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PWSTR     pCmdLine,
-                    _In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE instance,
+                    _In_opt_ HINSTANCE prevInstance,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 
 {
-   UNREFERENCED_PARAMETER(hPrevInstance);
-   UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR appName = L"SysMets2";
    static PCWSTR appTitle = L"Get System Metrics No. 2";
@@ -29,7 +29,7 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = hInstance;
+   wc.hInstance     = instance;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -46,9 +46,9 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
                              WS_OVERLAPPEDWINDOW | WS_VSCROLL,
                              CW_USEDEFAULT, CW_USEDEFAULT,
                              CW_USEDEFAULT, CW_USEDEFAULT,
-                             NULL, NULL, hInstance, NULL);
+                             NULL, NULL, instance, NULL);
 
-   ShowWindow(hwnd, nShowCmd);
+   ShowWindow(hwnd, showCmd);
    UpdateWindow(hwnd);
 
    MSG msg;
@@ -67,11 +67,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    static int  cxCaps;
    static int  cyChar;
    static int  cyClient;
-   static int  iVscrollPos;
+   static int  vScrollPos;
    HDC         hdc;
    int         y;
    PAINTSTRUCT ps;
-   WCHAR       szBuffer[ 10 ];
+   WCHAR       buffer[ 10 ];
    TEXTMETRICW tm;
 
    switch ( message )
@@ -88,7 +88,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       ReleaseDC(hwnd, hdc);
 
       SetScrollRange(hwnd, SB_VERT, 0, NUMLINES - 1, FALSE);
-      SetScrollPos(hwnd, SB_VERT, iVscrollPos, TRUE);
+      SetScrollPos(hwnd, SB_VERT, vScrollPos, TRUE);
       return 0;
 
    case WM_SIZE:
@@ -99,34 +99,34 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       switch ( LOWORD(wParam) )
       {
       case SB_LINEUP:
-         iVscrollPos -= 1;
+         vScrollPos -= 1;
          break;
 
       case SB_LINEDOWN:
-         iVscrollPos += 1;
+         vScrollPos += 1;
          break;
 
       case SB_PAGEUP:
-         iVscrollPos -= cyClient / cyChar;
+         vScrollPos -= cyClient / cyChar;
          break;
 
       case SB_PAGEDOWN:
-         iVscrollPos += cyClient / cyChar;
+         vScrollPos += cyClient / cyChar;
          break;
 
       case SB_THUMBPOSITION:
-         iVscrollPos = HIWORD(wParam);
+         vScrollPos = HIWORD(wParam);
          break;
 
       default:
          break;
       }
 
-      iVscrollPos = max(0, min(iVscrollPos, NUMLINES - 1));
+      vScrollPos = max(0, min(vScrollPos, NUMLINES - 1));
 
-      if ( iVscrollPos != GetScrollPos(hwnd, SB_VERT) )
+      if ( vScrollPos != GetScrollPos(hwnd, SB_VERT) )
       {
-         SetScrollPos(hwnd, SB_VERT, iVscrollPos, TRUE);
+         SetScrollPos(hwnd, SB_VERT, vScrollPos, TRUE);
          InvalidateRect(hwnd, NULL, TRUE);
       }
       return 0;
@@ -136,7 +136,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
       for ( unsigned i = 0; i < NUMLINES; i++ )
       {
-         y = cyChar * (i - iVscrollPos);
+         y = cyChar * (i - vScrollPos);
 
          TextOutW(hdc, 1, y,
                   sysmetrics[ i ].szLabel,
@@ -148,8 +148,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
          SetTextAlign(hdc, TA_RIGHT | TA_TOP);
 
-         TextOutW(hdc, 22 * cxCaps + 40 * cxChar + 1, y, szBuffer,
-                  wsprintfW(szBuffer, L"%5d",
+         TextOutW(hdc, 22 * cxCaps + 40 * cxChar + 1, y, buffer,
+                  wsprintfW(buffer, L"%5d",
                             GetSystemMetrics(sysmetrics[ i ].iIndex)));
 
          SetTextAlign(hdc, TA_LEFT | TA_TOP);
