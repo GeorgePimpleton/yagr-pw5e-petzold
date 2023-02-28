@@ -6,3 +6,5 @@ Many of the examples still compile, with a bit of modernization, but some don't.
 
 ## Changes to sources
 I have explicitly modified the source code from Petzold's original to compile as Unicode, annotated wWinMain with SAL annotations to stop Visual Studio from whinging, and dropped using Hungarian Notation from most variable names.
+
+I've also modified the directory structure to better reflect the progression of code examples.
