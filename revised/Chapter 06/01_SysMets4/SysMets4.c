@@ -13,13 +13,13 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE hInstance,
-                    _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PWSTR     pCmdLine,
-                    _In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE instance,
+                    _In_opt_ HINSTANCE prevInstance,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(hPrevInstance);
-   UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"SysMets4";
    HWND           hwnd;
@@ -30,7 +30,7 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = hInstance;
+   wc.hInstance     = instance;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -48,9 +48,9 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
                         WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, hInstance, NULL);
+                        NULL, NULL, instance, NULL);
 
-   ShowWindow(hwnd, nShowCmd);
+   ShowWindow(hwnd, showCmd);
    UpdateWindow(hwnd);
 
    while ( GetMessage(&msg, NULL, 0, 0) )
@@ -69,18 +69,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    static int  cyChar;
    static int  cxClient;
    static int  cyClient;
-   static int  iMaxWidth;
+   static int  maxWidth;
    HDC         hdc;
    int         i;
    int         x;
    int         y;
-   int         iVertPos;
-   int         iHorzPos;
-   int         iPaintBeg;
-   int         iPaintEnd;
+   int         vertPos;
+   int         horzPos;
+   int         paintBeg;
+   int         paintEnd;
    PAINTSTRUCT ps;
    SCROLLINFO  si;
-   WCHAR       szBuffer[ 10 ];
+   WCHAR       buffer[ 10 ];
    TEXTMETRICW tm;
 
    switch ( message )
@@ -96,7 +96,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       ReleaseDC(hwnd, hdc);
 
       // save the width of the three columns
-      iMaxWidth = 40 * cxChar + 22 * cxCaps;
+      maxWidth = 40 * cxChar + 22 * cxCaps;
       return 0;
 
    case WM_SIZE:
@@ -115,7 +115,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       si.cbSize = sizeof(si);
       si.fMask  = SIF_RANGE | SIF_PAGE;
       si.nMin   = 0;
-      si.nMax   = 2 + iMaxWidth / cxChar;
+      si.nMax   = 2 + maxWidth / cxChar;
       si.nPage  = cxClient / cxChar;
       SetScrollInfo(hwnd, SB_HORZ, &si, TRUE);
       return 0;
@@ -127,7 +127,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       GetScrollInfo(hwnd, SB_VERT, &si);
 
       // save the position for comparison later on
-      iVertPos = si.nPos;
+      vertPos = si.nPos;
 
       switch ( LOWORD(wParam) )
       {
@@ -170,9 +170,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       GetScrollInfo(hwnd, SB_VERT, &si);
 
       // if the position has changed, scroll the window and update it
-      if ( si.nPos != iVertPos )
+      if ( si.nPos != vertPos )
       {
-         ScrollWindow(hwnd, 0, cyChar * (iVertPos - si.nPos),
+         ScrollWindow(hwnd, 0, cyChar * (vertPos - si.nPos),
                       NULL, NULL);
          UpdateWindow(hwnd);
       }
@@ -185,7 +185,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
       // save the position for comparison later on
       GetScrollInfo(hwnd, SB_HORZ, &si);
-      iHorzPos = si.nPos;
+      horzPos = si.nPos;
 
       switch ( LOWORD(wParam) )
       {
@@ -220,9 +220,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       GetScrollInfo(hwnd, SB_HORZ, &si);
 
       // if the position has changed, scroll the window
-      if ( si.nPos != iHorzPos )
+      if ( si.nPos != horzPos )
       {
-         ScrollWindow(hwnd, cxChar * (iHorzPos - si.nPos), 0, NULL, NULL);
+         ScrollWindow(hwnd, cxChar * (horzPos - si.nPos), 0, NULL, NULL);
       }
       return 0;
 
@@ -270,21 +270,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       si.cbSize = sizeof(si);
       si.fMask  = SIF_POS;
       GetScrollInfo(hwnd, SB_VERT, &si);
-      iVertPos  = si.nPos;
+      vertPos  = si.nPos;
 
       // get horizontal scroll bar position
       GetScrollInfo(hwnd, SB_HORZ, &si);
-      iHorzPos = si.nPos;
+      horzPos = si.nPos;
 
       // find painting limits
-      iPaintBeg = max(0, iVertPos + ps.rcPaint.top / cyChar);
-      iPaintEnd = min(NUMLINES - 1,
-                      iVertPos + ps.rcPaint.bottom / cyChar);
+      paintBeg = max(0, vertPos + ps.rcPaint.top / cyChar);
+      paintEnd = min(NUMLINES - 1,
+                      vertPos + ps.rcPaint.bottom / cyChar);
 
-      for ( i = iPaintBeg; i <= iPaintEnd; i++ )
+      for ( i = paintBeg; i <= paintEnd; i++ )
       {
-         x = cxChar * (1 - iHorzPos);
-         y = cyChar * (i - iVertPos);
+         x = cxChar * (1 - horzPos);
+         y = cyChar * (i - vertPos);
 
          TextOutW(hdc, x, y,
                   sysmetrics[ i ].szLabel,
@@ -296,8 +296,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
          SetTextAlign(hdc, TA_RIGHT | TA_TOP);
 
-         TextOutW(hdc, x + 22 * cxCaps + 40 * cxChar, y, szBuffer,
-                  wsprintfW(szBuffer, L"%5d",
+         TextOutW(hdc, x + 22 * cxCaps + 40 * cxChar, y, buffer,
+                  wsprintfW(buffer, L"%5d",
                             GetSystemMetrics(sysmetrics[ i ].iIndex)));
 
          SetTextAlign(hdc, TA_LEFT | TA_TOP);

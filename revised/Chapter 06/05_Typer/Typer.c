@@ -9,17 +9,17 @@
 #include <windowsx.h>
 #include <malloc.h>
 
-#define BUFFER(x,y) *(pBuffer + y * cxBuffer + x)
+#define BUFFER(x,y) *(buffer + y * cxBuffer + x)
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE hInstance,
-                    _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PWSTR     pCmdLine,
-                    _In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE instance,
+                    _In_opt_ HINSTANCE prevInstance,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(hPrevInstance);
-   UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"Typer";
    HWND           hwnd;
@@ -30,7 +30,7 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = hInstance;
+   wc.hInstance     = instance;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -48,9 +48,9 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
                         WS_OVERLAPPEDWINDOW,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, hInstance, NULL);
+                        NULL, NULL, instance, NULL);
 
-   ShowWindow(hwnd, nShowCmd);
+   ShowWindow(hwnd, showCmd);
    UpdateWindow(hwnd);
 
    while ( GetMessage(&msg, NULL, 0, 0) )
@@ -63,7 +63,7 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-   static DWORD dwCharSet = DEFAULT_CHARSET;
+   static DWORD charSet = DEFAULT_CHARSET;
    static int   cxChar;
    static int   cyChar;
    static int   cxClient;
@@ -72,7 +72,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    static int   cyBuffer;
    static int   xCaret;
    static int   yCaret;
-   static PWSTR pBuffer   = NULL;
+   static PWSTR buffer   = NULL;
    HDC          hdc;
    int          x;
    int          y;
@@ -83,13 +83,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    switch ( message )
    {
    case WM_INPUTLANGCHANGE:
-      dwCharSet = (DWORD) wParam;
+      charSet = (DWORD) wParam;
       // fall through
 
    case WM_CREATE:
       hdc = GetDC(hwnd);
       SelectObject(hdc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
-                                    dwCharSet, 0, 0, 0, FIXED_PITCH, NULL));
+                                    charSet, 0, 0, 0, FIXED_PITCH, NULL));
 
       GetTextMetricsW(hdc, &tm);
       cxChar = tm.tmAveCharWidth;
@@ -112,10 +112,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       cyBuffer = max(1, cyClient / cyChar);
 
       // allocate memory for buffer and clear it
-      if ( pBuffer != NULL )
-         free(pBuffer);
+      if ( buffer != NULL )
+         free(buffer);
 
-      pBuffer = (PWSTR) malloc(cxBuffer * cyBuffer * sizeof(WCHAR));
+      buffer = (PWSTR) malloc(cxBuffer * cyBuffer * sizeof(WCHAR));
 
       for ( y = 0; y < cyBuffer; y++ )
          for ( x = 0; x < cxBuffer; x++ )
@@ -190,7 +190,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          hdc = GetDC(hwnd);
 
          SelectObject(hdc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
-                                       dwCharSet, 0, 0, 0, FIXED_PITCH, NULL));
+                                       charSet, 0, 0, 0, FIXED_PITCH, NULL));
 
          TextOutW(hdc, xCaret * cxChar, yCaret * cyChar,
                   &BUFFER(xCaret, yCaret),
@@ -254,7 +254,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             hdc = GetDC(hwnd);
 
             SelectObject(hdc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
-                                          dwCharSet, 0, 0, 0, FIXED_PITCH, NULL));
+                                          charSet, 0, 0, 0, FIXED_PITCH, NULL));
 
             TextOutW(hdc, xCaret* cxChar, yCaret* cyChar,
                      &BUFFER(xCaret, yCaret), 1);
@@ -282,7 +282,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       hdc = BeginPaint(hwnd, &ps);
 
       SelectObject(hdc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
-                                    dwCharSet, 0, 0, 0, FIXED_PITCH, NULL));
+                                    charSet, 0, 0, 0, FIXED_PITCH, NULL));
 
       for ( y = 0; y < cyBuffer; y++ )
          TextOutW(hdc, 0, y * cyChar, &BUFFER(0, y), cxBuffer);

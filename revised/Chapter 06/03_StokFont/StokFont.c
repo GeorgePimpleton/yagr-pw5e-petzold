@@ -10,13 +10,13 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE hInstance,
-                    _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PWSTR     pCmdLine,
-                    _In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE instance,
+                    _In_opt_ HINSTANCE prevInstance,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(hPrevInstance);
-   UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR appName = L"StokFont";
    HWND          hwnd;
@@ -27,7 +27,7 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = hInstance;
+   wc.hInstance     = instance;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -45,9 +45,9 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
                         WS_OVERLAPPEDWINDOW | WS_VSCROLL,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, hInstance, NULL);
+                        NULL, NULL, instance, NULL);
 
-   ShowWindow(hwnd, nShowCmd);
+   ShowWindow(hwnd, showCmd);
    UpdateWindow(hwnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
@@ -63,7 +63,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    static struct
    {
       int    idStockFont;
-      PCWSTR szStockFont;
+      PCWSTR stockFont;
    }
    stockfont[] = { {OEM_FIXED_FONT,       L"OEM_FIXED_FONT"},
                    {ANSI_FIXED_FONT,      L"ANSI_FIXED_FONT"},
@@ -82,8 +82,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    int         cxGrid;
    int         cyGrid;
    PAINTSTRUCT ps;
-   WCHAR       szFaceName[ LF_FACESIZE ];
-   WCHAR       szBuffer[ LF_FACESIZE + 64 ];
+   WCHAR       faceName[ LF_FACESIZE ];
+   WCHAR       buffer[ LF_FACESIZE + 64 ];
    TEXTMETRICW tm;
 
    switch ( message )
@@ -156,16 +156,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       hdc = BeginPaint(hwnd, &ps);
 
       SelectObject(hdc, GetStockObject(stockfont[ iFont ].idStockFont));
-      GetTextFaceW(hdc, LF_FACESIZE, szFaceName);
+      GetTextFaceW(hdc, LF_FACESIZE, faceName);
       GetTextMetricsW(hdc, &tm);
 
       cxGrid = max(3 * tm.tmAveCharWidth, 2 * tm.tmMaxCharWidth);
       cyGrid = tm.tmHeight + 3;
 
-      TextOutW(hdc, 0, 0, szBuffer,
-               wsprintfW(szBuffer, L" %s: Face Name = %s, CharSet = %i",
-                         stockfont[ iFont ].szStockFont,
-                         szFaceName, tm.tmCharSet));
+      TextOutW(hdc, 0, 0, buffer,
+               wsprintfW(buffer, L" %s: Face Name = %s, CharSet = %i",
+                         stockfont[ iFont ].stockFont,
+                         faceName, tm.tmCharSet));
 
       SetTextAlign(hdc, TA_TOP | TA_CENTER);
 
@@ -182,11 +182,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       // vertical and horizontal headings
       for ( i = 0; i < 16; i++ )
       {
-         TextOutW(hdc, (2 * i + 5) * cxGrid / 2, 2 * cyGrid + 2, szBuffer,
-                  wsprintfW(szBuffer, L"%X-", i));
+         TextOutW(hdc, (2 * i + 5) * cxGrid / 2, 2 * cyGrid + 2, buffer,
+                  wsprintfW(buffer, L"%X-", i));
 
-         TextOutW(hdc, 3 * cxGrid / 2, (i + 3) * cyGrid + 2, szBuffer,
-                  wsprintfW(szBuffer, L"-%X", i));
+         TextOutW(hdc, 3 * cxGrid / 2, (i + 3) * cyGrid + 2, buffer,
+                  wsprintfW(buffer, L"-%X", i));
       }
 
       // characters
@@ -194,8 +194,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          for ( x = 0; x < 16; x++ )
          {
             TextOutW(hdc, (2 * x + 5) * cxGrid / 2,
-                     (y + 3) * cyGrid + 2, szBuffer,
-                     wsprintfW(szBuffer, L"%c", 16 * x + y));
+                     (y + 3) * cyGrid + 2, buffer,
+                     wsprintfW(buffer, L"%c", 16 * x + y));
          }
 
       EndPaint(hwnd, &ps);

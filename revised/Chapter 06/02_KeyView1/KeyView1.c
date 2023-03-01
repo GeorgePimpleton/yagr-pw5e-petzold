@@ -11,13 +11,13 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE hInstance,
-                    _In_opt_ HINSTANCE hPrevInstance,
-                    _In_     PWSTR     pCmdLine,
-                    _In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE instance,
+                    _In_opt_ HINSTANCE prevInstance,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(hPrevInstance);
-   UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR szAppName = L"KeyView1";
    HWND          hwnd;
@@ -28,7 +28,7 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = hInstance;
+   wc.hInstance     = instance;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -46,9 +46,9 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
                         WS_OVERLAPPEDWINDOW,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, hInstance, NULL);
+                        NULL, NULL, instance, NULL);
 
-   ShowWindow(hwnd, nShowCmd);
+   ShowWindow(hwnd, showCmd);
    UpdateWindow(hwnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
@@ -88,10 +88,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                                L"WM_SYSCHAR",    L"WM_SYSDEADCHAR" };
    HDC           hdc;
    int           i;
-   int           iType;
+   int           type;
    PAINTSTRUCT   ps;
-   WCHAR         szBuffer[ 128 ];
-   WCHAR         szKeyName[ 32 ];
+   WCHAR         buffer[ 128 ];
+   WCHAR         keyName[ 32 ];
    TEXTMETRICW   tm;
 
    switch ( message )
@@ -175,19 +175,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
       for ( i = 0; i < min(cLines, cyClient / cyChar - 1); i++ )
       {
-         iType = pmsg[ i ].message == WM_CHAR ||
+         type = pmsg[ i ].message == WM_CHAR ||
                  pmsg[ i ].message == WM_SYSCHAR ||
                  pmsg[ i ].message == WM_DEADCHAR ||
                  pmsg[ i ].message == WM_SYSDEADCHAR;
 
-         GetKeyNameTextW((LONG) pmsg[ i ].lParam, szKeyName, _countof(szKeyName));
+         GetKeyNameTextW((LONG) pmsg[ i ].lParam, keyName, _countof(keyName));
 
-         TextOutW(hdc, 1, (cyClient / cyChar - 1 - i) * cyChar, szBuffer,
-                  wsprintfW(szBuffer, format[ iType ],
+         TextOutW(hdc, 1, (cyClient / cyChar - 1 - i) * cyChar, buffer,
+                  wsprintfW(buffer, format[ type ],
                             msgList[ pmsg[ i ].message - WM_KEYFIRST ],
                             pmsg[ i ].wParam,
-                            (PTSTR) (iType ? L" " : szKeyName),
-                            (TCHAR) (iType ? pmsg[ i ].wParam : ' '),
+                            (PTSTR) (type ? L" " : keyName),
+                            (TCHAR) (type ? pmsg[ i ].wParam : ' '),
                             LOWORD(pmsg[ i ].lParam),
                             HIWORD(pmsg[ i ].lParam) & 0xFF,
                             0x01000000 & pmsg[ i ].lParam ? yes : no,
