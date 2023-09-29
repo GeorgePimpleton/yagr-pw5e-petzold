@@ -1,7 +1,7 @@
 # yagr-pw5e-petzold (Yet Another github repository for Charles Petzold's "Programming Windows", 5th Edition)
 A github repository of revised C source code for Charles Petzold's Programming Windows 5th Edition ISBN-10 157231995X, adapting to the modern WinAPI
 
-----------------------------------------------------------------------------
+----
 
 "Programming Windows" 5th Edition was originally published in 1998, when Windows 9X, Windows NT, 16- & 32-bit CPUs and Internet Explorer were in common use.  PW5E was considered by many to be **The Bible** for learning Windows programming.
 
@@ -12,10 +12,10 @@ A newer edition (6th) was published that was targeted for newer WinAPI technolog
 Many programmers learned Windows programming using these books, and are still used as a decent start for learning.
 
 ## Changes to sources
-Win9X was a hybrid OS that combined 16-bit functionality with 32-bit.  WinNT was pure 32-bit.  16-bit functions are ANSI, 32-bit are now classified as Unicode.  Modern Windows is now pure Unicode, running on both 32- and 64-bit CPUs.  The two biggest changes I make are:
+Win9X was a hybrid OS that combined 16-bit functionality with 32-bit.  WinNT was pure 32-bit.  16-bit functions are ANSI, 32-bit are now classified as Unicode.  Modern Windows with WinXP and later is now pure Unicode, running on both 32- and 64-bit CPUs.  The two biggest changes I make are:
 
 1. Explicitly coding WinAPI functions so the Unicode versions are called.  A few samples require ANSI functionality be used for key parts, when dealing with text files.
-2. Adapting the code so it compiles (and runs) on x86 & x64 CPUs.  Leveraging a modern multi-core CPU is obviously not addressed since such a CPU didn't exist, even though Windows can and did utilize multitasking and multithreading.
+2. Adapting the code so it compiles (and runs) on x86 & x64 CPUs.  Leveraging a modern multi-core CPU is obviously not addressed since such a CPU didn't exist when the code was originally written, even though Windows can and did utilize multitasking and multithreading.
 
 ## Considerations on adapting old source code
 Most of the samples after modernizing still work, a credit on Microsoft and and their emphasis on backwards and forwards compatibility.
