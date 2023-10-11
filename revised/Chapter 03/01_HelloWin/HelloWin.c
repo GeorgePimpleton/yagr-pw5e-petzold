@@ -1,6 +1,6 @@
 /*------------------------------------------------------------
    HelloWin.c -- Displays "Hello, Windows 98!" in client area
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   ------------------------------------------------------------*/
 
 #define WIN32_MEAN_AND_LEAN
@@ -12,14 +12,14 @@
 // make sure the Windows multi-media library DLL is loaded for use
 #pragma comment(lib, "winmm.lib")
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR clsName  = L"HelloWin";
@@ -27,7 +27,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    WNDCLASSEX    wc;
 
    wc.cbSize        = sizeof(WNDCLASSEXW);
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.lpszClassName = clsName;
    wc.lpfnWndProc   = WndProc;
    wc.style         = 0;
@@ -43,28 +43,28 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
 
  if ( 0 == atom ) { return 0;  /* premature exit */ }
 
-   HWND hwnd = CreateWindowW((PCWSTR) atom,        // window class name or atom
-                             appTitle,             // window caption
-                             WS_OVERLAPPEDWINDOW,  // window style
-                             CW_USEDEFAULT,        // initial x position
-                             CW_USEDEFAULT,        // initial y position
-                             CW_USEDEFAULT,        // initial x size
-                             CW_USEDEFAULT,        // initial y size
-                             NULL,                 // parent window handle
-                             NULL,                 // window menu handle
-                             instance,            // program instance handle
-                             NULL);                // creation parameters
+ HWND wnd = CreateWindowW((PCWSTR) atom,        // window class name or atom
+                          appTitle,             // window caption
+                          WS_OVERLAPPEDWINDOW,  // window style
+                          CW_USEDEFAULT,        // initial x position
+                          CW_USEDEFAULT,        // initial y position
+                          CW_USEDEFAULT,        // initial x size
+                          CW_USEDEFAULT,        // initial y size
+                          NULL,                 // parent window handle
+                          NULL,                 // window menu handle
+                          inst,                 // program instance handle
+                          NULL);                // creation parameters
 
-   if ( 0 == hwnd ) { return 0;  /* premature exit*/ }
+   if ( 0 == wnd ) { return 0;  /* premature exit*/ }
 
-   ShowWindow(hwnd, showCmd);
+   ShowWindow(wnd, showCmd);
 
-   if ( 0 == UpdateWindow(hwnd) ) { return 0;  /* premature exit*/ }
+   if ( 0 == UpdateWindow(wnd) ) { return 0;  /* premature exit*/ }
 
    MSG  msg;
    BOOL ret;  // three states: -1, 0 or non-zero
 
-   while ( 0 != (ret = GetMessage(&msg, NULL, 0, 0)) )
+   while ( 0 != (ret = GetMessageW(&msg, NULL, 0, 0)) )
    {
       if ( -1 == ret )
       {
@@ -82,9 +82,9 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;  // WM_QUIT
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
       PlaySoundW(L"HelloWin.wav", NULL, SND_FILENAME | SND_ASYNC);
@@ -93,15 +93,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    case WM_PAINT:
    {
       PAINTSTRUCT ps;
-      HDC         hdc = BeginPaint(hwnd, &ps);
+      HDC         hdc = BeginPaint(wnd, &ps);
       RECT        rect;
 
-      GetClientRect(hwnd, &rect);
+      GetClientRect(wnd, &rect);
 
       DrawTextW(hdc, L"Hello, Windows 98!", -1, &rect,
                 DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
    }
    return 0;  // message processed
 
@@ -110,6 +110,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;  // message processed
 
    default:
-      return DefWindowProcW(hwnd, message, wParam, lParam);
+      return DefWindowProcW(wnd, msg, wParam, lParam);
    }
 }
