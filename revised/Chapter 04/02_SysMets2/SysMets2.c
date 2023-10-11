@@ -1,6 +1,6 @@
 /*----------------------------------------------------
    SYSMETS2.C -- System Metrics Display Program No. 2
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   ----------------------------------------------------*/
 
 #define WIN32_MEAN_AND_LEAN
@@ -10,15 +10,15 @@
 
 #include "SysMets.h"  // from 01_SysMets1
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR appName = L"SysMets2";
@@ -29,7 +29,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -46,7 +46,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
                              WS_OVERLAPPEDWINDOW | WS_VSCROLL,
                              CW_USEDEFAULT, CW_USEDEFAULT,
                              CW_USEDEFAULT, CW_USEDEFAULT,
-                             NULL, NULL, instance, NULL);
+                             NULL, NULL, inst, NULL);
 
    ShowWindow(hwnd, showCmd);
    UpdateWindow(hwnd);
@@ -61,100 +61,100 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   static int  cxChar;
-   static int  cxCaps;
-   static int  cyChar;
-   static int  cyClient;
-   static int  vScrollPos;
-   HDC         hdc;
+   static int  xChar;
+   static int  xCaps;
+   static int  yChar;
+   static int  yClient;
+   static int  scrollPos;
+   HDC         dc;
    int         y;
    PAINTSTRUCT ps;
    WCHAR       buffer[ 10 ];
    TEXTMETRICW tm;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
-      hdc = GetDC(hwnd);
+      dc = GetDC(wnd);
 
-      GetTextMetricsW(hdc, &tm);
+      GetTextMetricsW(dc, &tm);
 
-      cxChar = tm.tmAveCharWidth;
-      cxCaps = (tm.tmPitchAndFamily & 1 ? 3 : 2) * cxChar / 2;
-      cyChar = tm.tmHeight + tm.tmExternalLeading;
+      xChar = tm.tmAveCharWidth;
+      xCaps = (tm.tmPitchAndFamily & 1 ? 3 : 2) * xChar / 2;
+      yChar = tm.tmHeight + tm.tmExternalLeading;
 
-      ReleaseDC(hwnd, hdc);
+      ReleaseDC(wnd, dc);
 
-      SetScrollRange(hwnd, SB_VERT, 0, NUMLINES - 1, FALSE);
-      SetScrollPos(hwnd, SB_VERT, vScrollPos, TRUE);
+      SetScrollRange(wnd, SB_VERT, 0, NUMLINES - 1, FALSE);
+      SetScrollPos(wnd, SB_VERT, scrollPos, TRUE);
       return 0;
 
    case WM_SIZE:
-      cyClient = GET_Y_LPARAM(lParam);
+      yClient = GET_Y_LPARAM(lParam);
       return 0;
 
    case WM_VSCROLL:
       switch ( LOWORD(wParam) )
       {
       case SB_LINEUP:
-         vScrollPos -= 1;
+         scrollPos -= 1;
          break;
 
       case SB_LINEDOWN:
-         vScrollPos += 1;
+         scrollPos += 1;
          break;
 
       case SB_PAGEUP:
-         vScrollPos -= cyClient / cyChar;
+         scrollPos -= yClient / yChar;
          break;
 
       case SB_PAGEDOWN:
-         vScrollPos += cyClient / cyChar;
+         scrollPos += yClient / yChar;
          break;
 
       case SB_THUMBPOSITION:
-         vScrollPos = HIWORD(wParam);
+         scrollPos = HIWORD(wParam);
          break;
 
       default:
          break;
       }
 
-      vScrollPos = max(0, min(vScrollPos, NUMLINES - 1));
+      scrollPos = max(0, min(scrollPos, NUMLINES - 1));
 
-      if ( vScrollPos != GetScrollPos(hwnd, SB_VERT) )
+      if ( scrollPos != GetScrollPos(wnd, SB_VERT) )
       {
-         SetScrollPos(hwnd, SB_VERT, vScrollPos, TRUE);
-         InvalidateRect(hwnd, NULL, TRUE);
+         SetScrollPos(wnd, SB_VERT, scrollPos, TRUE);
+         InvalidateRect(wnd, NULL, TRUE);
       }
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
       for ( unsigned i = 0; i < NUMLINES; i++ )
       {
-         y = cyChar * (i - vScrollPos);
+         y = yChar * (i - scrollPos);
 
-         TextOutW(hdc, 1, y,
-                  sysmetrics[ i ].szLabel,
-                  lstrlenW(sysmetrics[ i ].szLabel));
+         TextOutW(dc, 1, y,
+                  sysmetrics[ i ].label,
+                  lstrlenW(sysmetrics[ i ].label));
 
-         TextOutW(hdc, 22 * cxCaps, y + 1,
-                  sysmetrics[ i ].szDesc,
-                  lstrlenW(sysmetrics[ i ].szDesc));
+         TextOutW(dc, 22 * xCaps, y + 1,
+                  sysmetrics[ i ].desc,
+                  lstrlenW(sysmetrics[ i ].desc));
 
-         SetTextAlign(hdc, TA_RIGHT | TA_TOP);
+         SetTextAlign(dc, TA_RIGHT | TA_TOP);
 
-         TextOutW(hdc, 22 * cxCaps + 40 * cxChar + 1, y, buffer,
+         TextOutW(dc, 22 * xCaps + 40 * xChar + 1, y, buffer,
                   wsprintfW(buffer, L"%5d",
-                            GetSystemMetrics(sysmetrics[ i ].iIndex)));
+                            GetSystemMetrics(sysmetrics[ i ].index)));
 
-         SetTextAlign(hdc, TA_LEFT | TA_TOP);
+         SetTextAlign(dc, TA_LEFT | TA_TOP);
       }
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
@@ -162,5 +162,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

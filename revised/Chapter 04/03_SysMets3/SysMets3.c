@@ -1,6 +1,6 @@
 /*----------------------------------------------------
    SYSMETS3.C -- System Metrics Display Program No. 3
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   ----------------------------------------------------*/
 
 #define WIN32_MEAN_AND_LEAN
@@ -10,18 +10,18 @@
 
 #include "SysMets.h"  // from 01_SysMets1
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR appName  = L"SysMets3";
-   HWND          hwnd;
+   HWND          wnd;
    MSG           msg;
    WNDCLASSW     wc;
 
@@ -29,7 +29,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -43,14 +43,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Get System Metrics No. 3",
-                        WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Get System Metrics No. 3",
+                       WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -60,15 +60,15 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   static int  cxChar;
-   static int  cxCaps;
-   static int  cyChar;
-   static int  cxClient;
-   static int  cyClient;
+   static int  xChar;
+   static int  xCaps;
+   static int  yChar;
+   static int  xClient;
+   static int  yClient;
    static int  maxWidth;
-   HDC         hdc;
+   HDC         dc;
    int         i;
    int         x;
    int         y;
@@ -81,49 +81,49 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    WCHAR       buffer[ 10 ];
    TEXTMETRICW tm;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
-      hdc = GetDC(hwnd);
+      dc = GetDC(wnd);
 
-      GetTextMetricsW(hdc, &tm);
+      GetTextMetricsW(dc, &tm);
 
-      cxChar = tm.tmAveCharWidth;
-      cxCaps = (tm.tmPitchAndFamily & 1 ? 3 : 2) * cxChar / 2;
-      cyChar = tm.tmHeight + tm.tmExternalLeading;
+      xChar = tm.tmAveCharWidth;
+      xCaps = (tm.tmPitchAndFamily & 1 ? 3 : 2) * xChar / 2;
+      yChar = tm.tmHeight + tm.tmExternalLeading;
 
-      ReleaseDC(hwnd, hdc);
+      ReleaseDC(wnd, dc);
 
       // save the width of the three columns
-      maxWidth = 40 * cxChar + 22 * cxCaps;
+      maxWidth = 40 * xChar + 22 * xCaps;
       return 0;
 
    case WM_SIZE:
-      cxClient = GET_X_LPARAM(lParam);
-      cyClient = GET_Y_LPARAM(lParam);
+      xClient = GET_X_LPARAM(lParam);
+      yClient = GET_Y_LPARAM(lParam);
 
       // set vertical scroll bar range and page size
       si.cbSize = sizeof(si);
       si.fMask  = SIF_RANGE | SIF_PAGE;
       si.nMin   = 0;
       si.nMax   = NUMLINES - 1;
-      si.nPage  = cyClient / cyChar;
-      SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
+      si.nPage  = yClient / yChar;
+      SetScrollInfo(wnd, SB_VERT, &si, TRUE);
 
       // set horizontal scroll bar range and page size
       si.cbSize = sizeof(si);
       si.fMask  = SIF_RANGE | SIF_PAGE;
       si.nMin   = 0;
-      si.nMax   = 2 + maxWidth / cxChar;
-      si.nPage  = cxClient / cxChar;
-      SetScrollInfo(hwnd, SB_HORZ, &si, TRUE);
+      si.nMax   = 2 + maxWidth / xChar;
+      si.nPage  = xClient / xChar;
+      SetScrollInfo(wnd, SB_HORZ, &si, TRUE);
       return 0;
 
    case WM_VSCROLL:
       // get all the vertial scroll bar information
       si.cbSize = sizeof(si);
       si.fMask  = SIF_ALL;
-      GetScrollInfo(hwnd, SB_VERT, &si);
+      GetScrollInfo(wnd, SB_VERT, &si);
 
       // save the position for comparison later on
       vertPos = si.nPos;
@@ -165,14 +165,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       //   by Windows it may not be the same as the value set.
 
       si.fMask = SIF_POS;
-      SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
-      GetScrollInfo(hwnd, SB_VERT, &si);
+      SetScrollInfo(wnd, SB_VERT, &si, TRUE);
+      GetScrollInfo(wnd, SB_VERT, &si);
 
       // if the position has changed, scroll the window and update it
       if ( si.nPos != vertPos )
       {
-         ScrollWindow(hwnd, 0, cyChar * (vertPos - si.nPos), NULL, NULL);
-         UpdateWindow(hwnd);
+         ScrollWindow(wnd, 0, yChar * (vertPos - si.nPos), NULL, NULL);
+         UpdateWindow(wnd);
       }
       return 0;
 
@@ -182,7 +182,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       si.fMask  = SIF_ALL;
 
       // save the position for comparison later on
-      GetScrollInfo(hwnd, SB_HORZ, &si);
+      GetScrollInfo(wnd, SB_HORZ, &si);
       horzPos = si.nPos;
 
       switch ( LOWORD(wParam) )
@@ -213,59 +213,59 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       // set the position and then retrieve it.  due to adjustments
       //   by Windows it may not be the same as the value set.
       si.fMask = SIF_POS;
-      SetScrollInfo(hwnd, SB_HORZ, &si, TRUE);
-      GetScrollInfo(hwnd, SB_HORZ, &si);
+      SetScrollInfo(wnd, SB_HORZ, &si, TRUE);
+      GetScrollInfo(wnd, SB_HORZ, &si);
 
       // If the position has changed, scroll the window
 
       if ( si.nPos != horzPos )
       {
-         ScrollWindow(hwnd, cxChar * (horzPos - si.nPos), 0,
+         ScrollWindow(wnd, xChar * (horzPos - si.nPos), 0,
                       NULL, NULL);
       }
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
       // get vertical scroll bar position
       si.cbSize = sizeof(si);
       si.fMask  = SIF_POS;
-      GetScrollInfo(hwnd, SB_VERT, &si);
+      GetScrollInfo(wnd, SB_VERT, &si);
       vertPos  = si.nPos;
 
       // get horizontal scroll bar position
-      GetScrollInfo(hwnd, SB_HORZ, &si);
+      GetScrollInfo(wnd, SB_HORZ, &si);
       horzPos = si.nPos;
 
       // find painting limits
-      paintBeg = max(0, vertPos + ps.rcPaint.top / cyChar);
+      paintBeg = max(0, vertPos + ps.rcPaint.top / yChar);
       paintEnd = min(NUMLINES - 1,
-                      vertPos + ps.rcPaint.bottom / cyChar);
+                      vertPos + ps.rcPaint.bottom / yChar);
 
       for ( i = paintBeg; i <= paintEnd; i++ )
       {
-         x = cxChar * (1 - horzPos);
-         y = cyChar * (i - vertPos);
+         x = xChar * (1 - horzPos);
+         y = yChar * (i - vertPos);
 
-         TextOutW(hdc, x, y,
-                  sysmetrics[ i ].szLabel,
-                  lstrlenW(sysmetrics[ i ].szLabel));
+         TextOutW(dc, x, y,
+                  sysmetrics[ i ].label,
+                  lstrlenW(sysmetrics[ i ].label));
 
-         TextOutW(hdc, x + 22 * cxCaps, y,
-                  sysmetrics[ i ].szDesc,
-                  lstrlenW(sysmetrics[ i ].szDesc));
+         TextOutW(dc, x + 22 * xCaps, y,
+                  sysmetrics[ i ].desc,
+                  lstrlenW(sysmetrics[ i ].desc));
 
-         SetTextAlign(hdc, TA_RIGHT | TA_TOP);
+         SetTextAlign(dc, TA_RIGHT | TA_TOP);
 
-         TextOutW(hdc, x + 22 * cxCaps + 40 * cxChar, y, buffer,
+         TextOutW(dc, x + 22 * xCaps + 40 * xChar, y, buffer,
                   wsprintfW(buffer, L"%5d",
-                            GetSystemMetrics(sysmetrics[ i ].iIndex)));
+                            GetSystemMetrics(sysmetrics[ i ].index)));
 
-         SetTextAlign(hdc, TA_LEFT | TA_TOP);
+         SetTextAlign(dc, TA_LEFT | TA_TOP);
       }
 
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
@@ -273,5 +273,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

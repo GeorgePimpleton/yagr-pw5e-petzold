@@ -1,6 +1,6 @@
 /*----------------------------------------------------
    SYSMETS1.C -- System Metrics Display Program No. 1
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   ----------------------------------------------------*/
 
   #define WIN32_MEAN_AND_LEAN
@@ -10,7 +10,7 @@
 
 #include "SysMets.h"
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 int WINAPI wWinMain(_In_     HINSTANCE instance,
                     _In_opt_ HINSTANCE prevInstance,
@@ -22,7 +22,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
 
    static PCWSTR appName  = L"SysMets1";
    static PCWSTR appTitle = L"Get System Metrics No. 1";
-   HWND          hwnd;
+   HWND          wnd;
    MSG           msg;
    WNDCLASSW     wc;
 
@@ -43,14 +43,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, appTitle,
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, appTitle,
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, instance, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -60,52 +60,52 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-   static int  cxChar;
-   static int  cxCaps;
-   static int  cyChar;
-   HDC         hdc;
+   static int  xChar;
+   static int  xCaps;
+   static int  yChar;
+   HDC         dc;
    PAINTSTRUCT ps;
-   WCHAR       buffer [ 10 ];
+   WCHAR       buffer[ 10 ];
    TEXTMETRICW tm;
 
    switch ( message )
    {
    case WM_CREATE:
-      hdc = GetDC(hwnd);
+      dc = GetDC(wnd);
 
-      GetTextMetricsW(hdc, &tm);
+      GetTextMetricsW(dc, &tm);
 
-      cxChar = tm.tmAveCharWidth;
-      cxCaps = (tm.tmPitchAndFamily & 1 ? 3 : 2) * cxChar / 2;
-      cyChar = tm.tmHeight + tm.tmExternalLeading;
+      xChar = tm.tmAveCharWidth;
+      xCaps = (tm.tmPitchAndFamily & 1 ? 3 : 2) * xChar / 2;
+      yChar = tm.tmHeight + tm.tmExternalLeading;
 
-      ReleaseDC(hwnd, hdc);
+      ReleaseDC(wnd, dc);
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
       for ( unsigned i = 0; i < NUMLINES; i++ )
       {
-         TextOutW(hdc, 1, cyChar * i,
+         TextOutW(dc, 1, yChar * i,
                   sysmetrics[ i ].label,
                   lstrlenW(sysmetrics[ i ].label));
 
-         TextOutW(hdc, 22 * cxCaps + 1, cyChar * i,
+         TextOutW(dc, 22 * xCaps + 1, yChar * i,
                   sysmetrics[ i ].desc,
                   lstrlenW(sysmetrics[ i ].desc));
 
-         SetTextAlign(hdc, TA_RIGHT | TA_TOP);
+         SetTextAlign(dc, TA_RIGHT | TA_TOP);
 
-         TextOutW(hdc, 22 * cxCaps + 40 * cxChar + 1, cyChar * i, buffer,
+         TextOutW(dc, 22 * xCaps + 40 * xChar + 1, yChar * i, buffer,
                   wsprintfW(buffer, L"%5d",
                             GetSystemMetrics(sysmetrics[ i ].index)));
 
-         SetTextAlign(hdc, TA_LEFT | TA_TOP);
+         SetTextAlign(dc, TA_LEFT | TA_TOP);
       }
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
@@ -113,5 +113,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, message, wParam, lParam);
 }

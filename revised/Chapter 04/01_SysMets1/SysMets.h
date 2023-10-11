@@ -6,9 +6,9 @@
 
 struct
 {
-   int    iIndex;
-   PCWSTR szLabel;
-   PCWSTR szDesc;
+   int    index;
+   PCWSTR label;
+   PCWSTR desc;
 }
 sysmetrics[] =
 {
