@@ -1,6 +1,6 @@
 /*-----------------------------------------
    STOKFONT.C -- Stock Font Objects
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   -----------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -10,16 +10,16 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR appName = L"StokFont";
-   HWND          hwnd;
+   HWND          wnd;
    MSG           msg;
    WNDCLASSW     wc;
 
@@ -27,7 +27,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -41,14 +41,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Stock Fonts",
-                        WS_OVERLAPPEDWINDOW | WS_VSCROLL,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Stock Fonts",
+                       WS_OVERLAPPEDWINDOW | WS_VSCROLL,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -58,147 +58,149 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static struct
    {
       int    idStockFont;
       PCWSTR stockFont;
    }
-   stockfont[] = { {OEM_FIXED_FONT,       L"OEM_FIXED_FONT"},
-                   {ANSI_FIXED_FONT,      L"ANSI_FIXED_FONT"},
-                   {ANSI_VAR_FONT,        L"ANSI_VAR_FONT"},
-                   {SYSTEM_FONT,          L"SYSTEM_FONT"},
-                   {DEVICE_DEFAULT_FONT,  L"DEVICE_DEFAULT_FONT"},
-                   {SYSTEM_FIXED_FONT,    L"SYSTEM_FIXED_FONT"},
-                   {DEFAULT_GUI_FONT,     L"DEFAULT_GUI_FONT"} };
+   stockfont[ ] = { {OEM_FIXED_FONT,       L"OEM_FIXED_FONT"},
+                    {ANSI_FIXED_FONT,      L"ANSI_FIXED_FONT"},
+                    {ANSI_VAR_FONT,        L"ANSI_VAR_FONT"},
+                    {SYSTEM_FONT,          L"SYSTEM_FONT"},
+                    {DEVICE_DEFAULT_FONT,  L"DEVICE_DEFAULT_FONT"},
+                    {SYSTEM_FIXED_FONT,    L"SYSTEM_FIXED_FONT"},
+                    {DEFAULT_GUI_FONT,     L"DEFAULT_GUI_FONT"} };
 
-   static int  iFont;
-   static int  cFonts = _countof(stockfont);
-   HDC         hdc;
+   static int  font;
+   static int  numFonts = _countof(stockfont);
+   HDC         dc;
    int         i;
    int         x;
    int         y;
-   int         cxGrid;
-   int         cyGrid;
+   int         xGrid;
+   int         yGrid;
    PAINTSTRUCT ps;
    WCHAR       faceName[ LF_FACESIZE ];
    WCHAR       buffer[ LF_FACESIZE + 64 ];
    TEXTMETRICW tm;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
-      SetScrollRange(hwnd, SB_VERT, 0, cFonts - 1, TRUE);
+      SetScrollRange(wnd, SB_VERT, 0, numFonts - 1, TRUE);
       return 0;
 
    case WM_DISPLAYCHANGE:
-      InvalidateRect(hwnd, NULL, TRUE);
+      InvalidateRect(wnd, NULL, TRUE);
       return 0;
 
    case WM_VSCROLL:
       switch ( LOWORD(wParam) )
       {
       case SB_TOP:
-         iFont = 0;
+         font = 0;
          break;
 
       case SB_BOTTOM:
-         iFont = cFonts - 1;
+         font = numFonts - 1;
          break;
 
       case SB_LINEUP:
       case SB_PAGEUP:
-         iFont -= 1;
+         font -= 1;
          break;
 
       case SB_LINEDOWN:
       case SB_PAGEDOWN:
-         iFont += 1;
+         font += 1;
          break;
 
       case SB_THUMBPOSITION:
-         iFont = HIWORD(wParam);
+         font = HIWORD(wParam);
          break;
       }
 
-      iFont = max(0, min(cFonts - 1, iFont));
-      SetScrollPos(hwnd, SB_VERT, iFont, TRUE);
-      InvalidateRect(hwnd, NULL, TRUE);
+      font = max(0, min(numFonts - 1, font));
+      SetScrollPos(wnd, SB_VERT, font, TRUE);
+      InvalidateRect(wnd, NULL, TRUE);
       return 0;
 
    case WM_KEYDOWN:
       switch ( wParam )
       {
       case VK_HOME:
-         SendMessageW(hwnd, WM_VSCROLL, SB_TOP, 0);
+         SendMessageW(wnd, WM_VSCROLL, SB_TOP, 0);
          break;
 
       case VK_END:
-         SendMessageW(hwnd, WM_VSCROLL, SB_BOTTOM, 0);
+         SendMessageW(wnd, WM_VSCROLL, SB_BOTTOM, 0);
          break;
 
       case VK_PRIOR:
       case VK_LEFT:
       case VK_UP:
-         SendMessageW(hwnd, WM_VSCROLL, SB_LINEUP, 0);
+         SendMessageW(wnd, WM_VSCROLL, SB_LINEUP, 0);
          break;
 
       case VK_NEXT:
       case VK_RIGHT:
       case VK_DOWN:
-         SendMessageW(hwnd, WM_VSCROLL, SB_PAGEDOWN, 0);
+         SendMessageW(wnd, WM_VSCROLL, SB_PAGEDOWN, 0);
          break;
       }
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
-      SelectObject(hdc, GetStockObject(stockfont[ iFont ].idStockFont));
-      GetTextFaceW(hdc, LF_FACESIZE, faceName);
-      GetTextMetricsW(hdc, &tm);
+      SelectObject(dc, GetStockObject(stockfont[ font ].idStockFont));
+      GetTextFaceW(dc, LF_FACESIZE, faceName);
+      GetTextMetricsW(dc, &tm);
 
-      cxGrid = max(3 * tm.tmAveCharWidth, 2 * tm.tmMaxCharWidth);
-      cyGrid = tm.tmHeight + 3;
+      xGrid = max(3 * tm.tmAveCharWidth, 2 * tm.tmMaxCharWidth);
+      yGrid = tm.tmHeight + 3;
 
-      TextOutW(hdc, 0, 0, buffer,
+      TextOutW(dc, 0, 0, buffer,
                wsprintfW(buffer, L" %s: Face Name = %s, CharSet = %i",
-                         stockfont[ iFont ].stockFont,
+                         stockfont[ font ].stockFont,
                          faceName, tm.tmCharSet));
 
-      SetTextAlign(hdc, TA_TOP | TA_CENTER);
+      SetTextAlign(dc, TA_TOP | TA_CENTER);
 
       // vertical and horizontal lines
       for ( i = 0; i < 17; i++ )
       {
-         MoveToEx(hdc, (i + 2) * cxGrid, 2 * cyGrid, NULL);
-         LineTo(hdc, (i + 2) * cxGrid, 19 * cyGrid);
+         MoveToEx(dc, (i + 2) * xGrid, 2 * yGrid, NULL);
+         LineTo(dc, (i + 2) * xGrid, 19 * yGrid);
 
-         MoveToEx(hdc, cxGrid, (i + 3) * cyGrid, NULL);
-         LineTo(hdc, 18 * cxGrid, (i + 3) * cyGrid);
+         MoveToEx(dc, xGrid, (i + 3) * yGrid, NULL);
+         LineTo(dc, 18 * xGrid, (i + 3) * yGrid);
       }
 
       // vertical and horizontal headings
       for ( i = 0; i < 16; i++ )
       {
-         TextOutW(hdc, (2 * i + 5) * cxGrid / 2, 2 * cyGrid + 2, buffer,
+         TextOutW(dc, (2 * i + 5) * xGrid / 2, 2 * yGrid + 2, buffer,
                   wsprintfW(buffer, L"%X-", i));
 
-         TextOutW(hdc, 3 * cxGrid / 2, (i + 3) * cyGrid + 2, buffer,
+         TextOutW(dc, 3 * xGrid / 2, (i + 3) * yGrid + 2, buffer,
                   wsprintfW(buffer, L"-%X", i));
       }
 
       // characters
       for ( y = 0; y < 16; y++ )
+      {
          for ( x = 0; x < 16; x++ )
          {
-            TextOutW(hdc, (2 * x + 5) * cxGrid / 2,
-                     (y + 3) * cyGrid + 2, buffer,
+            TextOutW(dc, (2 * x + 5) * xGrid / 2,
+                     (y + 3) * yGrid + 2, buffer,
                      wsprintfW(buffer, L"%c", 16 * x + y));
          }
+      }
 
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
@@ -206,5 +208,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

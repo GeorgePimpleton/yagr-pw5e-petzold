@@ -1,6 +1,6 @@
 /*--------------------------------------------------------
    KEYVIEW2.C -- Displays Keyboard and Character Messages
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   --------------------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -11,16 +11,16 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"KeyView2";
-   HWND           hwnd;
+   HWND           wnd;
    MSG            msg;
    WNDCLASSW      wc;
 
@@ -28,7 +28,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -42,14 +42,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Keyboard Message Viewer #2",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Keyboard Message Viewer #2",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -62,34 +62,35 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
    static DWORD   charSet = DEFAULT_CHARSET;
-   static int     cxClientMax;
-   static int     cyClientMax;
-   static int     cxClient;
-   static int     cyClient;
-   static int     cxChar;
-   static int     cyChar;
-   static int     cLinesMax;
-   static int     cLines;
+   static int     xClientMax;
+   static int     yClientMax;
+   static int     xClient;
+   static int     yClient;
+   static int     xChar;
+   static int     yChar;
+   static int     linesMax;
+   static int     lines;
    static PMSG    pmsg;
    static RECT    rectScroll;
+
    static PCWSTR  top = L"Message        Key       Char     Repeat Scan Ext ALT Prev Tran";
    static PCWSTR  und = L"_______        ___       ____     ______ ____ ___ ___ ____ ____";
 
    static PCWSTR  format[ 2 ] = { L"%-13s %3d %-15s%c%6u %4d %3s %3s %4s %4s",
                                   L"%-13s            0x%04X%1s%c %6u %4d %3s %3s %4s %4s" };
 
-   static PCWSTR  yes  = L"Yes";
-   static PCWSTR  no   = L"No";
-   static PCWSTR  down = L"Down";
-   static PCWSTR  up   = L"Up";
+   static PCWSTR yes  = L"Yes";
+   static PCWSTR no   = L"No";
+   static PCWSTR down = L"Down";
+   static PCWSTR up   = L"Up";
 
-   static PCWSTR  msgList[] = { L"WM_KEYDOWN", L"WM_KEYUP",
+   static PCWSTR  msgList[ ] = { L"WM_KEYDOWN", L"WM_KEYUP",
                                L"WM_CHAR", L"WM_DEADCHAR",
                                L"WM_SYSKEYDOWN", L"WM_SYSKEYUP",
                                L"WM_SYSCHAR", L"WM_SYSDEADCHAR" };
-   HDC            hdc;
+   HDC            dc;
    int            i;
-   int            iType;
+   int            type;
    PAINTSTRUCT    ps;
    WCHAR          buffer[ 128 ];
    WCHAR          keyName[ 32 ];
@@ -99,54 +100,59 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    {
    case WM_INPUTLANGCHANGE:
       charSet = (DWORD) wParam;
+
       // fall through
 
    case WM_CREATE:
    case WM_DISPLAYCHANGE:
-
       // get maximum size of client area
-      cxClientMax = GetSystemMetrics(SM_CXMAXIMIZED);
-      cyClientMax = GetSystemMetrics(SM_CYMAXIMIZED);
+      xClientMax = GetSystemMetrics(SM_CXMAXIMIZED);
+      yClientMax = GetSystemMetrics(SM_CYMAXIMIZED);
 
       // get character size for fixed-pitch font
-      hdc = GetDC(hwnd);
+      dc = GetDC(hwnd);
 
-      SelectObject(hdc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
+      SelectObject(dc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
                                     charSet, 0, 0, 0, FIXED_PITCH, NULL));
 
-      GetTextMetricsW(hdc, &tm);
-      cxChar = tm.tmAveCharWidth;
-      cyChar = tm.tmHeight;
+      GetTextMetricsW(dc, &tm);
+      xChar = tm.tmAveCharWidth;
+      yChar = tm.tmHeight;
 
-      DeleteObject(SelectObject(hdc, GetStockObject(SYSTEM_FONT)));
-      ReleaseDC(hwnd, hdc);
+      DeleteObject(SelectObject(dc, GetStockObject(SYSTEM_FONT)));
+      ReleaseDC(hwnd, dc);
 
       // allocate memory for display lines
       if ( pmsg )
+      {
          free(pmsg);
+      }
 
-      cLinesMax    = cyClientMax / cyChar;
-      pmsg         = (PMSG) malloc(cLinesMax * sizeof(MSG));
-      cLines       = 0;
+      linesMax = yClientMax / yChar;
+      pmsg     = (PMSG) malloc(linesMax * sizeof(MSG));
+      lines    = 0;
+
       // fall through
 
    case WM_SIZE:
       if ( message == WM_SIZE )
       {
-         cxClient = GET_X_LPARAM(lParam);
-         cyClient = GET_Y_LPARAM(lParam);
+         xClient = GET_X_LPARAM(lParam);
+         yClient = GET_Y_LPARAM(lParam);
       }
 
       // calculate scrolling rectangle
       rectScroll.left   = 0;
-      rectScroll.right  = cxClient;
-      rectScroll.top    = cyChar;
-      rectScroll.bottom = cyChar * (cyClient / cyChar);
+      rectScroll.right  = xClient;
+      rectScroll.top    = yChar;
+      rectScroll.bottom = yChar * (yClient / yChar);
 
       InvalidateRect(hwnd, NULL, TRUE);
 
       if ( message == WM_INPUTLANGCHANGE )
+      {
          return TRUE;
+      }
 
       return 0;
 
@@ -159,49 +165,49 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    case WM_SYSCHAR:
    case WM_SYSDEADCHAR:
       // rearrange storage array
-      for ( i = cLinesMax - 1; i > 0; i-- )
+      for ( i = linesMax - 1; i > 0; i-- )
       {
          pmsg[ i ] = pmsg[ i - 1 ];
       }
 
       // store new message
-      pmsg[ 0 ].hwnd    = hwnd;
+      pmsg[ 0 ].hwnd = hwnd;
       pmsg[ 0 ].message = message;
-      pmsg[ 0 ].wParam  = wParam;
-      pmsg[ 0 ].lParam  = lParam;
+      pmsg[ 0 ].wParam = wParam;
+      pmsg[ 0 ].lParam = lParam;
 
-      cLines = min(cLines + 1, cLinesMax);
+      lines = min(lines + 1, linesMax);
 
       // scroll up the display
-      ScrollWindow(hwnd, 0, -cyChar, &rectScroll, &rectScroll);
+      ScrollWindow(hwnd, 0, -yChar, &rectScroll, &rectScroll);
 
       break;   // ie, call DefWindowProc so sys messages work
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(hwnd, &ps);
 
-      SelectObject(hdc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
+      SelectObject(dc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
                                     charSet, 0, 0, 0, FIXED_PITCH, NULL));
 
-      SetBkMode(hdc, TRANSPARENT);
-      TextOutW(hdc, 0, 0, top, lstrlenW(top));
-      TextOutW(hdc, 0, 0, und, lstrlenW(und));
+      SetBkMode(dc, TRANSPARENT);
+      TextOutW(dc, 0, 0, top, lstrlenW(top));
+      TextOutW(dc, 0, 0, und, lstrlenW(und));
 
-      for ( i = 0; i < min(cLines, cyClient / cyChar - 1); i++ )
+      for ( i = 0; i < min(lines, yClient / yChar - 1); i++ )
       {
-         iType = pmsg[ i ].message == WM_CHAR ||
-                 pmsg[ i ].message == WM_SYSCHAR ||
-                 pmsg[ i ].message == WM_DEADCHAR ||
-                 pmsg[ i ].message == WM_SYSDEADCHAR;
+         type = pmsg[ i ].message == WM_CHAR ||
+                pmsg[ i ].message == WM_SYSCHAR ||
+                pmsg[ i ].message == WM_DEADCHAR ||
+                pmsg[ i ].message == WM_SYSDEADCHAR;
 
          GetKeyNameTextW((LONG) pmsg[ i ].lParam, keyName, _countof(keyName));
 
-         TextOutW(hdc, 0, (cyClient / cyChar - 1 - i) * cyChar, buffer,
-                  wsprintfW(buffer, format[ iType ],
+         TextOutW(dc, 0, (yClient / yChar - 1 - i) * yChar, buffer,
+                  wsprintfW(buffer, format[ type ],
                             msgList[ pmsg[ i ].message - WM_KEYFIRST ],
                             pmsg[ i ].wParam,
-                            (PCWSTR) (iType ? L" " : keyName),
-                            (WCHAR) (iType ? pmsg[ i ].wParam : ' '),
+                            (PCWSTR) (type ? L" " : keyName),
+                            (WCHAR) (type ? pmsg[ i ].wParam : L' '),
                             LOWORD(pmsg[ i ].lParam),
                             HIWORD(pmsg[ i ].lParam) & 0xFF,
                             0x01000000 & pmsg[ i ].lParam ? yes : no,
@@ -209,7 +215,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                             0x40000000 & pmsg[ i ].lParam ? down : up,
                             0x80000000 & pmsg[ i ].lParam ? up : down));
       }
-      DeleteObject(SelectObject(hdc, GetStockObject(SYSTEM_FONT)));
+      DeleteObject(SelectObject(dc, GetStockObject(SYSTEM_FONT)));
       EndPaint(hwnd, &ps);
       return 0;
 

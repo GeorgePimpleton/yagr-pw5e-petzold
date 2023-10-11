@@ -9,7 +9,7 @@
 #include <windowsx.h>
 #include <malloc.h>
 
-#define BUFFER(x,y) *(buffer + y * cxBuffer + x)
+#define BUFFER(x,y) *(buffer + y * xBuffer + x)
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -64,16 +64,16 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
    static DWORD charSet = DEFAULT_CHARSET;
-   static int   cxChar;
-   static int   cyChar;
-   static int   cxClient;
-   static int   cyClient;
-   static int   cxBuffer;
-   static int   cyBuffer;
+   static int   xChar;
+   static int   yChar;
+   static int   xClient;
+   static int   yClient;
+   static int   xBuffer;
+   static int   yBuffer;
    static int   xCaret;
    static int   yCaret;
    static PWSTR buffer   = NULL;
-   HDC          hdc;
+   HDC          dc;
    int          x;
    int          y;
    int          i;
@@ -87,55 +87,63 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       // fall through
 
    case WM_CREATE:
-      hdc = GetDC(hwnd);
-      SelectObject(hdc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
+      dc = GetDC(hwnd);
+      SelectObject(dc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
                                     charSet, 0, 0, 0, FIXED_PITCH, NULL));
 
-      GetTextMetricsW(hdc, &tm);
-      cxChar = tm.tmAveCharWidth;
-      cyChar = tm.tmHeight;
+      GetTextMetricsW(dc, &tm);
+      xChar = tm.tmAveCharWidth;
+      yChar = tm.tmHeight;
 
-      DeleteObject(SelectObject(hdc, GetStockObject(SYSTEM_FONT)));
-      ReleaseDC(hwnd, hdc);
+      DeleteObject(SelectObject(dc, GetStockObject(SYSTEM_FONT)));
+      ReleaseDC(hwnd, dc);
       // fall through
 
    case WM_SIZE:
       // obtain window size in pixels
       if ( message == WM_SIZE )
       {
-         cxClient = GET_X_LPARAM(lParam);
-         cyClient = GET_Y_LPARAM(lParam);
+         xClient = GET_X_LPARAM(lParam);
+         yClient = GET_Y_LPARAM(lParam);
       }
 
       // calculate window size in characters
-      cxBuffer = max(1, cxClient / cxChar);
-      cyBuffer = max(1, cyClient / cyChar);
+      xBuffer = max(1, xClient / xChar);
+      yBuffer = max(1, yClient / yChar);
 
       // allocate memory for buffer and clear it
       if ( buffer != NULL )
+      {
          free(buffer);
+      }
 
-      buffer = (PWSTR) malloc(cxBuffer * cyBuffer * sizeof(WCHAR));
+      buffer = (PWSTR) malloc(xBuffer * yBuffer * sizeof(WCHAR));
 
-      for ( y = 0; y < cyBuffer; y++ )
-         for ( x = 0; x < cxBuffer; x++ )
+      for ( y = 0; y < yBuffer; y++ )
+      {
+         for ( x = 0; x < xBuffer; x++ )
+         {
             BUFFER(x, y) = ' ';
+         }
+      }
 
       // set caret to upper left corner
 
       xCaret = 0;
       yCaret = 0;
 
-      if ( hwnd == GetFocus() )
-         SetCaretPos(xCaret * cxChar, yCaret * cyChar);
+      if ( hwnd == GetFocus( ) )
+      {
+         SetCaretPos(xCaret * xChar, yCaret * yChar);
+      }
 
       InvalidateRect(hwnd, NULL, TRUE);
       return 0;
 
    case WM_SETFOCUS:
       // create and show the caret
-      CreateCaret(hwnd, NULL, cxChar, cyChar);
-      SetCaretPos(xCaret * cxChar, yCaret * cyChar);
+      CreateCaret(hwnd, NULL, xChar, yChar);
+      SetCaretPos(xCaret * xChar, yCaret * yChar);
       ShowCaret(hwnd);
       return 0;
 
@@ -153,7 +161,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          break;
 
       case VK_END:
-         xCaret = cxBuffer - 1;
+         xCaret = xBuffer - 1;
          break;
 
       case VK_PRIOR:
@@ -161,7 +169,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          break;
 
       case VK_NEXT:
-         yCaret = cyBuffer - 1;
+         yCaret = yBuffer - 1;
          break;
 
       case VK_LEFT:
@@ -169,7 +177,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          break;
 
       case VK_RIGHT:
-         xCaret = min(xCaret + 1, cxBuffer - 1);
+         xCaret = min(xCaret + 1, xBuffer - 1);
          break;
 
       case VK_UP:
@@ -177,31 +185,33 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          break;
 
       case VK_DOWN:
-         yCaret = min(yCaret + 1, cyBuffer - 1);
+         yCaret = min(yCaret + 1, yBuffer - 1);
          break;
 
       case VK_DELETE:
-         for ( x = xCaret; x < cxBuffer - 1; x++ )
+         for ( x = xCaret; x < xBuffer - 1; x++ )
+         {
             BUFFER(x, yCaret) = BUFFER(x + 1, yCaret);
+         }
 
-         BUFFER(cxBuffer - 1, yCaret) = ' ';
+         BUFFER(xBuffer - 1, yCaret) = ' ';
 
          HideCaret(hwnd);
-         hdc = GetDC(hwnd);
+         dc = GetDC(hwnd);
 
-         SelectObject(hdc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
-                                       charSet, 0, 0, 0, FIXED_PITCH, NULL));
+         SelectObject(dc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
+                                      charSet, 0, 0, 0, FIXED_PITCH, NULL));
 
-         TextOutW(hdc, xCaret * cxChar, yCaret * cyChar,
+         TextOutW(dc, xCaret * xChar, yCaret * yChar,
                   &BUFFER(xCaret, yCaret),
-                  cxBuffer - xCaret);
+                  xBuffer - xCaret);
 
-         DeleteObject(SelectObject(hdc, GetStockObject(SYSTEM_FONT)));
-         ReleaseDC(hwnd, hdc);
+         DeleteObject(SelectObject(dc, GetStockObject(SYSTEM_FONT)));
+         ReleaseDC(hwnd, dc);
          ShowCaret(hwnd);
          break;
       }
-      SetCaretPos(xCaret * cxChar, yCaret * cyChar);
+      SetCaretPos(xCaret * xChar, yCaret * yChar);
       return 0;
 
    case WM_CHAR:
@@ -225,21 +235,29 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
 
          case '\n':  // line feed
-            if ( ++yCaret == cyBuffer )
+            if ( ++yCaret == yBuffer )
+            {
                yCaret = 0;
+            }
             break;
 
          case '\r':  // carriage return
             xCaret = 0;
 
-            if ( ++yCaret == cyBuffer )
+            if ( ++yCaret == yBuffer )
+            {
                yCaret = 0;
+            }
             break;
 
          case '\x1B':   // escape
-            for ( y = 0; y < cyBuffer; y++ )
-               for ( x = 0; x < cxBuffer; x++ )
+            for ( y = 0; y < yBuffer; y++ )
+            {
+               for ( x = 0; x < xBuffer; x++ )
+               {
                   BUFFER(x, y) = ' ';
+               }
+            }
 
             xCaret = 0;
             yCaret = 0;
@@ -251,43 +269,48 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             BUFFER(xCaret, yCaret) = (WCHAR) wParam;
 
             HideCaret(hwnd);
-            hdc = GetDC(hwnd);
+            dc = GetDC(hwnd);
 
-            SelectObject(hdc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
+            SelectObject(dc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
                                           charSet, 0, 0, 0, FIXED_PITCH, NULL));
 
-            TextOutW(hdc, xCaret* cxChar, yCaret* cyChar,
+            TextOutW(dc, xCaret* xChar, yCaret* yChar,
                      &BUFFER(xCaret, yCaret), 1);
 
             DeleteObject(
-               SelectObject(hdc, GetStockObject(SYSTEM_FONT)));
-            ReleaseDC(hwnd, hdc);
+               SelectObject(dc, GetStockObject(SYSTEM_FONT)));
+            ReleaseDC(hwnd, dc);
             ShowCaret(hwnd);
 
-            if ( ++xCaret == cxBuffer )
+            if ( ++xCaret == xBuffer )
             {
                xCaret = 0;
 
-               if ( ++yCaret == cyBuffer )
+               if ( ++yCaret == yBuffer )
+               {
                   yCaret = 0;
+               }
             }
+
             break;
          }
       }
 
-      SetCaretPos(xCaret * cxChar, yCaret * cyChar);
+      SetCaretPos(xCaret * xChar, yCaret * yChar);
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(hwnd, &ps);
 
-      SelectObject(hdc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
-                                    charSet, 0, 0, 0, FIXED_PITCH, NULL));
+      SelectObject(dc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
+                                   charSet, 0, 0, 0, FIXED_PITCH, NULL));
 
-      for ( y = 0; y < cyBuffer; y++ )
-         TextOutW(hdc, 0, y * cyChar, &BUFFER(0, y), cxBuffer);
+      for ( y = 0; y < yBuffer; y++ )
+      {
+         TextOutW(dc, 0, y * yChar, &BUFFER(0, y), xBuffer);
+      }
 
-      DeleteObject(SelectObject(hdc, GetStockObject(SYSTEM_FONT)));
+      DeleteObject(SelectObject(dc, GetStockObject(SYSTEM_FONT)));
       EndPaint(hwnd, &ps);
       return 0;
 
