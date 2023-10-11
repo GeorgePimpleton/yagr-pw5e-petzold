@@ -1,6 +1,6 @@
 /*--------------------------------------------------
    CLOVER.C -- Clover Drawing Program Using Regions
-            (c) Charles Petzold, 1998
+               (c) Charles Petzold, 1998
   --------------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -15,16 +15,16 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"Clover";
-   HWND           hwnd;
+   HWND           wnd;
    MSG            msg;
    WNDCLASSW      wc;
 
@@ -32,7 +32,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -46,14 +46,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Draw a Clover",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Draw a Clover",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -63,35 +63,37 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static HRGN rgnClip;
-   static int  cxClient;
-   static int  cyClient;
+   static int  xClient;
+   static int  yClient;
    double      angle;
    double      radius;
    HCURSOR     cursor;
-   HDC         hdc;
+   HDC         dc;
    HRGN        rgnTemp[ 6 ];
    int         i;
    PAINTSTRUCT ps;
 
-   switch ( iMsg )
+   switch ( msg )
    {
    case WM_SIZE:
-      cxClient = GET_X_LPARAM(lParam);
-      cyClient = GET_Y_LPARAM(lParam);
+      xClient = GET_X_LPARAM(lParam);
+      yClient = GET_Y_LPARAM(lParam);
 
       cursor = SetCursor((HCURSOR) LoadImageW(NULL, IDC_WAIT, IMAGE_CURSOR, 0, 0, LR_SHARED));
       ShowCursor(TRUE);
 
       if ( rgnClip )
+      {
          DeleteObject(rgnClip);
+      }
 
-      rgnTemp[ 0 ] = CreateEllipticRgn(0, cyClient / 3, cxClient / 2, 2 * cyClient / 3);
-      rgnTemp[ 1 ] = CreateEllipticRgn(cxClient / 2, cyClient / 3, cxClient, 2 * cyClient / 3);
-      rgnTemp[ 2 ] = CreateEllipticRgn(cxClient / 3, 0, 2 * cxClient / 3, cyClient / 2);
-      rgnTemp[ 3 ] = CreateEllipticRgn(cxClient / 3, cyClient / 2, 2 * cxClient / 3, cyClient);
+      rgnTemp[ 0 ] = CreateEllipticRgn(0, yClient / 3, xClient / 2, 2 * yClient / 3);
+      rgnTemp[ 1 ] = CreateEllipticRgn(xClient / 2, yClient / 3, xClient, 2 * yClient / 3);
+      rgnTemp[ 2 ] = CreateEllipticRgn(xClient / 3, 0, 2 * xClient / 3, yClient / 2);
+      rgnTemp[ 3 ] = CreateEllipticRgn(xClient / 3, yClient / 2, 2 * xClient / 3, yClient);
       rgnTemp[ 4 ] = CreateRectRgn(0, 0, 1, 1);
       rgnTemp[ 5 ] = CreateRectRgn(0, 0, 1, 1);
       rgnClip      = CreateRectRgn(0, 0, 1, 1);
@@ -101,26 +103,29 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
       CombineRgn(rgnClip, rgnTemp[ 4 ], rgnTemp[ 5 ], RGN_XOR);
 
       for ( i = 0; i < 6; i++ )
+      {
          DeleteObject(rgnTemp[ i ]);
+      }
 
       SetCursor(cursor);
       ShowCursor(FALSE);
       return 0;
 
-   case WM_PAINT: hdc = BeginPaint(hwnd, &ps);
+   case WM_PAINT:
+      dc = BeginPaint(wnd, &ps);
 
-      SetViewportOrgEx(hdc, cxClient / 2, cyClient / 2, NULL);
-      SelectClipRgn(hdc, rgnClip);
+      SetViewportOrgEx(dc, xClient / 2, yClient / 2, NULL);
+      SelectClipRgn(dc, rgnClip);
 
-      radius = _hypot(cxClient / 2.0, cyClient / 2.0);
+      radius = _hypot(xClient / 2.0, yClient / 2.0);
 
       for ( angle = 0.0; angle < TWO_PI; angle += TWO_PI / 360 )
       {
-         MoveToEx(hdc, 0, 0, NULL);
-         LineTo(hdc, (int) (radius * cos(angle) + 0.5),
-                     (int) (-radius * sin(angle) + 0.5));
+         MoveToEx(dc, 0, 0, NULL);
+         LineTo(dc, (int) (radius * cos(angle) + 0.5),
+                (int) (-radius * sin(angle) + 0.5));
       }
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY: DeleteObject(rgnClip);
@@ -128,5 +133,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, iMsg, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

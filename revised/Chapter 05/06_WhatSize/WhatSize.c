@@ -1,6 +1,6 @@
 /*-----------------------------------------
    WHATSIZE.C -- What Size is the Window?
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   -----------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -9,16 +9,16 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       nShowCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"WhatSize";
-   HWND           hwnd;
+   HWND           wnd;
    MSG            msg;
    WNDCLASSW      wc;
 
@@ -26,7 +26,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -40,14 +40,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"What Size is the Window?",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"What Size is the Window?",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, nShowCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, nShowCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -57,66 +57,66 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-void Show(HWND hwnd, HDC hdc, int xText, int yText, int iMapMode, PCWSTR szMapMode)
+void Show(HWND wnd, HDC dc, int xText, int yText, int iMapMode, PCWSTR szMapMode)
 {
    WCHAR buffer[ 60 ];
    RECT  rect;
 
-   SaveDC(hdc);
+   SaveDC(dc);
 
-   SetMapMode(hdc, iMapMode);
-   GetClientRect(hwnd, &rect);
-   DPtoLP(hdc, (PPOINT) &rect, 2);
+   SetMapMode(dc, iMapMode);
+   GetClientRect(wnd, &rect);
+   DPtoLP(dc, (PPOINT) &rect, 2);
 
-   RestoreDC(hdc, -1);
+   RestoreDC(dc, -1);
 
-   TextOutW(hdc, xText, yText, buffer,
+   TextOutW(dc, xText, yText, buffer,
             wsprintfW(buffer, L"%-20s %7d %7d %7d %7d", szMapMode,
-            rect.left, rect.right, rect.top, rect.bottom));
+                      rect.left, rect.right, rect.top, rect.bottom));
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   static PCWSTR  heading   = L"Mapping Mode            Left   Right     Top  Bottom";
-   static PCWSTR  underline = L"------------            ----   -----     ---  ------";
-   static int     cxChar;
-   static int     cyChar;
-   HDC            hdc;
-   PAINTSTRUCT    ps;
-   TEXTMETRICW    tm;
+   static PCWSTR heading   = L"Mapping Mode Left Right Top Bottom";
+   static PCWSTR underline = L"------------ ---- ----- --- ------";
+   static int    xChar;
+   static int    yChar;
+   HDC           dc;
+   PAINTSTRUCT   ps;
+   TEXTMETRICW   tm;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
-      hdc = GetDC(hwnd);
-      SelectObject(hdc, GetStockObject(SYSTEM_FIXED_FONT));
+      dc = GetDC(wnd);
+      SelectObject(dc, GetStockObject(SYSTEM_FIXED_FONT));
 
-      GetTextMetrics(hdc, &tm);
-      cxChar = tm.tmAveCharWidth;
-      cyChar = tm.tmHeight + tm.tmExternalLeading;
+      GetTextMetricsW(dc, &tm);
+      xChar = tm.tmAveCharWidth;
+      yChar = tm.tmHeight + tm.tmExternalLeading;
 
-      ReleaseDC(hwnd, hdc);
+      ReleaseDC(wnd, dc);
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
-      SelectObject(hdc, GetStockObject(SYSTEM_FIXED_FONT));
+      dc = BeginPaint(wnd, &ps);
+      SelectObject(dc, GetStockObject(SYSTEM_FIXED_FONT));
 
-      SetMapMode(hdc, MM_ANISOTROPIC);
-      SetWindowExtEx(hdc, 1, 1, NULL);
-      SetViewportExtEx(hdc, cxChar, cyChar, NULL);
+      SetMapMode(dc, MM_ANISOTROPIC);
+      SetWindowExtEx(dc, 1, 1, NULL);
+      SetViewportExtEx(dc, xChar, yChar, NULL);
 
-      TextOut(hdc, 1, 1, heading, lstrlen(heading));
-      TextOut(hdc, 1, 2, underline, lstrlen(underline));
+      TextOutW(dc, 1, 1, heading, lstrlenW(heading));
+      TextOutW(dc, 1, 2, underline, lstrlenW(underline));
 
-      Show(hwnd, hdc, 1, 3, MM_TEXT,      L"TEXT (pixels)");
-      Show(hwnd, hdc, 1, 4, MM_LOMETRIC,  L"LOMETRIC (.1 mm)");
-      Show(hwnd, hdc, 1, 5, MM_HIMETRIC,  L"HIMETRIC (.01 mm)");
-      Show(hwnd, hdc, 1, 6, MM_LOENGLISH, L"LOENGLISH (.01 in)");
-      Show(hwnd, hdc, 1, 7, MM_HIENGLISH, L"HIENGLISH (.001 in)");
-      Show(hwnd, hdc, 1, 8, MM_TWIPS,     L"TWIPS (1/1440 in)");
+      Show(wnd, dc, 1, 3, MM_TEXT,      L"TEXT (pixels)");
+      Show(wnd, dc, 1, 4, MM_LOMETRIC,  L"LOMETRIC (.1 mm)");
+      Show(wnd, dc, 1, 5, MM_HIMETRIC,  L"HIMETRIC (.01 mm)");
+      Show(wnd, dc, 1, 6, MM_LOENGLISH, L"LOENGLISH (.01 in)");
+      Show(wnd, dc, 1, 7, MM_HIENGLISH, L"HIENGLISH (.001 in)");
+      Show(wnd, dc, 1, 8, MM_TWIPS,     L"TWIPS (1/1440 in)");
 
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
@@ -124,5 +124,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

@@ -1,6 +1,6 @@
 /*---------------------------------------------------------
    DEVCAPS1.C -- Device Capabilities Display Program No. 1
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   ---------------------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -41,12 +41,12 @@ devcaps[] =
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR appName = L"DevCaps1";
@@ -56,7 +56,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -70,14 +70,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   HWND hwnd = CreateWindowW(appName, L"Device Capabilities",
-                             WS_OVERLAPPEDWINDOW,
-                             CW_USEDEFAULT, CW_USEDEFAULT,
-                             CW_USEDEFAULT, CW_USEDEFAULT,
-                             NULL, NULL, instance, NULL);
+   HWND wnd = CreateWindowW(appName, L"Device Capabilities",
+                            WS_OVERLAPPEDWINDOW,
+                            CW_USEDEFAULT, CW_USEDEFAULT,
+                            CW_USEDEFAULT, CW_USEDEFAULT,
+                            NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    MSG msg;
 
@@ -89,53 +89,53 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   static int  cxChar;
-   static int  cxCaps;
-   static int  cyChar;
+   static int  xChar;
+   static int  xCaps;
+   static int  yChar;
    WCHAR       buffer[ 10 ];
-   HDC         hdc;
+   HDC         dc;
    PAINTSTRUCT ps;
    TEXTMETRICW tm;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
-      hdc = GetDC(hwnd);
+      dc = GetDC(wnd);
 
-      GetTextMetricsW(hdc, &tm);
+      GetTextMetricsW(dc, &tm);
 
-      cxChar = tm.tmAveCharWidth;
-      cxCaps = (tm.tmPitchAndFamily & 1 ? 3 : 2) * cxChar / 2;
-      cyChar = tm.tmHeight + tm.tmExternalLeading;
+      xChar = tm.tmAveCharWidth;
+      xCaps = (tm.tmPitchAndFamily & 1 ? 3 : 2) * xChar / 2;
+      yChar = tm.tmHeight + tm.tmExternalLeading;
 
-      ReleaseDC(hwnd, hdc);
+      ReleaseDC(wnd, dc);
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
       for ( unsigned i = 0; i < _countof(devcaps); i++ )
       {
-         TextOutW(hdc, 1, cyChar * i,
+         TextOutW(dc, 1, yChar * i,
                   devcaps[ i ].label,
                   lstrlenW(devcaps[ i ].label));
 
-         TextOutW(hdc, 14 * cxCaps + 1, cyChar * i,
+         TextOutW(dc, 14 * xCaps + 1, yChar * i,
                   devcaps[ i ].desc,
                   lstrlenW(devcaps[ i ].desc));
 
-         SetTextAlign(hdc, TA_RIGHT | TA_TOP);
+         SetTextAlign(dc, TA_RIGHT | TA_TOP);
 
-         TextOutW(hdc, 14 * cxCaps + 35 * cxChar + 1, cyChar * i, buffer,
+         TextOutW(dc, 14 * xCaps + 35 * xChar + 1, yChar * i, buffer,
                   wsprintfW(buffer, L"%5d",
-                            GetDeviceCaps(hdc, devcaps[ i ].index)));
+                            GetDeviceCaps(dc, devcaps[ i ].index)));
 
-         SetTextAlign(hdc, TA_LEFT | TA_TOP);
+         SetTextAlign(dc, TA_LEFT | TA_TOP);
       }
 
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
@@ -143,5 +143,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

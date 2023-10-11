@@ -1,6 +1,6 @@
 /*---------------------------------------
    BEZIER.C -- Bezier Splines Demo
-            (c) Charles Petzold, 1998
+               (c) Charles Petzold, 1998
   ---------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -9,18 +9,18 @@
 #include <windowsx.h>
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-void             DrawBezier(HDC, POINT[]);
+void             DrawBezier(HDC, POINT[ ]);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"Bezier";
-   HWND           hwnd;
+   HWND           wnd;
    MSG            msg;
    WNDCLASSW      wc;
 
@@ -28,7 +28,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  GetStockObject(WHITE_BRUSH);
@@ -42,14 +42,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Bezier Splines",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Bezier Splines",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -59,42 +59,42 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-void DrawBezier(HDC hdc, POINT apt[])
+void DrawBezier(HDC dc, POINT apt[ ])
 {
-   PolyBezier(hdc, apt, 4);
+   PolyBezier(dc, apt, 4);
 
-   MoveToEx(hdc, apt[ 0 ].x, apt[ 0 ].y, NULL);
-   LineTo(hdc, apt[ 1 ].x, apt[ 1 ].y);
+   MoveToEx(dc, apt[ 0 ].x, apt[ 0 ].y, NULL);
+   LineTo(dc, apt[ 1 ].x, apt[ 1 ].y);
 
-   MoveToEx(hdc, apt[ 2 ].x, apt[ 2 ].y, NULL);
-   LineTo(hdc, apt[ 3 ].x, apt[ 3 ].y);
+   MoveToEx(dc, apt[ 2 ].x, apt[ 2 ].y, NULL);
+   LineTo(dc, apt[ 3 ].x, apt[ 3 ].y);
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static POINT   apt[ 4 ];
-   int            cxClient;
-   int            cyClient;
-   HDC            hdc;
+   int            xClient;
+   int            yClient;
+   HDC            dc;
    PAINTSTRUCT    ps;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_SIZE:
-      cxClient = GET_X_LPARAM(lParam);
-      cyClient = GET_Y_LPARAM(lParam);
+      xClient = GET_X_LPARAM(lParam);
+      yClient = GET_Y_LPARAM(lParam);
 
-      apt[ 0 ].x = cxClient / 4;
-      apt[ 0 ].y = cyClient / 2;
+      apt[ 0 ].x = xClient / 4;
+      apt[ 0 ].y = yClient / 2;
 
-      apt[ 1 ].x = cxClient / 2;
-      apt[ 1 ].y = cyClient / 4;
+      apt[ 1 ].x = xClient / 2;
+      apt[ 1 ].y = yClient / 4;
 
-      apt[ 2 ].x = cxClient / 2;
-      apt[ 2 ].y = 3 * cyClient / 4;
+      apt[ 2 ].x = xClient / 2;
+      apt[ 2 ].y = 3 * yClient / 4;
 
-      apt[ 3 ].x = 3 * cxClient / 4;
-      apt[ 3 ].y = cyClient / 2;
+      apt[ 3 ].x = 3 * xClient / 4;
+      apt[ 3 ].y = yClient / 2;
 
       return 0;
 
@@ -103,10 +103,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    case WM_MOUSEMOVE:
       if ( wParam & MK_LBUTTON || wParam & MK_RBUTTON )
       {
-         hdc = GetDC(hwnd);
+         dc = GetDC(wnd);
 
-         SelectObject(hdc, GetStockObject(WHITE_PEN));
-         DrawBezier(hdc, apt);
+         SelectObject(dc, GetStockObject(WHITE_PEN));
+         DrawBezier(dc, apt);
 
          if ( wParam & MK_LBUTTON )
          {
@@ -120,20 +120,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             apt[ 2 ].y = HIWORD(lParam);
          }
 
-         SelectObject(hdc, GetStockObject(BLACK_PEN));
-         DrawBezier(hdc, apt);
-         ReleaseDC(hwnd, hdc);
+         SelectObject(dc, GetStockObject(BLACK_PEN));
+         DrawBezier(dc, apt);
+         ReleaseDC(wnd, dc);
       }
       return 0;
 
    case WM_PAINT:
-      InvalidateRect(hwnd, NULL, TRUE);
+      InvalidateRect(wnd, NULL, TRUE);
 
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
-      DrawBezier(hdc, apt);
+      DrawBezier(dc, apt);
 
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
@@ -141,5 +141,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

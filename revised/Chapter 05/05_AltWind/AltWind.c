@@ -1,6 +1,6 @@
 /*-----------------------------------------------
    ALTWIND.C -- Alternate and Winding Fill Modes
-            (c) Charles Petzold, 1998
+               (c) Charles Petzold, 1998
   -----------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -10,16 +10,16 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"AltWind";
-   HWND           hwnd;
+   HWND           wnd;
    MSG            msg;
    WNDCLASSW      wc;
 
@@ -27,10 +27,10 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
-   wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hInstance     = inst;
+   wc.hIcon         = (HICON) LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
-   wc.hbrBackground = (HBRUSH)  GetStockObject(WHITE_BRUSH);
+   wc.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
    wc.lpszMenuName  = NULL;
    wc.lpszClassName = appName;
 
@@ -41,14 +41,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Alternate and Winding Fill Modes",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Alternate and Winding Fill Modes",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -58,52 +58,52 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static POINT aptFigure[ 10 ] = { {10,70}, {50,70}, {50,10}, {90,10}, {90,50},
                                     {30,50}, {30,90}, {70,90}, {70,30}, {10,30} };
-   static int   cxClient;
-   static int   cyClient;
-   HDC          hdc;
+   static int   xClient;
+   static int   yClient;
+   HDC          dc;
    int          i;
    PAINTSTRUCT  ps;
    POINT        apt[ 10 ];
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_SIZE:
-      cxClient = GET_X_LPARAM(lParam);
-      cyClient = GET_Y_LPARAM(lParam);
+      xClient = GET_X_LPARAM(lParam);
+      yClient = GET_Y_LPARAM(lParam);
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
-      SelectObject(hdc, GetStockObject(LTGRAY_BRUSH));
-
-      for ( i = 0; i < 10; i++ )
-      {
-         apt[ i ].x = cxClient * aptFigure[ i ].x / 200;
-         apt[ i ].y = cyClient * aptFigure[ i ].y / 100;
-      }
-
-      SetPolyFillMode(hdc, ALTERNATE);
-      Polygon(hdc, apt, 10);
+      SelectObject(dc, GetStockObject(LTGRAY_BRUSH));
 
       for ( i = 0; i < 10; i++ )
       {
-         apt[ i ].x += cxClient / 2;
+         apt[ i ].x = xClient * aptFigure[ i ].x / 200;
+         apt[ i ].y = yClient * aptFigure[ i ].y / 100;
       }
 
-      SetPolyFillMode(hdc, WINDING);
-      Polygon(hdc, apt, 10);
+      SetPolyFillMode(dc, ALTERNATE);
+      Polygon(dc, apt, 10);
 
-      EndPaint(hwnd, &ps);
+      for ( i = 0; i < 10; i++ )
+      {
+         apt[ i ].x += xClient / 2;
+      }
+
+      SetPolyFillMode(dc, WINDING);
+      Polygon(dc, apt, 10);
+
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
       PostQuitMessage(0);
       return 0;
    }
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

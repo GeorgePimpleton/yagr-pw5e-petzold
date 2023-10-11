@@ -1,6 +1,6 @@
 /*------------------------------------------
    RANDRECT.C -- Displays Random Rectangles
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   ------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -12,19 +12,19 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void DrawRectangle(HWND);
 
-int cxClient;
-int cyClient;
+int xClient;
+int yClient;
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"RandRect";
-   HWND           hwnd;
+   HWND           wnd;
    MSG            msg;
    WNDCLASSW      wc;
 
@@ -32,7 +32,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -46,71 +46,76 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Random Rectangles",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Random Rectangles",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( TRUE )
    {
       if ( PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE) )
       {
          if ( msg.message == WM_QUIT )
+         {
             break;
+         }
 
          TranslateMessage(&msg);
          DispatchMessageW(&msg);
       }
       else
       {
-         DrawRectangle(hwnd);
+         DrawRectangle(wnd);
 
-         // slow down the rect drawing
+         // slow down the rect drawing to make it noticeable
          // but not enough to make Windows sluggish
-         Sleep(1);
+         Sleep(10);
       }
    }
 
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   switch ( iMsg )
+   switch ( msg )
    {
    case WM_SIZE:
-      cxClient = GET_X_LPARAM(lParam);
-      cyClient = GET_Y_LPARAM(lParam);
+      xClient = GET_X_LPARAM(lParam);
+      yClient = GET_Y_LPARAM(lParam);
       return 0;
 
-   case WM_DESTROY:PostQuitMessage(0);
+   case WM_DESTROY:
+      PostQuitMessage(0);
       return 0;
    }
 
-   return DefWindowProcW(hwnd, iMsg, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }
 
-void DrawRectangle(HWND hwnd)
+void DrawRectangle(HWND wnd)
 {
-   HBRUSH hBrush;
-   HDC hdc;
-   RECT rect;
+   HBRUSH brush;
+   HDC    dc;
+   RECT   rect;
 
-   if ( cxClient == 0 || cyClient == 0 )
+   if ( xClient == 0 || yClient == 0 )
+   {
       return;
+   }
 
-   SetRect(&rect, rand() % cxClient, rand() % cyClient,
-           rand() % cxClient, rand() % cyClient);
+   SetRect(&rect, rand( ) % xClient, rand( ) % yClient,
+                  rand( ) % xClient, rand( ) % yClient);
 
-   hBrush = CreateSolidBrush(RGB(rand() % 256, rand() % 256, rand() % 256));
+   brush = CreateSolidBrush(RGB(rand( ) % 256, rand( ) % 256, rand( ) % 256));
 
-   hdc = GetDC(hwnd);
+   dc = GetDC(wnd);
 
-   FillRect(hdc, &rect, hBrush);
-   ReleaseDC(hwnd, hdc);
-   DeleteObject(hBrush);
+   FillRect(dc, &rect, brush);
+   ReleaseDC(wnd, dc);
+   DeleteObject(brush);
 }

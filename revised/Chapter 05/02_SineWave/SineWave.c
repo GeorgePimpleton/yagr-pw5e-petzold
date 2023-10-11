@@ -1,6 +1,6 @@
 /*-----------------------------------------
    SINEWAVE.C -- Sine Wave Using Polyline
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   -----------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -16,16 +16,16 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR appName = L"SineWave";
-   HWND          hwnd;
+   HWND          wnd;
    MSG           msg;
    WNDCLASSW     wc;
 
@@ -33,7 +33,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -47,14 +47,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Sine Wave Using Polyline",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Sine Wave Using Polyline",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -64,35 +64,35 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   static int  cxClient;
-   static int  cyClient;
-   HDC         hdc;
+   static int  xClient;
+   static int  yClient;
+   HDC         dc;
    int         i;
    PAINTSTRUCT ps;
    POINT       apt[ NUM ];
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_SIZE:
-      cxClient = GET_X_LPARAM(lParam);
-      cyClient = GET_Y_LPARAM(lParam);
+      xClient = GET_X_LPARAM(lParam);
+      yClient = GET_Y_LPARAM(lParam);
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
-      MoveToEx(hdc, 0, cyClient / 2, NULL);
-      LineTo(hdc, cxClient, cyClient / 2);
+      MoveToEx(dc, 0, yClient / 2, NULL);
+      LineTo(dc, xClient, yClient / 2);
 
       for ( i = 0; i < NUM; i++ )
       {
-         apt[ i ].x = i * cxClient / NUM;
-         apt[ i ].y = (int) (cyClient / 2 * (1 - sin(TWOPI * i / NUM)));
+         apt[ i ].x = i * xClient / NUM;
+         apt[ i ].y = (int) (yClient / 2 * (1 - sin(TWOPI * i / NUM)));
       }
 
-      Polyline(hdc, apt, NUM);
+      Polyline(dc, apt, NUM);
       return 0;
 
    case WM_DESTROY:
@@ -100,5 +100,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

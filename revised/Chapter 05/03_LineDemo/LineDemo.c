@@ -1,6 +1,6 @@
 /*--------------------------------------------------
    LINEDEMO.C -- Line-Drawing Demonstration Program
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   --------------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -10,16 +10,16 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR appName = L"LineDemo";
-   HWND          hwnd;
+   HWND          wnd;
    MSG           msg;
    WNDCLASSW     wc;
 
@@ -27,7 +27,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -41,14 +41,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Line Demonstration",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Line Demonstration",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -58,40 +58,40 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   static int  cxClient;
-   static int  cyClient;
-   HDC         hdc;
+   static int  xClient;
+   static int  yClient;
+   HDC         dc;
    PAINTSTRUCT ps;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_SIZE:
-      cxClient = GET_X_LPARAM(lParam);
-      cyClient = GET_Y_LPARAM(lParam);
+      xClient = GET_X_LPARAM(lParam);
+      yClient = GET_Y_LPARAM(lParam);
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
-      Rectangle(hdc, cxClient / 8, cyClient / 8,
-                7 * cxClient / 8, 7 * cyClient / 8);
+      Rectangle(dc, xClient / 8, yClient / 8,
+                7 * xClient / 8, 7 * yClient / 8);
 
-      MoveToEx(hdc, 0, 0, NULL);
-      LineTo(hdc, cxClient, cyClient);
+      MoveToEx(dc, 0, 0, NULL);
+      LineTo(dc, xClient, yClient);
 
-      MoveToEx(hdc, 0, cyClient, NULL);
-      LineTo(hdc, cxClient, 0);
+      MoveToEx(dc, 0, yClient, NULL);
+      LineTo(dc, xClient, 0);
 
-      Ellipse(hdc, cxClient / 8, cyClient / 8,
-              7 * cxClient / 8, 7 * cyClient / 8);
+      Ellipse(dc, xClient / 8, yClient / 8,
+              7 * xClient / 8, 7 * yClient / 8);
 
-      RoundRect(hdc, cxClient / 4, cyClient / 4,
-                3 * cxClient / 4, 3 * cyClient / 4,
-                cxClient / 4, cyClient / 4);
+      RoundRect(dc, xClient / 4, yClient / 4,
+                3 * xClient / 4, 3 * yClient / 4,
+                xClient / 4, yClient / 4);
 
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
@@ -99,5 +99,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }
