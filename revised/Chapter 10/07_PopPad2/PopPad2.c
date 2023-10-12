@@ -1,6 +1,6 @@
 /*-----------------------------------------------------
    POPPAD2.C -- Popup Editor Version 2 (includes menu)
-            (c) Charles Petzold, 1998
+                (c) Charles Petzold, 1998
   -----------------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -12,18 +12,18 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-PCWSTR szAppName = L"PopPad2";
+PCWSTR appName = L"PopPad2";
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    HACCEL    accel;
-   HWND      hwnd;
+   HWND      wnd;
    MSG       msg;
    WNDCLASSW wc;
 
@@ -31,36 +31,35 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
-   wc.hIcon         = (HICON)   LoadImageW(instance, szAppName, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hInstance     = inst;
+   wc.hIcon         = (HICON)   LoadImageW(inst, appName, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
-   wc.lpszMenuName  = szAppName;
-   wc.lpszClassName = szAppName;
+   wc.lpszMenuName  = appName;
+   wc.lpszClassName = appName;
 
    if ( !RegisterClassW(&wc) )
    {
-      MessageBoxW(NULL, L"This program requires Windows NT!",
-                  szAppName, MB_ICONERROR);
+      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
       return 0;
    }
 
-   hwnd = CreateWindowW(szAppName, szAppName,
-                        WS_OVERLAPPEDWINDOW,
-                        GetSystemMetrics(SM_CXSCREEN) / 4,
-                        GetSystemMetrics(SM_CYSCREEN) / 4,
-                        GetSystemMetrics(SM_CXSCREEN) / 2,
-                        GetSystemMetrics(SM_CYSCREEN) / 2,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, appName,
+                       WS_OVERLAPPEDWINDOW,
+                       GetSystemMetrics(SM_CXSCREEN) / 4,
+                       GetSystemMetrics(SM_CYSCREEN) / 4,
+                       GetSystemMetrics(SM_CXSCREEN) / 2,
+                       GetSystemMetrics(SM_CYSCREEN) / 2,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
-   accel = LoadAcceleratorsW(instance, szAppName);
+   accel = LoadAcceleratorsW(inst, appName);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
-      if ( !TranslateAcceleratorW(hwnd, accel, &msg) )
+      if ( !TranslateAcceleratorW(wnd, accel, &msg) )
       {
          TranslateMessage(&msg);
          DispatchMessageW(&msg);
@@ -69,26 +68,25 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-AskConfirmation(HWND hwnd)
+AskConfirmation(HWND wnd)
 {
-   return MessageBoxW(hwnd, L"Really want to close PopPad2?",
-                      szAppName, MB_YESNO | MB_ICONQUESTION);
+   return MessageBoxW(wnd, L"Really want to close PopPad2?", appName, MB_YESNO | MB_ICONQUESTION);
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static HWND edit;
    int         select;
-   int         iEnable;
+   int         enable;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
       edit = CreateWindowW(L"edit", NULL,
                            WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL |
                            WS_BORDER | ES_LEFT | ES_MULTILINE |
                            ES_AUTOHSCROLL | ES_AUTOVSCROLL,
-                           0, 0, 0, 0, hwnd, (HMENU) ID_EDIT,
+                           0, 0, 0, 0, wnd, (HMENU) ID_EDIT,
                            ((LPCREATESTRUCT) lParam)->hInstance, NULL);
       return 0;
 
@@ -114,13 +112,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          select = (int) SendMessage(edit, EM_GETSEL, 0, 0);
 
          if ( HIWORD(select) == LOWORD(select) )
-            iEnable = MF_GRAYED;
+         {
+            enable = MF_GRAYED;
+         }
          else
-            iEnable = MF_ENABLED;
+         {
+            enable = MF_ENABLED;
+         }
 
-         EnableMenuItem((HMENU) wParam, IDM_EDIT_CUT, iEnable);
-         EnableMenuItem((HMENU) wParam, IDM_EDIT_COPY, iEnable);
-         EnableMenuItem((HMENU) wParam, IDM_EDIT_CLEAR, iEnable);
+         EnableMenuItem((HMENU) wParam, IDM_EDIT_CUT, enable);
+         EnableMenuItem((HMENU) wParam, IDM_EDIT_COPY, enable);
+         EnableMenuItem((HMENU) wParam, IDM_EDIT_CLEAR, enable);
          return 0;
       }
       break;
@@ -131,8 +133,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          if ( LOWORD(lParam) == ID_EDIT &&
              (HIWORD(wParam) == EN_ERRSPACE ||
               HIWORD(wParam) == EN_MAXTEXT) )
-            MessageBoxW(hwnd, L"Edit control out of space.",
-                        szAppName, MB_OK | MB_ICONSTOP);
+         {
+            MessageBoxW(wnd, L"Edit control out of space.",
+                        appName, MB_OK | MB_ICONSTOP);
+         }
          return 0;
       }
       else switch ( LOWORD(wParam) )
@@ -146,7 +150,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          return 0;
 
       case IDM_APP_EXIT:
-         SendMessageW(hwnd, WM_CLOSE, 0, 0);
+         SendMessageW(wnd, WM_CLOSE, 0, 0);
          return 0;
 
       case IDM_EDIT_UNDO:
@@ -174,32 +178,38 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          return 0;
 
       case IDM_HELP_HELP:
-         MessageBoxW(hwnd, L"Help not yet implemented!",
-                     szAppName, MB_OK | MB_ICONEXCLAMATION);
+         MessageBoxW(wnd, L"Help not yet implemented!",
+                     appName, MB_OK | MB_ICONEXCLAMATION);
          return 0;
 
       case IDM_APP_ABOUT:
-         MessageBoxW(hwnd, L"POPPAD2 (c) Charles Petzold, 1998",
-                     szAppName, MB_OK | MB_ICONINFORMATION);
+         MessageBoxW(wnd, L"POPPAD2 (c) Charles Petzold, 1998",
+                     appName, MB_OK | MB_ICONINFORMATION);
          return 0;
       }
       break;
 
    case WM_CLOSE:
-      if ( IDYES == AskConfirmation(hwnd) )
-         DestroyWindow(hwnd);
+      if ( IDYES == AskConfirmation(wnd) )
+      {
+         DestroyWindow(wnd);
+      }
       return 0;
 
    case WM_QUERYENDSESSION:
-      if ( IDYES == AskConfirmation(hwnd) )
+      if ( IDYES == AskConfirmation(wnd) )
+      {
          return 1;
+      }
       else
+      {
          return 0;
+      }
 
    case WM_DESTROY:
       PostQuitMessage(0);
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

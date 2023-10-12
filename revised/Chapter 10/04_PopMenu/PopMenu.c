@@ -11,26 +11,26 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-HINSTANCE inst;
+HINSTANCE g_inst;
 PCWSTR    appName = L"PopMenu";
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   HWND        hwnd;
-   MSG         msg;
-   WNDCLASSW   wc;
+   HWND      wnd;
+   MSG       msg;
+   WNDCLASSW wc;
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -39,21 +39,20 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
 
    if ( !RegisterClassW(&wc) )
    {
-      MessageBoxW(NULL, L"This program requires Windows NT!",
-                  appName, MB_ICONERROR);
+      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
       return 0;
    }
 
-   inst = instance;
+   g_inst = inst;
 
-   hwnd = CreateWindowW(appName, L"Popup Menu Demonstration",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Popup Menu Demonstration",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -63,28 +62,27 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static HMENU menu;
-   static int   color[ 5 ] = { WHITE_BRUSH,  LTGRAY_BRUSH, GRAY_BRUSH, DKGRAY_BRUSH, BLACK_BRUSH };
+   static int   color[ 5 ] = { WHITE_BRUSH, LTGRAY_BRUSH, GRAY_BRUSH, DKGRAY_BRUSH, BLACK_BRUSH };
    static int   selection  = IDM_BKGND_WHITE;
    POINT        point;
    int          id;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
-      menu = LoadMenuW(inst, appName);
+      menu = LoadMenuW(g_inst, appName);
       menu = GetSubMenu(menu, 0);
       return 0;
 
    case WM_RBUTTONUP:
       point.x = LOWORD(lParam);
       point.y = HIWORD(lParam);
-      ClientToScreen(hwnd, &point);
+      ClientToScreen(wnd, &point);
 
-      TrackPopupMenu(menu, TPM_RIGHTBUTTON, point.x, point.y,
-                     0, hwnd, NULL);
+      TrackPopupMenu(menu, TPM_RIGHTBUTTON, point.x, point.y, 0, wnd, NULL);
       return 0;
 
    case WM_COMMAND:
@@ -113,25 +111,24 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          selection = id;
          CheckMenuItem(menu, selection, MF_CHECKED);
 
-         SetClassLongPtrW(hwnd,
-                          GCLP_HBRBACKGROUND,
+         SetClassLongPtrW(wnd, GCLP_HBRBACKGROUND,
                           (LONG_PTR) GetStockObject(color[ id - IDM_BKGND_WHITE ]));
 
-         InvalidateRect(hwnd, NULL, TRUE);
+         InvalidateRect(wnd, NULL, TRUE);
          return 0;
 
       case IDM_APP_ABOUT:
-         MessageBoxW(hwnd, L"Popup Menu Demonstration Program\n"
+         MessageBoxW(wnd, L"Popup Menu Demonstration Program\n"
                      L"(c) Charles Petzold, 1998",
                      appName, MB_ICONINFORMATION | MB_OK);
          return 0;
 
       case IDM_APP_EXIT:
-         SendMessageW(hwnd, WM_CLOSE, 0, 0);
+         SendMessageW(wnd, WM_CLOSE, 0, 0);
          return 0;
 
       case IDM_APP_HELP:
-         MessageBoxW(hwnd, L"Help not yet implemented!",
+         MessageBoxW(wnd, L"Help not yet implemented!",
                      appName, MB_ICONEXCLAMATION | MB_OK);
          return 0;
       }
@@ -142,5 +139,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

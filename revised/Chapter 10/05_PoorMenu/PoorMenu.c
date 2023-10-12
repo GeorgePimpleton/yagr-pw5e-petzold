@@ -1,6 +1,6 @@
 /*-----------------------------------------
    POORMENU.C -- The Poor Person's Menu
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   -----------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -15,16 +15,16 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 PCWSTR appName = L"PoorMenu";
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    HMENU     menu;
-   HWND      hwnd;
+   HWND      wnd;
    MSG       msg;
    WNDCLASSW wc;
 
@@ -32,7 +32,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -41,26 +41,25 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
 
    if ( !RegisterClassW(&wc) )
    {
-      MessageBoxW(NULL, L"This program requires Windows NT!",
-                  appName, MB_ICONERROR);
+      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"The Poor-Person's Menu",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"The Poor-Person's Menu",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   menu = GetSystemMenu(hwnd, FALSE);
+   menu = GetSystemMenu(wnd, FALSE);
 
    AppendMenuW(menu, MF_SEPARATOR, 0, NULL);
    AppendMenuW(menu, MF_STRING, IDM_SYS_ABOUT, L"About...");
    AppendMenuW(menu, MF_STRING, IDM_SYS_HELP, L"Help...");
    AppendMenuW(menu, MF_STRING, IDM_SYS_REMOVE, L"Remove Additions");
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -70,26 +69,26 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   switch ( message )
+   switch ( msg )
    {
    case WM_SYSCOMMAND:
       switch ( LOWORD(wParam) )
       {
       case IDM_SYS_ABOUT:
-         MessageBoxW(hwnd, L"A Poor-Person's Menu Program\n"
+         MessageBoxW(wnd, L"A Poor-Person's Menu Program\n"
                      L"(c) Charles Petzold, 1998",
                      appName, MB_OK | MB_ICONINFORMATION);
          return 0;
 
       case IDM_SYS_HELP:
-         MessageBoxW(hwnd, L"Help not yet implemented!",
+         MessageBoxW(wnd, L"Help not yet implemented!",
                      appName, MB_OK | MB_ICONEXCLAMATION);
          return 0;
 
       case IDM_SYS_REMOVE:
-         GetSystemMenu(hwnd, TRUE);
+         GetSystemMenu(wnd, TRUE);
          return 0;
       }
       break;
@@ -99,5 +98,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

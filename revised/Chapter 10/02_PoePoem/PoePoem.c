@@ -1,6 +1,6 @@
 /*-------------------------------------------
    POEPOEM.C -- Demonstrates Custom Resource
-            (c) Charles Petzold, 1998
+                (c) Charles Petzold, 1998
   -------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -12,58 +12,58 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-HINSTANCE inst;
+HINSTANCE g_inst;
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   WCHAR       appName[ 16 ];
-   WCHAR       caption[ 64 ];
-   WCHAR       errMsg[ 64 ];
-   HWND        hwnd;
-   MSG         msg;
-   WNDCLASSW   wc;
+   WCHAR     appName[ 16 ];
+   WCHAR     caption[ 64 ];
+   WCHAR     errMsg[ 64 ];
+   HWND      wnd;
+   MSG       msg;
+   WNDCLASSW wc;
 
-   LoadStringW(instance, IDS_APPNAME, appName, _countof(appName));
+   LoadStringW(inst, IDS_APPNAME, appName, _countof(appName));
 
-   LoadStringW(instance, IDS_CAPTION, caption, _countof(caption));
+   LoadStringW(inst, IDS_CAPTION, caption, _countof(caption));
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
-   wc.hIcon         = (HICON)   LoadImageW(instance, appName, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hInstance     = inst;
+   wc.hIcon         = (HICON)   LoadImageW(inst, appName, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
    wc.lpszMenuName  = NULL;
    wc.lpszClassName = appName;
 
-   inst = instance;
+   g_inst = inst;
 
    if ( !RegisterClassW(&wc) )
    {
-      LoadStringW(instance, IDS_APPNAME, (WCHAR*) appName, _countof(appName));
+      LoadStringW(inst, IDS_APPNAME, (WCHAR*) appName, _countof(appName));
 
-      LoadStringW(instance, IDS_ERRMSG, (WCHAR*) errMsg, _countof(errMsg));
+      LoadStringW(inst, IDS_ERRMSG, (WCHAR*) errMsg, _countof(errMsg));
 
       MessageBoxW(NULL, (WCHAR*) errMsg, (WCHAR*) appName, MB_ICONERROR);
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, caption,
-                        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, caption,
+                       WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -73,7 +73,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static char*   text;
    static char*   rsc;
@@ -82,41 +82,44 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    static HGLOBAL resource;
    static HWND    scroll;
    static int     position;
-   static int     cxChar;
-   static int     cyChar;
-   static int     cyClient;
+   static int     xChar;
+   static int     yChar;
+   static int     yClient;
    static int     numLines;
    static int     xScroll;
-   HDC            hdc;
+   HDC            dc;
    PAINTSTRUCT    ps;
    RECT           rect;
    TEXTMETRICW    tm;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
-      hdc = GetDC(hwnd);
-      GetTextMetricsW(hdc, &tm);
-      cxChar = tm.tmAveCharWidth;
-      cyChar = tm.tmHeight + tm.tmExternalLeading;
-      ReleaseDC(hwnd, hdc);
+      dc = GetDC(wnd);
+      GetTextMetricsW(dc, &tm);
+      xChar = tm.tmAveCharWidth;
+      yChar = tm.tmHeight + tm.tmExternalLeading;
+      ReleaseDC(wnd, dc);
 
       xScroll = GetSystemMetrics(SM_CXVSCROLL);
 
       scroll = CreateWindowW(L"scrollbar", NULL,
                              WS_CHILD | WS_VISIBLE | SBS_VERT,
                              0, 0, 0, 0,
-                             hwnd, (HMENU) 1, inst, NULL);
+                             wnd, (HMENU) 1, g_inst, NULL);
 
-      HRSRC rc = FindResourceW(inst, L"ANNABELLEE", L"TEXT");
+      HRSRC rc = FindResourceW(g_inst, L"ANNABELLEE", L"TEXT");
+
       if ( rc )
       {
-         resource = LoadResource(inst, rc);
-         fileSize = SizeofResource(inst, rc);
+         resource = LoadResource(g_inst, rc);
+         fileSize = SizeofResource(g_inst, rc);
+
          if ( resource ) text = (char*) LockResource(resource);
       }
-      rsc = (char*) malloc(sizeof(char) * fileSize);
-      if ( rsc ) memcpy(rsc, text, fileSize);
+      rsc = (char*) malloc(sizeof(char) * fileSize) ;
+
+      if ( rsc ) memcpy(rsc, text, fileSize) ;
       working = rsc;
 
       /*hResource = LoadResource(
@@ -132,7 +135,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          while ( *working != '\\' && *working != '\0' )
          {
             if ( *working == '\n' )
+            {
                numLines++;
+            }
             working = AnsiNext(working);
          }
          *working = '\0';
@@ -144,8 +149,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
    case WM_SIZE:
       MoveWindow(scroll, GET_X_LPARAM(lParam) - xScroll, 0,
-                 xScroll, cyClient = GET_Y_LPARAM(lParam), TRUE);
-      SetFocus(hwnd);
+                 xScroll, yClient = GET_Y_LPARAM(lParam), TRUE);
+      SetFocus(wnd);
       return 0;
 
    case WM_SETFOCUS:
@@ -158,21 +163,27 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       case SB_TOP:
          position = 0;
          break;
+
       case SB_BOTTOM:
          position = numLines;
          break;
+
       case SB_LINEUP:
          position -= 1;
          break;
+
       case SB_LINEDOWN:
          position += 1;
          break;
+
       case SB_PAGEUP:
-         position -= cyClient / cyChar;
+         position -= yClient / yChar;
          break;
+
       case SB_PAGEDOWN:
-         position += cyClient / cyChar;
+         position += yClient / yChar;
          break;
+
       case SB_THUMBPOSITION:
          position = LOWORD(lParam);
          break;
@@ -182,21 +193,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       if ( position != GetScrollPos(scroll, SB_CTL) )
       {
          SetScrollPos(scroll, SB_CTL, position, TRUE);
-         InvalidateRect(hwnd, NULL, TRUE);
+         InvalidateRect(wnd, NULL, TRUE);
       }
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
       //pText = (char*)LockResource(hResource);
 
-      GetClientRect(hwnd, &rect);
-      rect.left += cxChar;
-      rect.top += cyChar * (1 - position);
-      DrawTextA(hdc, rsc, -1, &rect, DT_EXTERNALLEADING);
+      GetClientRect(wnd, &rect);
+      rect.left += xChar;
+      rect.top  += yChar * (1 - position);
+      DrawTextA(dc, rsc, -1, &rect, DT_EXTERNALLEADING);
 
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
@@ -205,5 +216,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       PostQuitMessage(0);
       return 0;
    }
-   return DefWindowProc(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }
