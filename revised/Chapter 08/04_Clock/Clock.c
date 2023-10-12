@@ -1,6 +1,6 @@
 /*--------------------------------------
    CLOCK.C -- Analog Clock Program
-           (c) Charles Petzold, 1998
+              (c) Charles Petzold, 1998
   --------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -25,7 +25,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"Clock";
-   HWND           hwnd;
+   HWND           wnd;
    MSG            msg;
    WNDCLASSW      wc;
 
@@ -47,14 +47,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Analog Clock",
+   wnd = CreateWindowW(appName, L"Analog Clock",
                         WS_OVERLAPPEDWINDOW,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, CW_USEDEFAULT,
                         NULL, NULL, instance, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -64,32 +64,32 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-void SetIsotropic(HDC hdc, int cxClient, int cyClient)
+void SetIsotropic(HDC dc, int xClient, int yClient)
 {
-   SetMapMode(hdc, MM_ISOTROPIC);
-   SetWindowExtEx(hdc, 1000, 1000, NULL);
-   SetViewportExtEx(hdc, cxClient / 2, -cyClient / 2, NULL);
-   SetViewportOrgEx(hdc, cxClient / 2, cyClient / 2, NULL);
+   SetMapMode(dc, MM_ISOTROPIC);
+   SetWindowExtEx(dc, 1000, 1000, NULL);
+   SetViewportExtEx(dc, xClient / 2, -yClient / 2, NULL);
+   SetViewportOrgEx(dc, xClient / 2, yClient / 2, NULL);
 }
 
-void RotatePoint(POINT pt[], int iNum, int iAngle)
+void RotatePoint(POINT pt[], int num, int angle)
 {
    int   i;
    POINT temp;
 
-   for ( i = 0; i < iNum; i++ )
+   for ( i = 0; i < num; i++ )
    {
-      temp.x = (int) (pt[ i ].x * cos(TWOPI * iAngle / 360) +
-                      pt[ i ].y * sin(TWOPI * iAngle / 360));
+      temp.x = (int) (pt[ i ].x * cos(TWOPI * angle / 360) +
+                      pt[ i ].y * sin(TWOPI * angle / 360));
 
-      temp.y = (int) (pt[ i ].y * cos(TWOPI * iAngle / 360) -
-                      pt[ i ].x * sin(TWOPI * iAngle / 360));
+      temp.y = (int) (pt[ i ].y * cos(TWOPI * angle / 360) -
+                      pt[ i ].x * sin(TWOPI * angle / 360));
 
       pt[ i ] = temp;
    }
 }
 
-void DrawClock(HDC hdc)
+void DrawClock(HDC dc)
 {
    int   angle;
    POINT pt[ 3 ];
@@ -109,13 +109,13 @@ void DrawClock(HDC hdc)
       pt[ 1 ].x = pt[ 0 ].x + pt[ 2 ].x;
       pt[ 1 ].y = pt[ 0 ].y + pt[ 2 ].y;
 
-      SelectObject(hdc, GetStockObject(BLACK_BRUSH));
+      SelectObject(dc, GetStockObject(BLACK_BRUSH));
 
-      Ellipse(hdc, pt[ 0 ].x, pt[ 0 ].y, pt[ 1 ].x, pt[ 1 ].y);
+      Ellipse(dc, pt[ 0 ].x, pt[ 0 ].y, pt[ 1 ].x, pt[ 1 ].y);
    }
 }
 
-void DrawHands(HDC hdc, SYSTEMTIME* pst, BOOL fChange)
+void DrawHands(HDC dc, SYSTEMTIME* sysTime, BOOL change)
 {
    static POINT pt[ 3 ][ 5 ] = { {{0, -150}, {100, 0}, {0, 600}, {-100, 0}, {0, -150}},
                                  {{0, -200}, { 50, 0}, {0, 800}, { -50, 0}, {0, -200}},
@@ -124,78 +124,79 @@ void DrawHands(HDC hdc, SYSTEMTIME* pst, BOOL fChange)
    int          angle[ 3 ];
    POINT        temp[ 3 ][ 5 ];
 
-   angle[ 0 ] = (pst->wHour * 30) % 360 + pst->wMinute / 2;
-   angle[ 1 ] = pst->wMinute * 6;
-   angle[ 2 ] = pst->wSecond * 6;
+   angle[ 0 ] = (sysTime->wHour * 30) % 360 + sysTime->wMinute / 2;
+   angle[ 1 ] = sysTime->wMinute * 6;
+   angle[ 2 ] = sysTime->wSecond * 6;
 
    memcpy(temp, pt, sizeof(pt));
 
-   for ( i = fChange ? 0 : 2; i < 3; i++ )
+   for ( i = change ? 0 : 2; i < 3; i++ )
    {
       RotatePoint(temp[ i ], 5, angle[ i ]);
 
-      Polyline(hdc, temp[ i ], 5);
+      Polyline(dc, temp[ i ], 5);
    }
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   static int        cxClient, cyClient;
+   static int        xClient;
+   static int        yClient;
    static SYSTEMTIME previousTime;
    BOOL              change;
-   HDC               hdc;
+   HDC               dc;
    PAINTSTRUCT       ps;
-   SYSTEMTIME        st;
+   SYSTEMTIME        sysTime;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
-      SetTimer(hwnd, ID_TIMER, 1000, NULL);
-      GetLocalTime(&st);
-      previousTime = st;
+      SetTimer(wnd, ID_TIMER, 1000, NULL);
+      GetLocalTime(&sysTime);
+      previousTime = sysTime;
       return 0;
 
    case WM_SIZE:
-      cxClient = GET_X_LPARAM(lParam);
-      cyClient = GET_Y_LPARAM(lParam);
+      xClient = GET_X_LPARAM(lParam);
+      yClient = GET_Y_LPARAM(lParam);
       return 0;
 
    case WM_TIMER:
-      GetLocalTime(&st);
+      GetLocalTime(&sysTime);
 
-      change = st.wHour != previousTime.wHour ||
-         st.wMinute != previousTime.wMinute;
+      change = sysTime.wHour != previousTime.wHour ||
+               sysTime.wMinute != previousTime.wMinute;
 
-      hdc = GetDC(hwnd);
+      dc = GetDC(wnd);
 
-      SetIsotropic(hdc, cxClient, cyClient);
+      SetIsotropic(dc, xClient, yClient);
 
-      SelectObject(hdc, GetStockObject(WHITE_PEN));
-      DrawHands(hdc, &previousTime, change);
+      SelectObject(dc, GetStockObject(WHITE_PEN));
+      DrawHands(dc, &previousTime, change);
 
-      SelectObject(hdc, GetStockObject(BLACK_PEN));
-      DrawHands(hdc, &st, TRUE);
+      SelectObject(dc, GetStockObject(BLACK_PEN));
+      DrawHands(dc, &sysTime, TRUE);
 
-      ReleaseDC(hwnd, hdc);
+      ReleaseDC(wnd, dc);
 
-      previousTime = st;
+      previousTime = sysTime;
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
-      SetIsotropic(hdc, cxClient, cyClient);
-      DrawClock(hdc);
-      DrawHands(hdc, &previousTime, TRUE);
+      SetIsotropic(dc, xClient, yClient);
+      DrawClock(dc);
+      DrawHands(dc, &previousTime, TRUE);
 
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
-      KillTimer(hwnd, ID_TIMER);
+      KillTimer(wnd, ID_TIMER);
       PostQuitMessage(0);
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }
