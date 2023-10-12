@@ -18,16 +18,16 @@ LRESULT CALLBACK ScrollProc(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
 
 int focus;
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"Colors1";
-   HWND           hwnd;
+   HWND           wnd;
    MSG            msg;
    WNDCLASSW      wc;
 
@@ -35,7 +35,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = CreateSolidBrush(0);
@@ -44,19 +44,18 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
 
    if ( !RegisterClassW(&wc) )
    {
-      MessageBoxW(NULL, L"This program requires Windows NT!",
-                  appName, MB_ICONERROR);
+      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Color Scroll",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Color Scroll",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -66,9 +65,9 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   static COLORREF prim[ N ] = { RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255) };
+   static COLORREF prim[ N ]     = { RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255) };
    static HBRUSH   brush[ N ];
    static HBRUSH   brushStatic;
    static HWND     scroll[ N ];
@@ -76,26 +75,26 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    static HWND     value[ N ];
    static HWND     rect;
    static int      color[ N ];
-   static int      cyChar;
-   static RECT     rcColor;
-   static PCWSTR   colorLabel[] = { L"Red", L"Green", L"Blue" };
-   HINSTANCE       instance;
+   static int      yChar;
+   static RECT     rColor;
+   static PCWSTR   colorLabel[ ] = { L"Red", L"Green", L"Blue" };
+   HINSTANCE       inst;
    int             i;
-   int             cxClient;
-   int             cyClient;
+   int             xClient;
+   int             yClient;
    WCHAR           buffer[ 10 ];
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
-      instance = GetWindowInstance(hwnd);
+      inst = GetWindowInstance(wnd);
 
       // create the white-rectangle window against which the
       // scroll bars will be positioned. The child window ID is 9.
       rect = CreateWindowW(L"static", NULL,
                            WS_CHILD | WS_VISIBLE | SS_WHITERECT,
                            0, 0, 0, 0,
-                           hwnd, (HMENU) 9, instance, NULL);
+                           wnd, (HMENU) 9, inst, NULL);
 
       for ( i = 0; i < N; i++ )
       {
@@ -105,7 +104,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                                      WS_CHILD | WS_VISIBLE |
                                      WS_TABSTOP | SBS_VERT,
                                      0, 0, 0, 0,
-                                     hwnd, (HMENU) i, instance, NULL);
+                                     wnd, (HMENU) i, inst, NULL);
 
          SetScrollRange(scroll[ i ], SB_CTL, 0, 255, FALSE);
          SetScrollPos(scroll[ i ], SB_CTL, 0, FALSE);
@@ -115,16 +114,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          label[ i ] = CreateWindowW(L"static", colorLabel[ i ],
                                     WS_CHILD | WS_VISIBLE | SS_CENTER,
                                     0, 0, 0, 0,
-                                    hwnd, (HMENU) (i + N),
-                                    instance, NULL);
+                                    wnd, (HMENU) (i + N),
+                                    inst, NULL);
 
          // the three color-value text fields have IDs 6, 7,
          // and 8, and initial text strings of "0".
          value[ i ] = CreateWindowW(L"static", L"0",
                                     WS_CHILD | WS_VISIBLE | SS_CENTER,
                                     0, 0, 0, 0,
-                                    hwnd, (HMENU) (i + 2 * N),
-                                    instance, NULL);
+                                    wnd, (HMENU) (i + 2 * N),
+                                    inst, NULL);
 
          SetWindowSubclass(scroll[ i ], ScrollProc, (UINT_PTR) i, 0);
 
@@ -133,33 +132,33 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
       brushStatic = CreateSolidBrush(GetSysColor(COLOR_BTNHIGHLIGHT));
 
-      cyChar = HIWORD(GetDialogBaseUnits());
+      yChar = HIWORD(GetDialogBaseUnits( ));
       return 0;
 
    case WM_SIZE:
-      cxClient = GET_X_LPARAM(lParam);
-      cyClient = GET_Y_LPARAM(lParam);
+      xClient = GET_X_LPARAM(lParam);
+      yClient = GET_Y_LPARAM(lParam);
 
-      SetRect(&rcColor, cxClient / 2, 0, cxClient, cyClient);
+      SetRect(&rColor, xClient / 2, 0, xClient, yClient);
 
-      MoveWindow(rect, 0, 0, cxClient / 2, cyClient, TRUE);
+      MoveWindow(rect, 0, 0, xClient / 2, yClient, TRUE);
 
       for ( i = 0; i < N; i++ )
       {
          MoveWindow(scroll[ i ],
-                    (2 * i + 1) * cxClient / 14, 2 * cyChar,
-                    cxClient / 14, cyClient - 4 * cyChar, TRUE);
+                    (2 * i + 1) * xClient / 14, 2 * yChar,
+                    xClient / 14, yClient - 4 * yChar, TRUE);
 
          MoveWindow(label[ i ],
-                    (4 * i + 1) * cxClient / 28, cyChar / 2,
-                    cxClient / 7, cyChar, TRUE);
+                    (4 * i + 1) * xClient / 28, yChar / 2,
+                    xClient / 7, yChar, TRUE);
 
          MoveWindow(value[ i ],
-                    (4 * i + 1) * cxClient / 28,
-                    cyClient - 3 * cyChar / 2,
-                    cxClient / 7, cyChar, TRUE);
+                    (4 * i + 1) * xClient / 28,
+                    yClient - 3 * yChar / 2,
+                    xClient / 7, yChar, TRUE);
       }
-      SetFocus(hwnd);
+      SetFocus(wnd);
       return 0;
 
    case WM_SETFOCUS:
@@ -208,10 +207,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       wsprintfW(buffer, L"%i", color[ i ]);
       SetWindowTextW(value[ i ], buffer);
 
-      DeleteBrush((HBRUSH) SetClassLongPtrW(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)
+      DeleteBrush((HBRUSH) SetClassLongPtrW(wnd, GCLP_HBRBACKGROUND, (LONG_PTR)
                                             CreateSolidBrush(RGB(color[ 0 ], color[ 1 ], color[ 2 ]))));
 
-      InvalidateRect(hwnd, &rcColor, TRUE);
+      InvalidateRect(wnd, &rColor, TRUE);
       return 0;
 
    case WM_CTLCOLORSCROLLBAR:
@@ -235,7 +234,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
 
    case WM_DESTROY:
-      DeleteBrush((HBRUSH) SetClassLongPtrW(hwnd, GCLP_HBRBACKGROUND,
+      DeleteBrush((HBRUSH) SetClassLongPtrW(wnd, GCLP_HBRBACKGROUND,
                                             (LONG_PTR) GetStockBrush(WHITE_BRUSH)));
 
       for ( i = 0; i < N; i++ )
@@ -248,10 +247,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }
 
-LRESULT CALLBACK ScrollProc(HWND      hwnd,
+LRESULT CALLBACK ScrollProc(HWND      wnd,
                             UINT      msg,
                             WPARAM    wParam,
                             LPARAM    lParam,
@@ -261,24 +260,24 @@ LRESULT CALLBACK ScrollProc(HWND      hwnd,
    UNREFERENCED_PARAMETER(subclass);
    UNREFERENCED_PARAMETER(refData);
 
-   int id = (int) GetWindowLongPtrW(hwnd, GWLP_ID);
+   int id = (int) GetWindowLongPtrW(wnd, GWLP_ID);
 
    switch ( msg )
    {
    case WM_KEYDOWN:
       if ( wParam == VK_TAB )
       {
-         SetFocus(GetDlgItem(GetParent(hwnd), (id + (GetKeyState(VK_SHIFT) < 0 ? 2 : 1)) % N));
+         SetFocus(GetDlgItem(GetParent(wnd), (id + (GetKeyState(VK_SHIFT) < 0 ? 2 : 1)) % N));
       }
       break;
 
    case WM_NCDESTROY:
-      RemoveWindowSubclass(hwnd, ScrollProc, id);
+      RemoveWindowSubclass(wnd, ScrollProc, id);
       break;
 
    case WM_SETFOCUS:
       focus = id;
       break;
    }
-   return DefSubclassProc(hwnd, msg, wParam, lParam);
+   return DefSubclassProc(wnd, msg, wParam, lParam);
 }

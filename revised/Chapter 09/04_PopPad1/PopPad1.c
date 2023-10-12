@@ -1,6 +1,6 @@
 /*-------------------------------------------------------
    POPPAD1.C -- Popup Editor using child window edit box
-            (c) Charles Petzold, 1998
+                (c) Charles Petzold, 1998
   -------------------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -14,15 +14,15 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 PCWSTR appName = L"PopPad1";
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   HWND      hwnd;
+   HWND      wnd;
    MSG       msg;
    WNDCLASSW wc;
 
@@ -30,7 +30,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -39,19 +39,18 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
 
    if ( !RegisterClassW(&wc) )
    {
-      MessageBoxW(NULL, L"This program requires Windows NT!",
-                  appName, MB_ICONERROR);
+      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, appName,
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, appName,
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -61,18 +60,17 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static HWND edit;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
       edit = CreateWindowW(L"edit", NULL,
-                           WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL |
-                           WS_BORDER | ES_LEFT | ES_MULTILINE |
-                           ES_AUTOHSCROLL | ES_AUTOVSCROLL,
-                           0, 0, 0, 0, hwnd, (HMENU) ID_EDIT,
+                           WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | WS_BORDER |
+                           ES_LEFT | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL,
+                           0, 0, 0, 0, wnd, (HMENU) ID_EDIT,
                            ((LPCREATESTRUCT) lParam)->hInstance, NULL);
       return 0;
 
@@ -86,11 +84,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
    case WM_COMMAND:
       if ( LOWORD(wParam) == ID_EDIT )
+      {
          if ( HIWORD(wParam) == EN_ERRSPACE ||
               HIWORD(wParam) == EN_MAXTEXT )
-
-            MessageBoxW(hwnd, L"Edit control out of space.",
-                        appName, MB_OK | MB_ICONSTOP);
+         {
+            MessageBoxW(wnd, L"Edit control out of space.", appName, MB_OK | MB_ICONSTOP);
+         }
+      }
       return 0;
 
    case WM_DESTROY:
@@ -98,5 +98,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

@@ -1,6 +1,6 @@
 /*----------------------------------------
    ENVIRON.C -- Environment List Box
-            (c) Charles Petzold, 1998
+                (c) Charles Petzold, 1998
   ----------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -14,24 +14,24 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  appName = L"Environ";
-   HWND           hwnd;
-   MSG            msg;
-   WNDCLASSW      wc;
+   static PCWSTR appName = L"Environ";
+   HWND          wnd;
+   MSG           msg;
+   WNDCLASSW     wc;
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -40,19 +40,18 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
 
    if ( !RegisterClassW(&wc) )
    {
-      MessageBoxW(NULL, L"This program requires Windows NT!",
-                  appName, MB_ICONERROR);
+      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Environment List Box",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Environment List Box",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -63,7 +62,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-void FillListBox(HWND hwndList)
+void FillListBox(HWND wndList)
 {
    int    length;
    WCHAR* EBlock;
@@ -72,17 +71,17 @@ void FillListBox(HWND hwndList)
    WCHAR* varEnd;
    WCHAR* varName;
 
-   EBlock   = (WCHAR*) GetEnvironmentStrings();  // Get pointer to environment block
+   EBlock = (WCHAR*) GetEnvironmentStringsW( );  // Get pointer to environment block
    varBlock = EBlock;
 
    while ( *varBlock )
    {
       if ( *varBlock != '=' )   // Skip variable names beginning with '='
       {
-         varBeg  = varBlock;              // Beginning of variable name
-         while ( *varBlock++ != L'=' );      // Scan until '='
-         varEnd  = varBlock - 1;          // Points to '=' sign
-         length = (int) (varEnd - varBeg);      // Length of variable name
+         varBeg = varBlock;                // Beginning of variable name
+         while ( *varBlock++ != L'=' ) ;   // Scan until '='
+         varEnd = varBlock - 1;            // Points to '=' sign
+         length = (int) (varEnd - varBeg); // Length of variable name
 
          // Allocate memory for the variable name and terminating
          // zero. Copy the variable name and append a zero.
@@ -92,8 +91,7 @@ void FillListBox(HWND hwndList)
          varName[ length ] = L'\0';
 
          // Put the variable name in the list box and free memory.
-
-         SendMessageW(hwndList, LB_ADDSTRING, 0, (LPARAM) varName);
+         SendMessageW(wndList, LB_ADDSTRING, 0, (LPARAM) varName);
          free(varName);
       }
       while ( *varBlock++ != '\0' );     // Scan until terminating zero
@@ -101,40 +99,40 @@ void FillListBox(HWND hwndList)
    FreeEnvironmentStringsW(EBlock);
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static HWND list;
    static HWND text;
    int         index;
    int         length;
-   int         cxChar;
-   int         cyChar;
-   WCHAR*      varName;
-   WCHAR*      varValue;
+   int         xChar;
+   int         yChar;
+   WCHAR* varName;
+   WCHAR* varValue;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
-      cxChar = LOWORD(GetDialogBaseUnits());
-      cyChar = HIWORD(GetDialogBaseUnits());
+      xChar = LOWORD(GetDialogBaseUnits( ));
+      yChar = HIWORD(GetDialogBaseUnits( ));
 
       // Create listbox and static text windows.
 
       list = CreateWindowW(L"listbox", NULL,
                            WS_CHILD | WS_VISIBLE | LBS_STANDARD,
-                           cxChar, cyChar * 3,
-                           cxChar * 16 + GetSystemMetrics(SM_CXVSCROLL),
-                           cyChar * 5,
-                           hwnd, (HMENU) ID_LIST,
-                           GetWindowInstance(hwnd),
+                           xChar, yChar * 3,
+                           xChar * 16 + GetSystemMetrics(SM_CXVSCROLL),
+                           yChar * 5,
+                           wnd, (HMENU) ID_LIST,
+                           GetWindowInstance(wnd),
                            NULL);
 
       text = CreateWindowW(L"static", NULL,
                            WS_CHILD | WS_VISIBLE | SS_LEFT,
-                           cxChar, cyChar,
-                           GetSystemMetrics(SM_CXSCREEN), cyChar,
-                           hwnd, (HMENU) ID_TEXT,
-                           GetWindowInstance(hwnd),
+                           xChar, yChar,
+                           GetSystemMetrics(SM_CXSCREEN), yChar,
+                           wnd, (HMENU) ID_TEXT,
+                           GetWindowInstance(wnd),
                            NULL);
 
       FillListBox(list);
@@ -149,14 +147,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       {
          // Get current selection.
 
-         index   = ListBox_GetCurSel(list);
-         length  = ListBox_GetTextLen(list, index) + 1;
+         index = ListBox_GetCurSel(list);
+         length = ListBox_GetTextLen(list, index) + 1;
          varName = (WCHAR*) calloc(length, sizeof(WCHAR));
          ListBox_GetText(list, index, varName);
 
          // Get environment string.
 
-         length   = GetEnvironmentVariableW(varName, NULL, 0);
+         length = GetEnvironmentVariableW(varName, NULL, 0);
          varValue = (WCHAR*) calloc(length, sizeof(WCHAR));
          GetEnvironmentVariableW(varName, varValue, length);
 
@@ -173,5 +171,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }
