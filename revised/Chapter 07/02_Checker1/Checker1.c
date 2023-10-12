@@ -11,16 +11,16 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"Checker1";
-   HWND           hwnd;
+   HWND           wnd;
    MSG            msg;
    WNDCLASSW      wc;
 
@@ -28,7 +28,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -42,14 +42,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Checker1 Mouse Hit-Test Demo",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Checker1 Mouse Hit-Test Demo",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -62,9 +62,9 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
    static BOOL state[ DIVISIONS ][ DIVISIONS ];
-   static int  cxBlock;
-   static int  cyBlock;
-   HDC         hdc;
+   static int  xBlock;
+   static int  yBlock;
+   HDC         dc;
    int         x;
    int         y;
    PAINTSTRUCT ps;
@@ -73,46 +73,50 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    switch ( message )
    {
    case WM_SIZE:
-      cxBlock = LOWORD(lParam) / DIVISIONS;
-      cyBlock = HIWORD(lParam) / DIVISIONS;
+      xBlock = LOWORD(lParam) / DIVISIONS;
+      yBlock = HIWORD(lParam) / DIVISIONS;
       return 0;
 
    case WM_LBUTTONDOWN:
-      x = LOWORD(lParam) / cxBlock;
-      y = HIWORD(lParam) / cyBlock;
+      x = LOWORD(lParam) / xBlock;
+      y = HIWORD(lParam) / yBlock;
 
       if ( x < DIVISIONS && y < DIVISIONS )
       {
          state[ x ][ y ] ^= 1;
 
-         rect.left = x * cxBlock;
-         rect.top = y * cyBlock;
-         rect.right = (x + 1) * cxBlock;
-         rect.bottom = (y + 1) * cyBlock;
+         rect.left   = x * xBlock;
+         rect.top    = y * yBlock;
+         rect.right  = (x + 1) * xBlock;
+         rect.bottom = (y + 1) * yBlock;
 
          InvalidateRect(hwnd, &rect, FALSE);
       }
       else
+      {
          MessageBeep(0);
+      }
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(hwnd, &ps);
 
       for ( x = 0; x < DIVISIONS; x++ )
+      {
          for ( y = 0; y < DIVISIONS; y++ )
          {
-            Rectangle(hdc, x * cxBlock, y * cyBlock,
-                      (x + 1) * cxBlock, (y + 1) * cyBlock);
+            Rectangle(dc, x * xBlock, y * yBlock,
+                      (x + 1) * xBlock, (y + 1) * yBlock);
 
             if ( state[ x ][ y ] )
             {
-               MoveToEx(hdc, x * cxBlock, y * cyBlock, NULL);
-               LineTo(hdc, (x + 1) * cxBlock, (y + 1) * cyBlock);
-               MoveToEx(hdc, x * cxBlock, (y + 1) * cyBlock, NULL);
-               LineTo(hdc, (x + 1) * cxBlock, y * cyBlock);
+               MoveToEx(dc, x * xBlock, y * yBlock, NULL);
+               LineTo(dc, (x + 1) * xBlock, (y + 1) * yBlock);
+               MoveToEx(dc, x * xBlock, (y + 1) * yBlock, NULL);
+               LineTo(dc, (x + 1) * xBlock, y * yBlock);
             }
          }
+      }
       EndPaint(hwnd, &ps);
       return 0;
 

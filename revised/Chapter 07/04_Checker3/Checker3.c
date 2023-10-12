@@ -1,6 +1,6 @@
 /*-------------------------------------------------
    CHECKER3.C -- Mouse Hit-Test Demo Program No. 3
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   -------------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -14,16 +14,16 @@ LRESULT CALLBACK ChildWndProc(HWND, UINT, WPARAM, LPARAM);
 
 PCWSTR childClass = L"Checker3_Child";
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"Checker3";
-   HWND           hwnd;
+   HWND           wnd;
    MSG            msg;
    WNDCLASSW      wc;
 
@@ -31,7 +31,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -53,14 +53,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
 
    RegisterClassW(&wc);
 
-   hwnd = CreateWindowW(appName, L"Checker3 Mouse Hit-Test Demo",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Checker3 Mouse Hit-Test Demo",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -70,36 +70,44 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   static HWND hwndChild[ DIVISIONS ][ DIVISIONS ];
-   int         cxBlock;
-   int         cyBlock;
+   static HWND wndChild[ DIVISIONS ][ DIVISIONS ];
+   int         xBlock;
+   int         yBlock;
    int         x;
    int         y;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
       for ( x = 0; x < DIVISIONS; x++ )
+      {
          for ( y = 0; y < DIVISIONS; y++ )
-            hwndChild[ x ][ y ] = CreateWindowW(childClass, NULL,
-                                                WS_CHILDWINDOW | WS_VISIBLE,
-                                                0, 0, 0, 0,
-                                                hwnd, (HMENU) (y << 8 | x),
-                                                (HINSTANCE) GetWindowLongPtrW(hwnd, GWLP_HINSTANCE),
-                                                NULL);
+         {
+            wndChild[ x ][ y ] = CreateWindowW(childClass, NULL,
+                                               WS_CHILDWINDOW | WS_VISIBLE,
+                                               0, 0, 0, 0,
+                                               wnd, (HMENU) (y << 8 | x),
+                                               (HINSTANCE) GetWindowLongPtrW(wnd, GWLP_HINSTANCE),
+                                               NULL);
+         }
+      }
       return 0;
 
    case WM_SIZE:
-      cxBlock = LOWORD(lParam) / DIVISIONS;
-      cyBlock = HIWORD(lParam) / DIVISIONS;
+      xBlock = LOWORD(lParam) / DIVISIONS;
+      yBlock = HIWORD(lParam) / DIVISIONS;
 
       for ( x = 0; x < DIVISIONS; x++ )
+      {
          for ( y = 0; y < DIVISIONS; y++ )
-            MoveWindow(hwndChild[ x ][ y ],
-                       x * cxBlock, y * cyBlock,
-                       cxBlock, cyBlock, TRUE);
+         {
+            MoveWindow(wndChild[ x ][ y ],
+                       x * xBlock, y * yBlock,
+                       xBlock, yBlock, TRUE);
+         }
+      }
       return 0;
 
    case WM_LBUTTONDOWN:
@@ -111,34 +119,33 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }
 
-LRESULT CALLBACK ChildWndProc(HWND hwnd, UINT message,
-                              WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ChildWndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    HDC         hdc;
    PAINTSTRUCT ps;
    RECT        rect;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
-      SetWindowLongPtrW(hwnd, GWLP_USERDATA, 0);       // on/off flag
+      SetWindowLongPtrW(wnd, GWLP_USERDATA, 0);       // on/off flag
       return 0;
 
    case WM_LBUTTONDOWN:
-      SetWindowLongPtrW(hwnd, GWLP_USERDATA, 1 ^ GetWindowLongPtrW(hwnd, GWLP_USERDATA));
-      InvalidateRect(hwnd, NULL, FALSE);
+      SetWindowLongPtrW(wnd, GWLP_USERDATA, 1 ^ GetWindowLongPtrW(wnd, GWLP_USERDATA));
+      InvalidateRect(wnd, NULL, FALSE);
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      hdc = BeginPaint(wnd, &ps);
 
-      GetClientRect(hwnd, &rect);
+      GetClientRect(wnd, &rect);
       Rectangle(hdc, 0, 0, rect.right, rect.bottom);
 
-      if ( GetWindowLongPtrW(hwnd, GWLP_USERDATA) )
+      if ( GetWindowLongPtrW(wnd, GWLP_USERDATA) )
       {
          MoveToEx(hdc, 0, 0, NULL);
          LineTo(hdc, rect.right, rect.bottom);
@@ -146,9 +153,9 @@ LRESULT CALLBACK ChildWndProc(HWND hwnd, UINT message,
          LineTo(hdc, rect.right, 0);
       }
 
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

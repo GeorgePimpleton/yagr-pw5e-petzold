@@ -1,6 +1,6 @@
 /*--------------------------------------------------
    CONNECT.C -- Connect-the-Dots Mouse Demo Program
-            (c) Charles Petzold, 1998
+                (c) Charles Petzold, 1998
   --------------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -11,16 +11,16 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"Connect";
-   HWND           hwnd;
+   HWND           wnd;
    MSG            msg;
    WNDCLASSW      wc;
 
@@ -28,7 +28,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -42,14 +42,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Connect-the-Points Mouse Demo",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Connect-the-Points Mouse Demo",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -59,55 +59,58 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static POINT pt[ MAXPOINTS ];
    static int   count;
-   HDC          hdc;
+   HDC          dc;
    int          i;
    int          j;
    PAINTSTRUCT  ps;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_LBUTTONDOWN:
       count = 0;
-      InvalidateRect(hwnd, NULL, TRUE);
+      InvalidateRect(wnd, NULL, TRUE);
       return 0;
 
    case WM_MOUSEMOVE:
       if ( wParam & MK_LBUTTON && count < MAXPOINTS )
       {
-         pt[ count ].x = LOWORD(lParam);
+         pt[ count ].x   = LOWORD(lParam);
          pt[ count++ ].y = HIWORD(lParam);
 
-         hdc = GetDC(hwnd);
-         SetPixel(hdc, LOWORD(lParam), HIWORD(lParam), 0);
-         ReleaseDC(hwnd, hdc);
+         dc = GetDC(wnd);
+         SetPixel(dc, LOWORD(lParam), HIWORD(lParam), 0);
+         ReleaseDC(wnd, dc);
       }
       return 0;
 
    case WM_LBUTTONUP:
-      InvalidateRect(hwnd, NULL, FALSE);
+      InvalidateRect(wnd, NULL, FALSE);
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
-      SetCursor(LoadCursor(NULL, IDC_WAIT));
+      SetCursor(LoadCursorW(NULL, IDC_WAIT));
       ShowCursor(TRUE);
 
       for ( i = 0; i < count - 1; i++ )
+      {
          for ( j = i + 1; j < count; j++ )
          {
-            MoveToEx(hdc, pt[ i ].x, pt[ i ].y, NULL);
-            LineTo(hdc, pt[ j ].x, pt[ j ].y);
+            MoveToEx(dc, pt[ i ].x, pt[ i ].y, NULL);
+            LineTo(dc, pt[ j ].x, pt[ j ].y);
          }
+         Sleep(1);
+      }
 
       ShowCursor(FALSE);
-      SetCursor(LoadCursor(NULL, IDC_ARROW));
+      SetCursor(LoadCursorW(NULL, IDC_ARROW));
 
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
@@ -115,5 +118,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

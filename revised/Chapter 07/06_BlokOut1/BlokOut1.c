@@ -1,6 +1,6 @@
 /*-----------------------------------------
    BLOKOUT1.C -- Mouse Button Demo Program
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   -----------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -9,16 +9,16 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR  appName = L"BlokOut1";
-   HWND           hwnd;
+   HWND           wnd;
    MSG            msg;
    WNDCLASSW      wc;
 
@@ -26,7 +26,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  GetStockObject(WHITE_BRUSH);
@@ -40,14 +40,14 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Mouse Button Demo",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   wnd = CreateWindowW(appName, L"Mouse Button Demo",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
    while ( GetMessageW(&msg, NULL, 0, 0) )
    {
@@ -57,37 +57,37 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-void DrawBoxOutline(HWND hwnd, POINT ptBeg, POINT ptEnd)
+void DrawBoxOutline(HWND wnd, POINT beg, POINT end)
 {
-   HDC hdc;
+   HDC dc;
 
-   hdc = GetDC(hwnd);
+   dc = GetDC(wnd);
 
-   SetROP2(hdc, R2_NOT);
-   SelectObject(hdc, GetStockObject(NULL_BRUSH));
-   Rectangle(hdc, ptBeg.x, ptBeg.y, ptEnd.x, ptEnd.y);
+   SetROP2(dc, R2_NOT);
+   SelectObject(dc, GetStockObject(NULL_BRUSH));
+   Rectangle(dc, beg.x, beg.y, end.x, end.y);
 
-   ReleaseDC(hwnd, hdc);
+   ReleaseDC(wnd, dc);
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static BOOL  blocking;
    static BOOL  validBox;
-   static POINT ptBeg;
-   static POINT ptEnd;
-   static POINT ptBoxBeg;
-   static POINT ptBoxEnd;
-   HDC          hdc;
+   static POINT beg;
+   static POINT end;
+   static POINT boxBeg;
+   static POINT boxEnd;
+   HDC          dc;
    PAINTSTRUCT  ps;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_LBUTTONDOWN:
-      ptBeg.x = ptEnd.x = LOWORD(lParam);
-      ptBeg.y = ptEnd.y = HIWORD(lParam);
+      beg.x = end.x = LOWORD(lParam);
+      beg.y = end.y = HIWORD(lParam);
 
-      DrawBoxOutline(hwnd, ptBeg, ptEnd);
+      DrawBoxOutline(wnd, beg, end);
 
       SetCursor((HCURSOR) LoadImageW(NULL, IDC_CROSS, IMAGE_CURSOR, 0, 0, LR_SHARED));
 
@@ -99,37 +99,37 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       {
          SetCursor((HCURSOR) LoadImageW(NULL, IDC_CROSS, IMAGE_CURSOR, 0, 0, LR_SHARED));
 
-         DrawBoxOutline(hwnd, ptBeg, ptEnd);
+         DrawBoxOutline(wnd, beg, end);
 
-         ptEnd.x = LOWORD(lParam);
-         ptEnd.y = HIWORD(lParam);
+         end.x = LOWORD(lParam);
+         end.y = HIWORD(lParam);
 
-         DrawBoxOutline(hwnd, ptBeg, ptEnd);
+         DrawBoxOutline(wnd, beg, end);
       }
       return 0;
 
    case WM_LBUTTONUP:
       if ( blocking )
       {
-         DrawBoxOutline(hwnd, ptBeg, ptEnd);
+         DrawBoxOutline(wnd, beg, end);
 
-         ptBoxBeg   = ptBeg;
-         ptBoxEnd.x = LOWORD(lParam);
-         ptBoxEnd.y = HIWORD(lParam);
+         boxBeg   = beg;
+         boxEnd.x = LOWORD(lParam);
+         boxEnd.y = HIWORD(lParam);
 
          SetCursor((HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED));
 
          blocking = FALSE;
          validBox = TRUE;
 
-         InvalidateRect(hwnd, NULL, TRUE);
+         InvalidateRect(wnd, NULL, TRUE);
       }
       return 0;
 
    case WM_CHAR:
       if ( blocking && (wParam == '\x1B') )     // i.e., Escape
       {
-         DrawBoxOutline(hwnd, ptBeg, ptEnd);
+         DrawBoxOutline(wnd, beg, end);
 
          SetCursor((HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED));
 
@@ -138,23 +138,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
       if ( validBox )
       {
-         SelectObject(hdc, GetStockObject(BLACK_BRUSH));
-         Rectangle(hdc, ptBoxBeg.x, ptBoxBeg.y,
-                   ptBoxEnd.x, ptBoxEnd.y);
+         SelectObject(dc, GetStockObject(BLACK_BRUSH));
+         Rectangle(dc, boxBeg.x, boxBeg.y, boxEnd.x, boxEnd.y);
       }
 
       if ( blocking )
       {
-         SetROP2(hdc, R2_NOT);
-         SelectObject(hdc, GetStockObject(NULL_BRUSH));
-         Rectangle(hdc, ptBeg.x, ptBeg.y, ptEnd.x, ptEnd.y);
+         SetROP2(dc, R2_NOT);
+         SelectObject(dc, GetStockObject(NULL_BRUSH));
+         Rectangle(dc, beg.x, beg.y, end.x, end.y);
       }
 
-      EndPaint(hwnd, &ps);
+      EndPaint(wnd, &ps);
       return 0;
 
    case WM_DESTROY:
@@ -162,5 +161,5 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProc(hwnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }
