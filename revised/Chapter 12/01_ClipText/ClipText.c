@@ -4,187 +4,184 @@
   -----------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
-#include <tchar.h>
+
 #include <windows.h>
 #include <malloc.h>
 #include "Resource.h"
 
-LRESULT CALLBACK WndProc (HWND, UINT, WPARAM, LPARAM) ;
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-#ifdef UNICODE
+WCHAR defaultText[ ] = L"Default Text";
+WCHAR caption[ ]     = L"Clipboard Text Transfers";
 
-#define CF_TCHAR CF_UNICODETEXT
-TCHAR szDefaultText[] = TEXT ("Default Text - Unicode Version") ;
-TCHAR szCaption[]     = TEXT ("Clipboard Text Transfers - Unicode Version") ;
-
-#else
-
-#define CF_TCHAR CF_TEXT
-TCHAR szDefaultText[] = TEXT ("Default Text - ANSI Version") ;
-TCHAR szCaption[]     = TEXT ("Clipboard Text Transfers - ANSI Version") ;
-
-#endif
-
-int WINAPI _tWinMain(
-	_In_     HINSTANCE hInstance,
-	_In_opt_ HINSTANCE hPrevInstance,
-	_In_     PTSTR     pCmdLine,
-	_In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-     static TCHAR szAppName[] = TEXT ("ClipText") ;
-     HACCEL       hAccel ;
-     HWND         hwnd ;
-     MSG          msg ;
-     WNDCLASS     wndclass ;
+   UNREFERENCED_PARAMETER(cmdLine);
 
-     wndclass.style         = CS_HREDRAW | CS_VREDRAW ;
-     wndclass.lpfnWndProc   = WndProc ;
-     wndclass.cbClsExtra    = 0 ;
-     wndclass.cbWndExtra    = 0 ;
-     wndclass.hInstance     = hInstance ;
-     wndclass.hIcon         = LoadIcon (NULL, IDI_APPLICATION) ;
-     wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW) ;
-     wndclass.hbrBackground = (HBRUSH) GetStockObject (WHITE_BRUSH) ;
-     wndclass.lpszMenuName  = szAppName ;
-     wndclass.lpszClassName = szAppName ;
+   static WCHAR appName[ ] = L"ClipText";
+   HACCEL       accel;
+   HWND         wnd;
+   MSG          msg;
+   WNDCLASSW    wc;
 
-     if (!RegisterClass (&wndclass))
-     {
-          MessageBox (NULL, TEXT ("This program requires Windows NT!"),
-                      szAppName, MB_ICONERROR) ;
-          return 0 ;
-     }
+   wc.style         = CS_HREDRAW | CS_VREDRAW;
+   wc.lpfnWndProc   = WndProc;
+   wc.cbClsExtra    = 0;
+   wc.cbWndExtra    = 0;
+   wc.hInstance     = inst;
+   wc.hIcon         = (HICON)   LoadImageW(inst, appName, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
+   wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
+   wc.lpszMenuName  = appName;
+   wc.lpszClassName = appName;
 
-     hwnd = CreateWindow (szAppName, szCaption,
-                          WS_OVERLAPPEDWINDOW,
-                          CW_USEDEFAULT, CW_USEDEFAULT,
-                          CW_USEDEFAULT, CW_USEDEFAULT,
-                          NULL, NULL, hInstance, NULL) ;
+   if ( !RegisterClassW(&wc) )
+   {
+      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
+      return 0;
+   }
 
-     ShowWindow (hwnd, nShowCmd) ;
-     UpdateWindow (hwnd) ;
+   wnd = CreateWindowW(appName, caption,
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-     hAccel = LoadAccelerators (hInstance, szAppName) ;
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
-     while (GetMessage (&msg, NULL, 0, 0))
-     {
-          if (!TranslateAccelerator (hwnd, hAccel, &msg))
-          {
-               TranslateMessage (&msg) ;
-               DispatchMessage (&msg) ;
-          }
-     }
-     return (int)msg.wParam;  // WM_QUIT
+   accel = LoadAcceleratorsW(inst, appName);
+
+   while ( GetMessageW(&msg, NULL, 0, 0) )
+   {
+      if ( !TranslateAcceleratorW(wnd, accel, &msg) )
+      {
+         TranslateMessage(&msg);
+         DispatchMessageW(&msg);
+      }
+   }
+   return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-     static PTSTR pText ;
-     BOOL         bEnable ;
-     HGLOBAL      hGlobal ;
-     HDC          hdc ;
-     PTSTR        pGlobal ;
-     PAINTSTRUCT  ps ;
-     RECT         rect ;
+   static PWSTR text;
+   BOOL         enable;
+   HGLOBAL      global;
+   HDC          dc;
+   PWSTR        strGlobal;
+   PAINTSTRUCT  ps;
+   RECT         rect;
 
-     switch (message)
-     {
-     case WM_CREATE:
-          SendMessage (hwnd, WM_COMMAND, IDM_EDIT_RESET, 0) ;
-          return 0 ;
+   switch ( msg )
+   {
+   case WM_CREATE:
+      SendMessageW(wnd, WM_COMMAND, IDM_EDIT_RESET, 0);
+      return 0;
 
-    case WM_INITMENUPOPUP:
-          EnableMenuItem ((HMENU) wParam, IDM_EDIT_PASTE,
-               IsClipboardFormatAvailable (CF_TCHAR) ? MF_ENABLED : MF_GRAYED) ;
+   case WM_INITMENUPOPUP:
+      EnableMenuItem((HMENU) wParam, IDM_EDIT_PASTE,
+                     IsClipboardFormatAvailable(CF_UNICODETEXT) ? MF_ENABLED : MF_GRAYED);
 
-          bEnable = pText ? MF_ENABLED : MF_GRAYED ;
+      enable = text ? MF_ENABLED : MF_GRAYED;
 
-          EnableMenuItem ((HMENU) wParam, IDM_EDIT_CUT,   bEnable) ;
-          EnableMenuItem ((HMENU) wParam, IDM_EDIT_COPY,  bEnable) ;
-          EnableMenuItem ((HMENU) wParam, IDM_EDIT_CLEAR, bEnable) ;
-          break ;
+      EnableMenuItem((HMENU) wParam, IDM_EDIT_CUT, enable);
+      EnableMenuItem((HMENU) wParam, IDM_EDIT_COPY, enable);
+      EnableMenuItem((HMENU) wParam, IDM_EDIT_CLEAR, enable);
+      break;
 
-     case WM_COMMAND:
-          switch (LOWORD (wParam))
-          {
-          case IDM_EDIT_PASTE:
-               OpenClipboard (hwnd) ;
+   case WM_COMMAND:
+      switch ( LOWORD(wParam) )
+      {
+      case IDM_EDIT_PASTE:
+         OpenClipboard(wnd);
 
-               if (hGlobal = GetClipboardData (CF_TCHAR))
-               {
-                    pGlobal = GlobalLock (hGlobal) ;
+         if ( global = GetClipboardData(CF_UNICODETEXT) )
+         {
+            strGlobal = (PWSTR) GlobalLock(global);
 
-                    if (pText)
-                    {
-                         free (pText) ;
-                         pText = NULL ;
-                    }
-                    pText = malloc (GlobalSize (hGlobal)) ;
-                    lstrcpy (pText, pGlobal) ;
-                    InvalidateRect (hwnd, NULL, TRUE) ;
-               }
-               CloseClipboard () ;
-               return 0 ;
+            if ( text )
+            {
+               free(text);
+               text = NULL;
+            }
+            text = (PWSTR) malloc(GlobalSize(global));
+            lstrcpyW(text, strGlobal);
+            InvalidateRect(wnd, NULL, TRUE);
+         }
+         CloseClipboard( );
+         return 0;
 
-          case IDM_EDIT_CUT:
-          case IDM_EDIT_COPY:
-               if (!pText)
-                    return 0 ;
+      case IDM_EDIT_CUT:
+      case IDM_EDIT_COPY:
+         if ( !text )
+         {
+            return 0;
+         }
 
-               hGlobal = GlobalAlloc (GHND | GMEM_SHARE,
-                                      (lstrlen (pText) + 1) * sizeof (TCHAR)) ;
-               pGlobal = GlobalLock (hGlobal) ;
-               lstrcpy (pGlobal, pText) ;
-               GlobalUnlock (hGlobal) ;
+         global    = GlobalAlloc(GHND | GMEM_SHARE, (lstrlenW(text) + 1) * sizeof(WCHAR));
+         strGlobal = (PWSTR) GlobalLock(global);
+         lstrcpyW(strGlobal, text);
+         GlobalUnlock(global);
 
-               OpenClipboard (hwnd) ;
-               EmptyClipboard () ;
-               SetClipboardData (CF_TCHAR, hGlobal) ;
-               CloseClipboard () ;
+         OpenClipboard(wnd);
+         EmptyClipboard( );
+         SetClipboardData(CF_UNICODETEXT, global);
+         CloseClipboard( );
 
-               if (LOWORD (wParam) == IDM_EDIT_COPY)
-                    return 0 ;
-                                             // fall through for IDM_EDIT_CUT
-          case IDM_EDIT_CLEAR:
-               if (pText)
-               {
-                    free (pText) ;
-                    pText = NULL ;
-               }
-               InvalidateRect (hwnd, NULL, TRUE) ;
-               return 0 ;
+         if ( LOWORD(wParam) == IDM_EDIT_COPY )
+         {
+            return 0;
+         }
+         // fall through for IDM_EDIT_CUT
 
-          case IDM_EDIT_RESET:
-               if (pText)
-               {
-                    free (pText) ;
-                    pText = NULL ;
-               }
+      case IDM_EDIT_CLEAR:
+         if ( text )
+         {
+            free(text);
+            text = NULL;
+         }
+         InvalidateRect(wnd, NULL, TRUE);
+         return 0;
 
-               pText = malloc ((lstrlen (szDefaultText) + 1) * sizeof (TCHAR)) ;
-               lstrcpy (pText, szDefaultText) ;
-               InvalidateRect (hwnd, NULL, TRUE) ;
-               return 0 ;
-          }
-          break ;
+      case IDM_EDIT_RESET:
+         if ( text )
+         {
+            free(text);
+            text = NULL;
+         }
 
-     case WM_PAINT:
-          hdc = BeginPaint (hwnd, &ps) ;
+         text = (PWSTR) malloc((lstrlen(defaultText) + 1) * sizeof(TCHAR));
+         lstrcpy(text, defaultText);
+         InvalidateRect(wnd, NULL, TRUE);
+         return 0;
+      }
+      break;
 
-          GetClientRect (hwnd, &rect) ;
+   case WM_PAINT:
+      dc = BeginPaint(wnd, &ps);
 
-          if (pText != NULL)
-               DrawText (hdc, pText, -1, &rect, DT_EXPANDTABS | DT_WORDBREAK) ;
+      GetClientRect(wnd, &rect);
 
-          EndPaint (hwnd, &ps) ;
-          return 0 ;
+      if ( text != NULL )
+      {
+         DrawTextW(dc, text, -1, &rect, DT_EXPANDTABS | DT_WORDBREAK);
+      }
 
-     case WM_DESTROY:
-          if (pText)
-               free (pText) ;
+      EndPaint(wnd, &ps);
+      return 0;
 
-          PostQuitMessage (0) ;
-          return 0 ;
-     }
-     return DefWindowProc (hwnd, message, wParam, lParam) ;
+   case WM_DESTROY:
+      if ( text )
+      {
+         free(text);
+      }
+
+      PostQuitMessage(0);
+      return 0;
+   }
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }
