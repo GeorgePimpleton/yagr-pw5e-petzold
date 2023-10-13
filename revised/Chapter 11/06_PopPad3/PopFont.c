@@ -3,60 +3,60 @@
   ------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
+
 #include <windows.h>
 #include <windowsx.h>
-#include <tchar.h>
 #include <commdlg.h>
 
-static LOGFONT logfont;
-static HFONT   hFont;
+static LOGFONTW logfont;
+static HFONT    font;
 
-BOOL PopFontChooseFont(HWND hwnd)
+BOOL PopFontChooseFont(HWND wnd)
 {
-	CHOOSEFONT cf;
+   CHOOSEFONTW cf;
 
-	cf.lStructSize = sizeof(CHOOSEFONT);
-	cf.hwndOwner = hwnd;
-	cf.hDC = NULL;
-	cf.lpLogFont = &logfont;
-	cf.iPointSize = 0;
-	cf.Flags = CF_INITTOLOGFONTSTRUCT | CF_SCREENFONTS | CF_EFFECTS;
-	cf.rgbColors = 0;
-	cf.lCustData = 0;
-	cf.lpfnHook = NULL;
-	cf.lpTemplateName = NULL;
-	cf.hInstance = NULL;
-	cf.lpszStyle = NULL;
-	cf.nFontType = 0;               // Returned from ChooseFont
-	cf.nSizeMin = 0;
-	cf.nSizeMax = 0;
+   cf.lStructSize    = sizeof(CHOOSEFONTW);
+   cf.hwndOwner      = wnd;
+   cf.hDC            = NULL;
+   cf.lpLogFont      = &logfont;
+   cf.iPointSize     = 0;
+   cf.Flags          = CF_INITTOLOGFONTSTRUCT | CF_SCREENFONTS | CF_EFFECTS;
+   cf.rgbColors      = 0;
+   cf.lCustData      = 0;
+   cf.lpfnHook       = NULL;
+   cf.lpTemplateName = NULL;
+   cf.hInstance      = NULL;
+   cf.lpszStyle      = NULL;
+   cf.nFontType      = 0;               // Returned from ChooseFont
+   cf.nSizeMin       = 0;
+   cf.nSizeMax       = 0;
 
-	return ChooseFont(&cf);
+   return ChooseFontW(&cf);
 }
 
-void PopFontInitialize(HWND hwndEdit)
+void PopFontInitialize(HWND wndEdit)
 {
-	GetObject(GetStockObject(SYSTEM_FONT), sizeof(LOGFONT),
-		(PTSTR)& logfont);
+   GetObjectW(GetStockObject(SYSTEM_FONT), sizeof(LOGFONTW),
+              (PWSTR) &logfont);
 
-	hFont = CreateFontIndirect(&logfont);
-	SendMessage(hwndEdit, WM_SETFONT, (WPARAM)hFont, 0);
+   font = CreateFontIndirectW(&logfont);
+   SendMessageW(wndEdit, WM_SETFONT, (WPARAM) font, 0);
 }
 
-void PopFontSetFont(HWND hwndEdit)
+void PopFontSetFont(HWND wndEdit)
 {
-	HFONT hFontNew;
-	RECT  rect;
+   HFONT fontNew;
+   RECT  rect;
 
-	hFontNew = CreateFontIndirect(&logfont);
-	SendMessage(hwndEdit, WM_SETFONT, (WPARAM)hFontNew, 0);
-	DeleteObject(hFont);
-	hFont = hFontNew;
-	GetClientRect(hwndEdit, &rect);
-	InvalidateRect(hwndEdit, &rect, TRUE);
+   fontNew = CreateFontIndirectW(&logfont);
+   SendMessageW(wndEdit, WM_SETFONT, (WPARAM) fontNew, 0);
+   DeleteObject(font);
+   font = fontNew;
+   GetClientRect(wndEdit, &rect);
+   InvalidateRect(wndEdit, &rect, TRUE);
 }
 
 void PopFontDeinitialize(void)
 {
-	DeleteObject(hFont);
+   DeleteObject(font);
 }

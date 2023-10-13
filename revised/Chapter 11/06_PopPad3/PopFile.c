@@ -3,200 +3,207 @@
   ------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
+
 #include <windows.h>
 #include <commdlg.h>
 #include <malloc.h>
 
-static OPENFILENAME ofn;
+static OPENFILENAMEW ofn;
 
 void PopFileInitialize(HWND hwnd)
 {
-	static TCHAR szFilter[] = TEXT("Text Files (*.TXT)\0*.txt\0")  \
-		TEXT("ASCII Files (*.ASC)\0*.asc\0") \
-		TEXT("All Files (*.*)\0*.*\0\0");
+   static WCHAR filter[ ] = L"Text Files (*.TXT)\0*.txt\0"  \
+                            L"ASCII Files (*.ASC)\0*.asc\0" \
+                            L"All Files (*.*)\0*.*\0\0";
 
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = hwnd;
-	ofn.hInstance = NULL;
-	ofn.lpstrFilter = szFilter;
-	ofn.lpstrCustomFilter = NULL;
-	ofn.nMaxCustFilter = 0;
-	ofn.nFilterIndex = 0;
-	ofn.lpstrFile = NULL;          // Set in Open and Close functions
-	ofn.nMaxFile = MAX_PATH;
-	ofn.lpstrFileTitle = NULL;          // Set in Open and Close functions
-	ofn.nMaxFileTitle = MAX_PATH;
-	ofn.lpstrInitialDir = NULL;
-	ofn.lpstrTitle = NULL;
-	ofn.Flags = 0;             // Set in Open and Close functions
-	ofn.nFileOffset = 0;
-	ofn.nFileExtension = 0;
-	ofn.lpstrDefExt = TEXT("txt");
-	ofn.lCustData = 0L;
-	ofn.lpfnHook = NULL;
-	ofn.lpTemplateName = NULL;
+   ofn.lStructSize       = sizeof(OPENFILENAMEW);
+   ofn.hwndOwner         = hwnd;
+   ofn.hInstance         = NULL;
+   ofn.lpstrFilter       = filter;
+   ofn.lpstrCustomFilter = NULL;
+   ofn.nMaxCustFilter    = 0;
+   ofn.nFilterIndex      = 0;
+   ofn.lpstrFile         = NULL;          // Set in Open and Close functions
+   ofn.nMaxFile          = MAX_PATH;
+   ofn.lpstrFileTitle    = NULL;          // Set in Open and Close functions
+   ofn.nMaxFileTitle     = MAX_PATH;
+   ofn.lpstrInitialDir   = NULL;
+   ofn.lpstrTitle        = NULL;
+   ofn.Flags             = 0;             // Set in Open and Close functions
+   ofn.nFileOffset       = 0;
+   ofn.nFileExtension    = 0;
+   ofn.lpstrDefExt       = L"txt";
+   ofn.lCustData         = 0L;
+   ofn.lpfnHook          = NULL;
+   ofn.lpTemplateName    = NULL;
 }
 
-BOOL PopFileOpenDlg(HWND hwnd, PTSTR pstrFileName, PTSTR pstrTitleName)
+BOOL PopFileOpenDlg(HWND wnd, PWSTR fileName, PWSTR titleName)
 {
-	ofn.hwndOwner = hwnd;
-	ofn.lpstrFile = pstrFileName;
-	ofn.lpstrFileTitle = pstrTitleName;
-	ofn.Flags = OFN_HIDEREADONLY | OFN_CREATEPROMPT;
+   ofn.hwndOwner      = wnd;
+   ofn.lpstrFile      = fileName;
+   ofn.lpstrFileTitle = titleName;
+   ofn.Flags          = OFN_HIDEREADONLY | OFN_CREATEPROMPT;
 
-	return GetOpenFileName(&ofn);
+   return GetOpenFileNameW(&ofn);
 }
 
-BOOL PopFileSaveDlg(HWND hwnd, PTSTR pstrFileName, PTSTR pstrTitleName)
+BOOL PopFileSaveDlg(HWND wnd, PTSTR fileName, PTSTR titleName)
 {
-	ofn.hwndOwner = hwnd;
-	ofn.lpstrFile = pstrFileName;
-	ofn.lpstrFileTitle = pstrTitleName;
-	ofn.Flags = OFN_OVERWRITEPROMPT;
+   ofn.hwndOwner      = wnd;
+   ofn.lpstrFile      = fileName;
+   ofn.lpstrFileTitle = titleName;
+   ofn.Flags          = OFN_OVERWRITEPROMPT;
 
-	return GetSaveFileName(&ofn);
+   return GetSaveFileNameW(&ofn);
 }
 
-BOOL PopFileRead(HWND hwndEdit, PTSTR pstrFileName)
+BOOL PopFileRead(HWND wndEdit, PWSTR fileName)
 {
-	BYTE   bySwap;
-	DWORD  dwBytesRead;
-	HANDLE hFile;
-	int    i, iFileLength, iUniTest;
-	PBYTE  pBuffer, pText, pConv;
+   BYTE   swap;
+   DWORD  bytesRead;
+   HANDLE file;
+   int    i;
+   int    fileLength;
+   int    uniTest;
+   PBYTE  buffer;
+   PBYTE  text;
+   PBYTE  conv;
 
-	// Open the file.
+   // Open the file.
 
-	if (INVALID_HANDLE_VALUE ==
-		(hFile = CreateFile(pstrFileName, GENERIC_READ, FILE_SHARE_READ,
-			NULL, OPEN_EXISTING, 0, NULL)))
-		return FALSE;
+   if ( INVALID_HANDLE_VALUE == (file = CreateFileW(fileName, GENERIC_READ, FILE_SHARE_READ,
+                                                    NULL, OPEN_EXISTING, 0, NULL)) )
+   {
+      return FALSE;
+   }
 
-	// Get file size in bytes and allocate memory for read.
-	// Add an extra two bytes for zero termination.
+   // Get file size in bytes and allocate memory for read.
+   // Add an extra two bytes for zero termination.
 
-	iFileLength = GetFileSize(hFile, NULL);
-	pBuffer = malloc(iFileLength + 2);
+   fileLength = GetFileSize(file, NULL);
+   buffer     = malloc(fileLength + 2);
 
-	// Read file and put terminating zeros at end.
+   // Read file and put terminating zeros at end.
 
-	ReadFile(hFile, pBuffer, iFileLength, &dwBytesRead, NULL);
-	CloseHandle(hFile);
-	pBuffer[iFileLength] = '\0';
-	pBuffer[iFileLength + 1] = '\0';
+   ReadFile(file, buffer, fileLength, &bytesRead, NULL);
+   CloseHandle(file);
+   buffer[ fileLength ]     = '\0';
+   buffer[ fileLength + 1 ] = '\0';
 
-	// Test to see if the text is Unicode
+   // Test to see if the text is Unicode
 
-	iUniTest = IS_TEXT_UNICODE_SIGNATURE | IS_TEXT_UNICODE_REVERSE_SIGNATURE;
+   uniTest = IS_TEXT_UNICODE_SIGNATURE | IS_TEXT_UNICODE_REVERSE_SIGNATURE;
 
-	if (IsTextUnicode(pBuffer, iFileLength, &iUniTest))
-	{
-		pText = pBuffer + 2;
-		iFileLength -= 2;
+   if ( IsTextUnicode(buffer, fileLength, &uniTest) )
+   {
+      text        = buffer + 2;
+      fileLength -= 2;
 
-		if (iUniTest & IS_TEXT_UNICODE_REVERSE_SIGNATURE)
-		{
-			for (i = 0; i < iFileLength / 2; i++)
-			{
-				bySwap = ((BYTE*)pText)[2 * i];
-				((BYTE*)pText)[2 * i] = ((BYTE*)pText)[2 * i + 1];
-				((BYTE*)pText)[2 * i + 1] = bySwap;
-			}
-		}
+      if ( uniTest & IS_TEXT_UNICODE_REVERSE_SIGNATURE )
+      {
+         for ( i = 0; i < fileLength / 2; i++ )
+         {
+            swap                        = ((BYTE*) text)[ 2 * i ];
+            ((BYTE*) text)[ 2 * i ]     = ((BYTE*) text)[ 2 * i + 1 ];
+            ((BYTE*) text)[ 2 * i + 1 ] = swap;
+         }
+      }
 
-		// Allocate memory for possibly converted string
+      // Allocate memory for possibly converted string
 
-		pConv = malloc(iFileLength + 2);
+      conv = malloc(fileLength + 2);
 
-		// If the edit control is not Unicode, convert Unicode text to
-		// non-Unicode (ie, in general, wide character).
+      // If the edit control is not Unicode, convert Unicode text to
+      // non-Unicode (ie, in general, wide character).
 
 #ifndef UNICODE
-		WideCharToMultiByte(CP_ACP, 0, (PWSTR)pText, -1, pConv,
-			iFileLength + 2, NULL, NULL);
+      WideCharToMultiByte(CP_ACP, 0, (PWSTR) text, -1, conv,
+                          fileLength + 2, NULL, NULL);
 
-		// If the edit control is Unicode, just copy the string
+      // If the edit control is Unicode, just copy the string
 #else
-		lstrcpy((PTSTR)pConv, (PTSTR)pText);
+      lstrcpyW((PWSTR) conv, (PWSTR) text);
 #endif
 
-	}
-	else      // the file is not Unicode
-	{
-		pText = pBuffer;
+   }
+   else      // the file is not Unicode
+   {
+      text = buffer;
 
-		// Allocate memory for possibly converted string.
+      // Allocate memory for possibly converted string.
 
-		pConv = malloc(2 * iFileLength + 2);
+      conv = malloc(2 * fileLength + 2);
 
-		// If the edit control is Unicode, convert ASCII text.
+      // If the edit control is Unicode, convert ASCII text.
 
 #ifdef UNICODE
-		MultiByteToWideChar(CP_ACP, 0, pText, -1, (PTSTR)pConv,
-			iFileLength + 1);
+      MultiByteToWideChar(CP_ACP, 0, text, -1, (PWSTR) conv,
+                          fileLength + 1);
 
-		// If not, just copy buffer
+      // If not, just copy buffer
 #else
-		lstrcpy((PTSTR)pConv, (PTSTR)pText);
+      lstrcpyW((PWSTR) conv, (PWSTR) text);
 #endif
-	}
+   }
 
-	SetWindowText(hwndEdit, (PTSTR)pConv);
-	free(pBuffer);
-	free(pConv);
+   SetWindowTextW(wndEdit, (PWSTR) conv);
+   free(buffer);
+   free(conv);
 
-	return TRUE;
+   return TRUE;
 }
 
-BOOL PopFileWrite(HWND hwndEdit, PTSTR pstrFileName)
+BOOL PopFileWrite(HWND wndEdit, PTSTR fileName)
 {
-	DWORD  dwBytesWritten;
-	HANDLE hFile;
-	int    iLength;
-	PTSTR  pstrBuffer;
-	WORD   wByteOrderMark = 0xFEFF;
+   DWORD  bytesWritten;
+   HANDLE file;
+   int    length;
+   PWSTR  buffer;
+   WORD   byteOrderMark = 0xFEFF;
 
-	// Open the file, creating it if necessary
+   // Open the file, creating it if necessary
 
-	if (INVALID_HANDLE_VALUE ==
-		(hFile = CreateFile(pstrFileName, GENERIC_WRITE, 0,
-			NULL, CREATE_ALWAYS, 0, NULL)))
-		return FALSE;
+   if ( INVALID_HANDLE_VALUE == (file = CreateFileW(fileName, GENERIC_WRITE, 0,
+                                                    NULL, CREATE_ALWAYS, 0, NULL)) )
+   {
+      return FALSE;
+   }
 
-	// Get the number of characters in the edit control and allocate
-	// memory for them.
+   // Get the number of characters in the edit control and allocate
+   // memory for them.
 
-	iLength = GetWindowTextLength(hwndEdit);
-	pstrBuffer = (PTSTR)malloc((iLength + 1) * sizeof(TCHAR));
+   length = GetWindowTextLengthW(wndEdit);
+   buffer = (PWSTR) malloc((length + 1) * sizeof(TCHAR));
 
-	if (!pstrBuffer)
-	{
-		CloseHandle(hFile);
-		return FALSE;
-	}
+   if ( !buffer )
+   {
+      CloseHandle(file);
+      return FALSE;
+   }
 
-	// If the edit control will return Unicode text, write the
-	// byte order mark to the file.
+   // If the edit control will return Unicode text, write the
+   // byte order mark to the file.
 
 #ifdef UNICODE
-	WriteFile(hFile, &wByteOrderMark, 2, &dwBytesWritten, NULL);
+   WriteFile(file, &byteOrderMark, 2, &bytesWritten, NULL);
 #endif
 
-	// Get the edit buffer and write that out to the file.
+   // Get the edit buffer and write that out to the file.
 
-	GetWindowText(hwndEdit, pstrBuffer, iLength + 1);
-	WriteFile(hFile, pstrBuffer, iLength * sizeof(TCHAR),
-		&dwBytesWritten, NULL);
+   GetWindowTextW(wndEdit, buffer, length + 1);
+   WriteFile(file, buffer, length * sizeof(TCHAR),
+             &bytesWritten, NULL);
 
-	if ((iLength * sizeof(TCHAR)) != (int)dwBytesWritten)
-	{
-		CloseHandle(hFile);
-		free(pstrBuffer);
-		return FALSE;
-	}
+   if ( (length * sizeof(TCHAR)) != (int) bytesWritten )
+   {
+      CloseHandle(file);
+      free(buffer);
+      return FALSE;
+   }
 
-	CloseHandle(hFile);
-	free(pstrBuffer);
+   CloseHandle(file);
+   free(buffer);
 
-	return TRUE;
+   return TRUE;
 }

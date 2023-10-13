@@ -1,193 +1,198 @@
 /*------------------------------------------
    ABOUT2.C -- About Box Demo Program No. 2
-			   (c) Charles Petzold, 1998
+               (c) Charles Petzold, 1998
   ------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
-#include <tchar.h>
+
 #include <windows.h>
+#include <windowsx.h>
 #include "Resource.h"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 
-int iCurrentColor = IDC_BLACK,
-iCurrentFigure = IDC_RECT;
+int currentColor  = IDC_BLACK;
+int currentFigure = IDC_RECT;
 
-int WINAPI _tWinMain(
-	_In_     HINSTANCE hInstance,
-	_In_opt_ HINSTANCE hPrevInstance,
-	_In_     PTSTR     pCmdLine,
-	_In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInst);
+   UNREFERENCED_PARAMETER(cmdLine);
 
-	static TCHAR szAppName[] = TEXT("About2");
-	MSG          msg;
-	HWND         hwnd;
-	WNDCLASS     wndclass;
+   static WCHAR appName[ ] = L"About2";
+   MSG          msg;
+   HWND         wnd;
+   WNDCLASSW    wc;
 
-	wndclass.style = CS_HREDRAW | CS_VREDRAW;
-	wndclass.lpfnWndProc = WndProc;
-	wndclass.cbClsExtra = 0;
-	wndclass.cbWndExtra = 0;
-	wndclass.hInstance = hInstance;
-	wndclass.hIcon = LoadIcon(hInstance, szAppName);
-	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-	wndclass.lpszMenuName = szAppName;
-	wndclass.lpszClassName = szAppName;
+   wc.style         = CS_HREDRAW | CS_VREDRAW;
+   wc.lpfnWndProc   = WndProc;
+   wc.cbClsExtra    = 0;
+   wc.cbWndExtra    = 0;
+   wc.hInstance     = inst;
+   wc.hIcon         = (HICON)   LoadImageW(inst, appName, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
+   wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
+   wc.lpszMenuName  = appName;
+   wc.lpszClassName = appName;
 
-	if (!RegisterClass(&wndclass))
-	{
-		MessageBox(NULL, TEXT("This program requires Windows NT!"),
-			szAppName, MB_ICONERROR);
-		return 0;
-	}
+   if ( !RegisterClassW(&wc) )
+   {
+      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
+      return 0;
+   }
 
-	hwnd = CreateWindow(szAppName, TEXT("About Box Demo Program"),
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		NULL, NULL, hInstance, NULL);
+   wnd = CreateWindowW(appName, L"About Box Demo Program",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-	ShowWindow(hwnd, nShowCmd);
-	UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
-	while (GetMessage(&msg, NULL, 0, 0))
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-	return (int)msg.wParam;  // WM_QUIT
+   while ( GetMessageW(&msg, NULL, 0, 0) )
+   {
+      TranslateMessage(&msg);
+      DispatchMessageW(&msg);
+   }
+   return (int) msg.wParam;
 }
 
-void PaintWindow(HWND hwnd, int iColor, int iFigure)
+void PaintWindow(HWND wnd, int color, int figure)
 {
-	static COLORREF crColor[8] = { RGB(0,   0, 0), RGB(0,   0, 255),
-								   RGB(0, 255, 0), RGB(0, 255, 255),
-								   RGB(255,   0, 0), RGB(255,   0, 255),
-								   RGB(255, 255, 0), RGB(255, 255, 255) };
+   static COLORREF crColor[ 8 ] = { RGB(0,   0, 0), RGB(0,   0, 255),
+                                    RGB(0, 255, 0), RGB(0, 255, 255),
+                                    RGB(255,   0, 0), RGB(255,   0, 255),
+                                    RGB(255, 255, 0), RGB(255, 255, 255) };
 
-	HBRUSH          hBrush;
-	HDC             hdc;
-	RECT            rect;
+   HBRUSH brush;
+   HDC    dc;
+   RECT   rect;
 
-	hdc = GetDC(hwnd);
-	GetClientRect(hwnd, &rect);
-	hBrush = CreateSolidBrush(crColor[iColor - IDC_BLACK]);
-	hBrush = (HBRUSH)SelectObject(hdc, hBrush);
+   dc = GetDC(wnd);
+   GetClientRect(wnd, &rect);
+   brush = CreateSolidBrush(crColor[ color - IDC_BLACK ]);
+   brush = (HBRUSH) SelectObject(dc, brush);
 
-	if (iFigure == IDC_RECT)
-		Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom);
-	else
-		Ellipse(hdc, rect.left, rect.top, rect.right, rect.bottom);
+   if ( figure == IDC_RECT )
+   {
+      Rectangle(dc, rect.left, rect.top, rect.right, rect.bottom);
+   }
+   else
+   {
+      Ellipse(dc, rect.left, rect.top, rect.right, rect.bottom);
+   }
 
-	DeleteObject(SelectObject(hdc, hBrush));
-	ReleaseDC(hwnd, hdc);
+   DeleteObject(SelectObject(dc, brush));
+   ReleaseDC(wnd, dc);
 }
 
-void PaintTheBlock(HWND hCtrl, int iColor, int iFigure)
+void PaintTheBlock(HWND ctrl, int color, int figure)
 {
-	InvalidateRect(hCtrl, NULL, TRUE);
-	UpdateWindow(hCtrl);
-	PaintWindow(hCtrl, iColor, iFigure);
+   InvalidateRect(ctrl, NULL, TRUE);
+   UpdateWindow(ctrl);
+   PaintWindow(ctrl, color, figure);
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	static HINSTANCE hInstance;
-	PAINTSTRUCT      ps;
+   static HINSTANCE inst;
+   PAINTSTRUCT      ps;
 
-	switch (message)
-	{
-	case WM_CREATE:
-		hInstance = ((LPCREATESTRUCT)lParam)->hInstance;
-		return 0;
+   switch ( msg )
+   {
+   case WM_CREATE:
+      inst = GetWindowInstance(wnd);
+      return 0;
 
-	case WM_COMMAND:
-		switch (LOWORD(wParam))
-		{
-		case IDM_APP_ABOUT:
-			if (DialogBox(hInstance, TEXT("AboutBox"), hwnd, AboutDlgProc))
-				InvalidateRect(hwnd, NULL, TRUE);
-			return 0;
-		}
-		break;
+   case WM_COMMAND:
+      switch ( LOWORD(wParam) )
+      {
+      case IDM_APP_ABOUT:
+         if ( DialogBoxParamW(inst, L"AboutBox", wnd, AboutDlgProc, 0L) )
+         {
+            InvalidateRect(wnd, NULL, TRUE);
+         }
+         return 0;
+      }
+      break;
 
-	case WM_PAINT:
-		BeginPaint(hwnd, &ps);
-		EndPaint(hwnd, &ps);
+   case WM_PAINT:
+      BeginPaint(wnd, &ps);
+      EndPaint(wnd, &ps);
 
-		PaintWindow(hwnd, iCurrentColor, iCurrentFigure);
-		return 0;
+      PaintWindow(wnd, currentColor, currentFigure);
+      return 0;
 
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hwnd, message, wParam, lParam);
+   case WM_DESTROY:
+      PostQuitMessage(0);
+      return 0;
+   }
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }
 
-INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message,
-	WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK AboutDlgProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	static HWND hCtrlBlock;
-	static int  iColor, iFigure;
+   static HWND ctrlBlock;
+   static int  color;
+   static int  figure;
 
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		iColor = iCurrentColor;
-		iFigure = iCurrentFigure;
+   switch ( msg )
+   {
+   case WM_INITDIALOG:
+      color  = currentColor;
+      figure = currentFigure;
 
-		CheckRadioButton(hDlg, IDC_BLACK, IDC_WHITE, iColor);
-		CheckRadioButton(hDlg, IDC_RECT, IDC_ELLIPSE, iFigure);
+      CheckRadioButton(dlg, IDC_BLACK, IDC_WHITE, color);
+      CheckRadioButton(dlg, IDC_RECT, IDC_ELLIPSE, figure);
 
-		hCtrlBlock = GetDlgItem(hDlg, IDC_PAINT);
+      ctrlBlock = GetDlgItem(dlg, IDC_PAINT);
 
-		SetFocus(GetDlgItem(hDlg, iColor));
-		return FALSE;
+      SetFocus(GetDlgItem(dlg, color));
+      return FALSE;
 
-	case WM_COMMAND:
-		switch (LOWORD(wParam))
-		{
-		case IDOK:
-			iCurrentColor = iColor;
-			iCurrentFigure = iFigure;
-			EndDialog(hDlg, TRUE);
-			return TRUE;
+   case WM_COMMAND:
+      switch ( LOWORD(wParam) )
+      {
+      case IDOK:
+         currentColor  = color;
+         currentFigure = figure;
+         EndDialog(dlg, TRUE);
+         return TRUE;
 
-		case IDCANCEL:
-			EndDialog(hDlg, FALSE);
-			return TRUE;
+      case IDCANCEL:
+         EndDialog(dlg, FALSE);
+         return TRUE;
 
-		case IDC_BLACK:
-		case IDC_RED:
-		case IDC_GREEN:
-		case IDC_YELLOW:
-		case IDC_BLUE:
-		case IDC_MAGENTA:
-		case IDC_CYAN:
-		case IDC_WHITE:
-			iColor = LOWORD(wParam);
-			CheckRadioButton(hDlg, IDC_BLACK, IDC_WHITE, LOWORD(wParam));
-			PaintTheBlock(hCtrlBlock, iColor, iFigure);
-			return TRUE;
+      case IDC_BLACK:
+      case IDC_RED:
+      case IDC_GREEN:
+      case IDC_YELLOW:
+      case IDC_BLUE:
+      case IDC_MAGENTA:
+      case IDC_CYAN:
+      case IDC_WHITE:
+         color = LOWORD(wParam);
+         CheckRadioButton(dlg, IDC_BLACK, IDC_WHITE, LOWORD(wParam));
+         PaintTheBlock(ctrlBlock, color, figure);
+         return TRUE;
 
-		case IDC_RECT:
-		case IDC_ELLIPSE:
-			iFigure = LOWORD(wParam);
-			CheckRadioButton(hDlg, IDC_RECT, IDC_ELLIPSE, LOWORD(wParam));
-			PaintTheBlock(hCtrlBlock, iColor, iFigure);
-			return TRUE;
-		}
-		break;
+      case IDC_RECT:
+      case IDC_ELLIPSE:
+         figure = LOWORD(wParam);
+         CheckRadioButton(dlg, IDC_RECT, IDC_ELLIPSE, LOWORD(wParam));
+         PaintTheBlock(ctrlBlock, color, figure);
+         return TRUE;
+      }
+      break;
 
-	case WM_PAINT:
-		PaintTheBlock(hCtrlBlock, iColor, iFigure);
-		break;
-	}
-	return FALSE;
+   case WM_PAINT:
+      PaintTheBlock(ctrlBlock, color, figure);
+      break;
+   }
+   return FALSE;
 }

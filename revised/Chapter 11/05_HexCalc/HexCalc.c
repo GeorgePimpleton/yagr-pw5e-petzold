@@ -1,152 +1,165 @@
 /*----------------------------------------
    HEXCALC.C -- Hexadecimal Calculator
-				(c) Charles Petzold, 1998
+                (c) Charles Petzold, 1998
   ----------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
-#include <tchar.h>
+
 #include <windows.h>
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI _tWinMain(
-	_In_     HINSTANCE hInstance,
-	_In_opt_ HINSTANCE hPrevInstance,
-	_In_     PTSTR     pCmdLine,
-	_In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInst);
+   UNREFERENCED_PARAMETER(cmdLine);
 
-	static TCHAR szAppName[] = TEXT("HexCalc");
-	HWND         hwnd;
-	MSG          msg;
-	WNDCLASS     wndclass;
+   static WCHAR appName[ ] = L"HexCalc";
+   HWND         wnd;
+   MSG          msg;
+   WNDCLASS     wc;
 
-	wndclass.style = CS_HREDRAW | CS_VREDRAW;
-	wndclass.lpfnWndProc = WndProc;
-	wndclass.cbClsExtra = 0;
-	wndclass.cbWndExtra = DLGWINDOWEXTRA;    // Note!
-	wndclass.hInstance = hInstance;
-	wndclass.hIcon = LoadIcon(hInstance, szAppName);
-	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wndclass.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
-	wndclass.lpszMenuName = NULL;
-	wndclass.lpszClassName = szAppName;
+   wc.style         = CS_HREDRAW | CS_VREDRAW;
+   wc.lpfnWndProc   = WndProc;
+   wc.cbClsExtra    = 0;
+   wc.cbWndExtra    = DLGWINDOWEXTRA;    // Note!
+   wc.hInstance     = inst;
+   wc.hIcon         = (HICON)   LoadImageW(inst, appName, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
+   wc.hbrBackground = (HBRUSH)  (COLOR_BTNFACE + 1);
+   wc.lpszMenuName  = NULL;
+   wc.lpszClassName = appName;
 
-	if (!RegisterClass(&wndclass))
-	{
-		MessageBox(NULL, TEXT("This program requires Windows NT!"),
-			szAppName, MB_ICONERROR);
-		return 0;
-	}
+   if ( !RegisterClassW(&wc) )
+   {
+      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
+      return 0;
+   }
 
-	hwnd = CreateDialog(hInstance, szAppName, 0, NULL);
+   wnd = CreateDialogParamW(inst, appName, 0, NULL, 0L);
 
-	ShowWindow(hwnd, nShowCmd);
+   ShowWindow(wnd, showCmd);
 
-	while (GetMessage(&msg, NULL, 0, 0))
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-	return (int)msg.wParam;  // WM_QUIT
+   while ( GetMessageW(&msg, NULL, 0, 0) )
+   {
+      TranslateMessage(&msg);
+      DispatchMessageW(&msg);
+   }
+   return (int) msg.wParam;
 }
 
-void ShowNumber(HWND hwnd, UINT iNumber)
+void ShowNumber(HWND wnd, UINT number)
 {
-	TCHAR szBuffer[20];
+   WCHAR szBuffer[ 20 ];
 
-	wsprintf(szBuffer, TEXT("%X"), iNumber);
-	SetDlgItemText(hwnd, VK_ESCAPE, szBuffer);
+   wsprintfW(szBuffer, L"%X", number);
+   SetDlgItemTextW(wnd, VK_ESCAPE, szBuffer);
 }
 
-DWORD CalcIt(UINT iFirstNum, int iOperation, UINT iNum)
+DWORD CalcIt(UINT firstNum, int operation, UINT num)
 {
-	switch (iOperation)
-	{
-	case '=': return iNum;
-	case '+': return iFirstNum + iNum;
-	case '-': return iFirstNum - iNum;
-	case '*': return iFirstNum * iNum;
-	case '&': return iFirstNum & iNum;
-	case '|': return iFirstNum | iNum;
-	case '^': return iFirstNum ^ iNum;
-	case '<': return iFirstNum << iNum;
-	case '>': return iFirstNum >> iNum;
-	case '/': return iNum ? iFirstNum / iNum : MAXDWORD;
-	case '%': return iNum ? iFirstNum % iNum : MAXDWORD;
-	default: return 0;
-	}
+   switch ( operation )
+   {
+   case '=': return num;
+   case '+': return firstNum + num;
+   case '-': return firstNum - num;
+   case '*': return firstNum * num;
+   case '&': return firstNum & num;
+   case '|': return firstNum | num;
+   case '^': return firstNum ^ num;
+   case '<': return firstNum << num;
+   case '>': return firstNum >> num;
+   case '/': return num ? firstNum / num : MAXDWORD;
+   case '%': return num ? firstNum % num : MAXDWORD;
+   default: return 0;
+   }
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	static BOOL  bNewNumber = TRUE;
-	static int   iOperation = '=';
-	static UINT  iNumber, iFirstNum;
-	HWND         hButton;
+   static BOOL newNumber = TRUE;
+   static int  operation = '=';
+   static UINT number;
+   static UINT firstNum;
+   HWND        button;
 
-	switch (message)
-	{
-	case WM_KEYDOWN:                   // left arrow --> backspace
-		if (wParam != VK_LEFT)
-			break;
-		wParam = VK_BACK;
-		// fall through
-	case WM_CHAR:
-		if ((wParam = (WPARAM)CharUpper((TCHAR*)wParam)) == VK_RETURN)
-			wParam = '=';
+   switch ( msg )
+   {
+   case WM_KEYDOWN:                   // left arrow --> backspace
+      if ( wParam != VK_LEFT )
+      {
+         break;
+      }
+      wParam = VK_BACK;
+      // fall through
 
-		if (hButton = GetDlgItem(hwnd, wParam))
-		{
-			SendMessage(hButton, BM_SETSTATE, 1, 0);
-			Sleep(100);
-			SendMessage(hButton, BM_SETSTATE, 0, 0);
-		}
-		else
-		{
-			MessageBeep(0);
-			break;
-		}
-		// fall through
-	case WM_COMMAND:
-		SetFocus(hwnd);
+   case WM_CHAR:
+      if ( (wParam = (WPARAM) CharUpper((TCHAR*) wParam)) == VK_RETURN )
+      {
+         wParam = '=';
+      }
 
-		if (LOWORD(wParam) == VK_BACK)         // backspace
-			ShowNumber(hwnd, iNumber /= 16);
+      if ( button = GetDlgItem(wnd, wParam) )
+      {
+         SendMessage(button, BM_SETSTATE, 1, 0);
+         Sleep(100);
+         SendMessage(button, BM_SETSTATE, 0, 0);
+      }
+      else
+      {
+         MessageBeep(0);
+         break;
+      }
+      // fall through
 
-		else if (LOWORD(wParam) == VK_ESCAPE)  // escape
-			ShowNumber(hwnd, iNumber = 0);
+   case WM_COMMAND:
+      SetFocus(wnd);
 
-		else if (isxdigit(LOWORD(wParam)))    // hex digit
-		{
-			if (bNewNumber)
-			{
-				iFirstNum = iNumber;
-				iNumber = 0;
-			}
-			bNewNumber = FALSE;
+      if ( LOWORD(wParam) == VK_BACK )         // backspace
+      {
+         ShowNumber(wnd, number /= 16);
+      }
+      else if ( LOWORD(wParam) == VK_ESCAPE )  // escape
+      {
+         ShowNumber(wnd, number = 0);
+      }
+      else if ( isxdigit(LOWORD(wParam)) )    // hex digit
+      {
+         if ( newNumber )
+         {
+            firstNum = number;
+            number = 0;
+         }
+         newNumber = FALSE;
 
-			if (iNumber <= MAXDWORD >> 4)
-				ShowNumber(hwnd, iNumber = 16 * iNumber + wParam -
-				(isdigit(wParam) ? '0' : 'A' - 10));
-			else
-				MessageBeep(0);
-		}
-		else                                    // operation
-		{
-			if (!bNewNumber)
-				ShowNumber(hwnd, iNumber =
-					CalcIt(iFirstNum, iOperation, iNumber));
-			bNewNumber = TRUE;
-			iOperation = LOWORD(wParam);
-		}
-		return 0;
+         if ( number <= MAXDWORD >> 4 )
+         {
+            ShowNumber(wnd, number = 16 * number + wParam -
+                       (isdigit(wParam) ? '0' : 'A' - 10));
+         }
+         else
+         {
+            MessageBeep(0);
+         }
+      }
+      else                                    // operation
+      {
+         if ( !newNumber )
+         {
+            ShowNumber(wnd, number =
+                       CalcIt(firstNum, operation, number));
+         }
+         newNumber = TRUE;
+         operation = LOWORD(wParam);
+      }
+      return 0;
 
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hwnd, message, wParam, lParam);
+   case WM_DESTROY:
+      PostQuitMessage(0);
+      return 0;
+   }
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }

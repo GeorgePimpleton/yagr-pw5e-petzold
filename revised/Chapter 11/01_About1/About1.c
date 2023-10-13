@@ -1,109 +1,106 @@
-s/*------------------------------------------
+/*------------------------------------------
    ABOUT1.C -- About Box Demo Program No. 1
-			   (c) Charles Petzold, 1998
+               (c) Charles Petzold, 1998
    ------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
+
 #include <windows.h>
 #include <windowsx.h>
-#include <tchar.h>
 #include "Resource.h"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI _tWinMain(
-	_In_     HINSTANCE hInstance,
-	_In_opt_ HINSTANCE hPrevInstance,
-	_In_     PTSTR     pCmdLine,
-	_In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInst);
+   UNREFERENCED_PARAMETER(cmdLine);
 
-	static TCHAR szAppName[] = TEXT("About1");
-	MSG          msg;
-	HWND         hwnd;
-	WNDCLASS     wndclass;
+   static WCHAR appName[ ] = L"About1";
+   MSG          msg;
+   HWND         wnd;
+   WNDCLASSW    wc;
 
-	wndclass.style = CS_HREDRAW | CS_VREDRAW;
-	wndclass.lpfnWndProc = WndProc;
-	wndclass.cbClsExtra = 0;
-	wndclass.cbWndExtra = 0;
-	wndclass.hInstance = hInstance;
-	wndclass.hIcon = LoadIcon(hInstance, szAppName);
-	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-	wndclass.lpszMenuName = szAppName;
-	wndclass.lpszClassName = szAppName;
+   wc.style         = CS_HREDRAW | CS_VREDRAW;
+   wc.lpfnWndProc   = WndProc;
+   wc.cbClsExtra    = 0;
+   wc.cbWndExtra    = 0;
+   wc.hInstance     = inst;
+   wc.hIcon         = (HICON)   LoadImageW(inst, appName, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
+   wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
+   wc.lpszMenuName  = appName;
+   wc.lpszClassName = appName;
 
-	if (!RegisterClass(&wndclass))
-	{
-		MessageBox(NULL, TEXT("This program requires Windows NT!"),
-			szAppName, MB_ICONERROR);
-		return 0;
-	}
+   if ( !RegisterClassW(&wc) )
+   {
+      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
+      return 0;
+   }
 
-	hwnd = CreateWindow(szAppName, TEXT("About Box Demo Program"),
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		NULL, NULL, hInstance, NULL);
+   wnd = CreateWindowW(appName, L"About Box Demo Program",
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-	ShowWindow(hwnd, nShowCmd);
-	UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
-	while (GetMessage(&msg, NULL, 0, 0))
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-	return (int)msg.wParam;  // WM_QUIT
+   while ( GetMessageW(&msg, NULL, 0, 0) )
+   {
+      TranslateMessage(&msg);
+      DispatchMessageW(&msg);
+   }
+   return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	static HINSTANCE hInstance;
+   static HINSTANCE inst;
 
-	switch (message)
-	{
-	case WM_CREATE:
-		hInstance = ((LPCREATESTRUCT)lParam)->hInstance;
-		return 0;
+   switch ( msg )
+   {
+   case WM_CREATE:
+      inst = GetWindowInstance(wnd);
+      return 0;
 
-	case WM_COMMAND:
-		switch (LOWORD(wParam))
-		{
-		case IDM_APP_ABOUT:
-			DialogBox(hInstance, TEXT("AboutBox"), hwnd, AboutDlgProc);
-			break;
-		}
-		return 0;
+   case WM_COMMAND:
+      switch ( LOWORD(wParam) )
+      {
+      case IDM_APP_ABOUT:
+         DialogBoxParamW(inst, L"AboutBox", wnd, AboutDlgProc, 0L);
+         break;
+      }
+      return 0;
 
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hwnd, message, wParam, lParam);
+   case WM_DESTROY:
+      PostQuitMessage(0);
+      return 0;
+   }
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }
 
-INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message,
-	WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK AboutDlgProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		return TRUE;
+   switch ( msg )
+   {
+   case WM_INITDIALOG:
+      return TRUE;
 
-	case WM_COMMAND:
-		switch (LOWORD(wParam))
-		{
-		case IDOK:
-		case IDCANCEL:
-			EndDialog(hDlg, 0);
-			return TRUE;
-		}
-		break;
-	}
-	return FALSE;
+   case WM_COMMAND:
+      switch ( LOWORD(wParam) )
+      {
+      case IDOK:
+      case IDCANCEL:
+         EndDialog(dlg, 0);
+         return TRUE;
+      }
+      break;
+   }
+   return FALSE;
 }

@@ -1,16 +1,9 @@
-//{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
-// Used by About1.rc
-//
-#define IDM_APP_ABOUT                   40001
+#pragma once
 
-// Next default values for new objects
-// 
-#ifdef APSTUDIO_INVOKED
-#ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        104
-#define _APS_NEXT_COMMAND_VALUE         40004
-#define _APS_NEXT_CONTROL_VALUE         1003
-#define _APS_NEXT_SYMED_VALUE           101
-#endif
-#endif
+#define IDM_APP_ABOUT 40001
+
+// IDC_STATIC is defined as part of the Microsoft Foundatation Classes
+// AKA MFC, in <winres.h>
+//
+// better to define it yourself when working with static resources
+#define IDC_STATIC    -1

@@ -3,116 +3,124 @@
   --------------------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
+
 #include <windows.h>
 #include <commdlg.h>
-#include <tchar.h>            // for _tcsstr (strstr for Unicode & non-Unicode)
 #include <malloc.h>
 
 #define MAX_STRING_LEN   256
 
-static TCHAR szFindText[MAX_STRING_LEN];
-static TCHAR szReplText[MAX_STRING_LEN];
+static WCHAR findText[ MAX_STRING_LEN ];
+static WCHAR replText[ MAX_STRING_LEN ];
 
-HWND PopFindFindDlg(HWND hwnd)
+HWND PopFindFindDlg(HWND wnd)
 {
-	static FINDREPLACE fr;       // must be static for modeless dialog!!!
+   static FINDREPLACEW fr;       // must be static for modeless dialog!!!
 
-	fr.lStructSize = sizeof(FINDREPLACE);
-	fr.hwndOwner = hwnd;
-	fr.hInstance = NULL;
-	fr.Flags = FR_HIDEUPDOWN | FR_HIDEMATCHCASE | FR_HIDEWHOLEWORD;
-	fr.lpstrFindWhat = szFindText;
-	fr.lpstrReplaceWith = NULL;
-	fr.wFindWhatLen = MAX_STRING_LEN;
-	fr.wReplaceWithLen = 0;
-	fr.lCustData = 0;
-	fr.lpfnHook = NULL;
-	fr.lpTemplateName = NULL;
+   fr.lStructSize      = sizeof(FINDREPLACEW);
+   fr.hwndOwner        = wnd;
+   fr.hInstance        = NULL;
+   fr.Flags            = FR_HIDEUPDOWN | FR_HIDEMATCHCASE | FR_HIDEWHOLEWORD;
+   fr.lpstrFindWhat    = findText;
+   fr.lpstrReplaceWith = NULL;
+   fr.wFindWhatLen     = MAX_STRING_LEN;
+   fr.wReplaceWithLen  = 0;
+   fr.lCustData        = 0;
+   fr.lpfnHook         = NULL;
+   fr.lpTemplateName   = NULL;
 
-	return FindText(&fr);
+   return FindTextW(&fr);
 }
 
-HWND PopFindReplaceDlg(HWND hwnd)
+HWND PopFindReplaceDlg(HWND wnd)
 {
-	static FINDREPLACE fr;       // must be static for modeless dialog!!!
+   static FINDREPLACEW fr;       // must be static for modeless dialog!!!
 
-	fr.lStructSize = sizeof(FINDREPLACE);
-	fr.hwndOwner = hwnd;
-	fr.hInstance = NULL;
-	fr.Flags = FR_HIDEUPDOWN | FR_HIDEMATCHCASE | FR_HIDEWHOLEWORD;
-	fr.lpstrFindWhat = szFindText;
-	fr.lpstrReplaceWith = szReplText;
-	fr.wFindWhatLen = MAX_STRING_LEN;
-	fr.wReplaceWithLen = MAX_STRING_LEN;
-	fr.lCustData = 0;
-	fr.lpfnHook = NULL;
-	fr.lpTemplateName = NULL;
+   fr.lStructSize      = sizeof(FINDREPLACEW);
+   fr.hwndOwner        = wnd;
+   fr.hInstance        = NULL;
+   fr.Flags            = FR_HIDEUPDOWN | FR_HIDEMATCHCASE | FR_HIDEWHOLEWORD;
+   fr.lpstrFindWhat    = findText;
+   fr.lpstrReplaceWith = replText;
+   fr.wFindWhatLen     = MAX_STRING_LEN;
+   fr.wReplaceWithLen  = MAX_STRING_LEN;
+   fr.lCustData        = 0;
+   fr.lpfnHook         = NULL;
+   fr.lpTemplateName   = NULL;
 
-	return ReplaceText(&fr);
+   return ReplaceTextW(&fr);
 }
 
-BOOL PopFindFindText(HWND hwndEdit, int* piSearchOffset, LPFINDREPLACE pfr)
+BOOL PopFindFindText(HWND wndEdit, int* searchOffset, LPFINDREPLACEW fr)
 {
-	int    iLength, iPos;
-	PTSTR  pstrDoc, pstrPos;
+   int   length;
+   int   pos;
+   PWSTR strDoc;
+   PWSTR strPos;
 
-	// Read in the edit document
+   // Read in the edit document
 
-	iLength = GetWindowTextLength(hwndEdit);
+   length = GetWindowTextLengthW(wndEdit);
 
-	if (NULL == (pstrDoc = (PTSTR)malloc((iLength + 1) * sizeof(TCHAR))))
-		return FALSE;
+   if ( NULL == (strDoc = (PWSTR) malloc((length + 1) * sizeof(WCHAR))) )
+   {
+      return FALSE;
+   }
 
-	GetWindowText(hwndEdit, pstrDoc, iLength + 1);
+   GetWindowTextW(wndEdit, strDoc, length + 1);
 
-	// Search the document for the find string
+   // Search the document for the find string
 
-	pstrPos = _tcsstr(pstrDoc + *piSearchOffset, pfr->lpstrFindWhat);
+   strPos = wcsstr(strDoc + *searchOffset, fr->lpstrFindWhat);
 
-	// Return an error code if the string cannot be found
+   // Return an error code if the string cannot be found
 
-	if (pstrPos == NULL)
-		return FALSE;
+   if ( strPos == NULL )
+   {
+      return FALSE;
+   }
 
-	// Find the position in the document and the new start offset
+   // Find the position in the document and the new start offset
 
-	iPos = pstrPos - pstrDoc;
-	*piSearchOffset = iPos + lstrlen(pfr->lpstrFindWhat);
+   pos           = strPos - strDoc;
+   *searchOffset = pos + lstrlenW(fr-> lpstrFindWhat);
 
-	// Select the found text
+   // Select the found text
 
-	SendMessage(hwndEdit, EM_SETSEL, iPos, *piSearchOffset);
-	SendMessage(hwndEdit, EM_SCROLLCARET, 0, 0);
+   SendMessageW(wndEdit, EM_SETSEL, pos, *searchOffset);
+   SendMessageW(wndEdit, EM_SCROLLCARET, 0, 0);
 
-	free(pstrDoc);
+   free(strDoc);
 
-	return TRUE;
+   return TRUE;
 }
 
-BOOL PopFindNextText(HWND hwndEdit, int* piSearchOffset)
+BOOL PopFindNextText(HWND wndEdit, int* searchOffset)
 {
-	FINDREPLACE fr;
+   FINDREPLACEW fr;
 
-	fr.lpstrFindWhat = szFindText;
+   fr.lpstrFindWhat = findText;
 
-	return PopFindFindText(hwndEdit, piSearchOffset, &fr);
+   return PopFindFindText(wndEdit, searchOffset, &fr);
 }
 
-BOOL PopFindReplaceText(HWND hwndEdit, int* piSearchOffset, LPFINDREPLACE pfr)
+BOOL PopFindReplaceText(HWND wndEdit, int* searchOffset, LPFINDREPLACEW fr)
 {
-	// Find the text
+   // Find the text
 
-	if (!PopFindFindText(hwndEdit, piSearchOffset, pfr))
-		return FALSE;
+   if ( !PopFindFindText(wndEdit, searchOffset, fr) )
+   {
+      return FALSE;
+   }
 
-	// Replace it
+   // Replace it
 
-	SendMessage(hwndEdit, EM_REPLACESEL, 0, (LPARAM)pfr->lpstrReplaceWith);
+   SendMessageW(wndEdit, EM_REPLACESEL, 0, (LPARAM) fr->lpstrReplaceWith);
 
-	return TRUE;
+   return TRUE;
 }
 
 BOOL PopFindValidFind(void)
 {
-	return *szFindText != '\0';
+   return *findText != '\0';
 }
