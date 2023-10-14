@@ -1,12 +1,12 @@
 /*------------------------------------------------------------------
    DEVCAPS2.C -- Displays Device Capability Information (Version 2)
-				 (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
 ------------------------------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
+
 #include <windows.h>
 #include <winspool.h>
-#include <tchar.h>
 #include <stdlib.h>
 #include "Resource.h"
 
@@ -17,416 +17,411 @@ void DoBitCodedCaps(HDC, HDC, int, int, int);
 
 typedef struct
 {
-	int     iMask;
-	TCHAR* szDesc;
+   int    mask;
+   PCWSTR desc;
 }
 BITS;
 
 #define IDM_DEVMODE      1000
 
-int WINAPI _tWinMain(
-	_In_     HINSTANCE hInstance,
-	_In_opt_ HINSTANCE hPrevInstance,
-	_In_     PTSTR     pCmdLine,
-	_In_     int       nShowCmd)
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
+                    _In_     PWSTR     cmdLine,
+                    _In_     int       showCmd)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(pCmdLine);
+   UNREFERENCED_PARAMETER(prevInst);
+   UNREFERENCED_PARAMETER(cmdLine);
 
-	static TCHAR szAppName[] = TEXT("DevCaps2");
-	HWND         hwnd;
-	MSG          msg;
-	WNDCLASS     wndclass;
+   static PCWSTR appName = L"DevCaps2";
+   HWND          wnd;
+   MSG           msg;
+   WNDCLASSW     wc;
 
-	wndclass.style = CS_HREDRAW | CS_VREDRAW;
-	wndclass.lpfnWndProc = WndProc;
-	wndclass.cbClsExtra = 0;
-	wndclass.cbWndExtra = 0;
-	wndclass.hInstance = hInstance;
-	wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-	wndclass.lpszMenuName = szAppName;
-	wndclass.lpszClassName = szAppName;
+   wc.style = CS_HREDRAW | CS_VREDRAW;
+   wc.lpfnWndProc = WndProc;
+   wc.cbClsExtra = 0;
+   wc.cbWndExtra = 0;
+   wc.hInstance = inst;
+   wc.hIcon = (HICON) LoadImageW(inst, appName, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hCursor = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
+   wc.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
+   wc.lpszMenuName = appName;
+   wc.lpszClassName = appName;
 
-	if (!RegisterClass(&wndclass))
-	{
-		MessageBox(NULL, TEXT("This program requires Windows NT!"),
-			szAppName, MB_ICONERROR);
-		return 0;
-	}
+   if ( !RegisterClassW(&wc) )
+   {
+      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
+      return 0;
+   }
 
-	hwnd = CreateWindow(szAppName, NULL,
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		NULL, NULL, hInstance, NULL);
+   wnd = CreateWindowW(appName, NULL,
+                       WS_OVERLAPPEDWINDOW,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       CW_USEDEFAULT, CW_USEDEFAULT,
+                       NULL, NULL, inst, NULL);
 
-	ShowWindow(hwnd, nShowCmd);
-	UpdateWindow(hwnd);
+   ShowWindow(wnd, showCmd);
+   UpdateWindow(wnd);
 
-	while (GetMessage(&msg, NULL, 0, 0))
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-	return (int)msg.wParam;  // WM_QUIT
+   while ( GetMessageW(&msg, NULL, 0, 0) )
+   {
+      TranslateMessage(&msg);
+      DispatchMessageW(&msg);
+   }
+   return (int) msg.wParam;
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	static TCHAR            szDevice[32], szWindowText[64];
-	static int              cxChar, cyChar, nCurrentDevice = IDM_SCREEN,
-		nCurrentInfo = IDM_BASIC;
-	static DWORD            dwNeeded, dwReturned;
-	static PRINTER_INFO_4* pinfo4;
-	static PRINTER_INFO_5* pinfo5;
-	DWORD                   i;
-	HDC                     hdc, hdcInfo;
-	HMENU                   hMenu;
-	HANDLE                  hPrint;
-	PAINTSTRUCT             ps;
-	TEXTMETRIC              tm;
+   static WCHAR           device[ 32 ];
+   static WCHAR           windowText[ 64 ];
+   static int             xChar;
+   static int             yChar;
+   static int             currentDevice = IDM_SCREEN;
+   static int             currentInfo   = IDM_BASIC;
+   static DWORD           needed;
+   static DWORD           returned;
+   static PRINTER_INFO_4* pinfo4;
+   DWORD                  i;
+   HDC                    dc;
+   HDC                    dcInfo;
+   HMENU                  menu;
+   HANDLE                 print;
+   PAINTSTRUCT            ps;
+   TEXTMETRIC             tm;
 
-	switch (message)
-	{
-	case WM_CREATE:
-		hdc = GetDC(hwnd);
-		SelectObject(hdc, GetStockObject(SYSTEM_FIXED_FONT));
-		GetTextMetrics(hdc, &tm);
-		cxChar = tm.tmAveCharWidth;
-		cyChar = tm.tmHeight + tm.tmExternalLeading;
-		ReleaseDC(hwnd, hdc);
-		// fall through
-	case WM_SETTINGCHANGE:
-		hMenu = GetSubMenu(GetMenu(hwnd), 0);
+   switch ( message )
+   {
+   case WM_CREATE:
+      dc = GetDC(hwnd);
+      SelectObject(dc, GetStockObject(SYSTEM_FIXED_FONT));
+      GetTextMetricsW(dc, &tm);
+      xChar = tm.tmAveCharWidth;
+      yChar = tm.tmHeight + tm.tmExternalLeading;
+      ReleaseDC(hwnd, dc);
+      // fall through
 
-		while (GetMenuItemCount(hMenu) > 1)
-			DeleteMenu(hMenu, 1, MF_BYPOSITION);
+   case WM_SETTINGCHANGE:
+      menu = GetSubMenu(GetMenu(hwnd), 0);
 
-		// Get a list of all local and remote printers
-		//
-		// First, find out how large an array we need; this
-		//   call will fail, leaving the required size in dwNeeded
-		//
-		// Next, allocate space for the info array and fill it
-		//
-		// Put the printer names on the menu.
+      while ( GetMenuItemCount(menu) > 1 )
+      {
+         DeleteMenu(menu, 1, MF_BYPOSITION);
+      }
 
-		if (GetVersion() & 0x80000000)         // Windows 98
-		{
-			EnumPrinters(PRINTER_ENUM_LOCAL, NULL, 5, NULL,
-				0, &dwNeeded, &dwReturned);
+      // Get a list of all local and remote printers
+      //
+      // First, find out how large an array we need; this
+      //   call will fail, leaving the required size in dwNeeded
+      //
+      // Next, allocate space for the info array and fill it
+      //
+      // Put the printer names on the menu.
 
-			pinfo5 = malloc(dwNeeded);
+      EnumPrintersW(PRINTER_ENUM_LOCAL, NULL, 4, NULL,
+                    0, &needed, &returned);
 
-			EnumPrinters(PRINTER_ENUM_LOCAL, NULL, 5, (PBYTE)pinfo5,
-				dwNeeded, &dwNeeded, &dwReturned);
+      pinfo4 = (PRINTER_INFO_4*) malloc(needed);
 
-			for (i = 0; i < dwReturned; i++)
-			{
-				AppendMenu(hMenu, (i + 1) % 16 ? 0 : MF_MENUBARBREAK, i + 1,
-					pinfo5[i].pPrinterName);
-			}
-			free(pinfo5);
-		}
-		else                                    // Windows NT
-		{
-			EnumPrinters(PRINTER_ENUM_LOCAL, NULL, 4, NULL,
-				0, &dwNeeded, &dwReturned);
+      EnumPrintersW(PRINTER_ENUM_LOCAL, NULL, 4, (PBYTE) pinfo4,
+                    needed, &needed, &returned);
 
-			pinfo4 = malloc(dwNeeded);
+      for ( i = 0; i < returned; i++ )
+      {
+         AppendMenuW(menu, (i + 1) % 16 ? 0 : MF_MENUBARBREAK, i + 1,
+                     pinfo4[ i ].pPrinterName);
+      }
+      free(pinfo4);
 
-			EnumPrinters(PRINTER_ENUM_LOCAL, NULL, 4, (PBYTE)pinfo4,
-				dwNeeded, &dwNeeded, &dwReturned);
+      AppendMenuW(menu, MF_SEPARATOR, 0, NULL);
+      AppendMenuW(menu, 0, IDM_DEVMODE, L"Properties");
 
-			for (i = 0; i < dwReturned; i++)
-			{
-				AppendMenu(hMenu, (i + 1) % 16 ? 0 : MF_MENUBARBREAK, i + 1,
-					pinfo4[i].pPrinterName);
-			}
-			free(pinfo4);
-		}
+      wParam = IDM_SCREEN;
+      // fall through
 
-		AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
-		AppendMenu(hMenu, 0, IDM_DEVMODE, TEXT("Properties"));
+   case WM_COMMAND:
+      menu = GetMenu(hwnd);
 
-		wParam = IDM_SCREEN;
-		// fall through
-	case WM_COMMAND:
-		hMenu = GetMenu(hwnd);
+      if ( LOWORD(wParam) == IDM_SCREEN ||         // IDM_SCREEN & Printers
+           LOWORD(wParam) < IDM_DEVMODE )
+      {
+         CheckMenuItem(menu, currentDevice, MF_UNCHECKED);
+         currentDevice = LOWORD(wParam);
+         CheckMenuItem(menu, currentDevice, MF_CHECKED);
+      }
+      else if ( LOWORD(wParam) == IDM_DEVMODE )     // Properties selection
+      {
+         GetMenuStringW(menu, currentDevice, device,
+                        _countof(device), MF_BYCOMMAND);
 
-		if (LOWORD(wParam) == IDM_SCREEN ||         // IDM_SCREEN & Printers
-			LOWORD(wParam) < IDM_DEVMODE)
-		{
-			CheckMenuItem(hMenu, nCurrentDevice, MF_UNCHECKED);
-			nCurrentDevice = LOWORD(wParam);
-			CheckMenuItem(hMenu, nCurrentDevice, MF_CHECKED);
-		}
-		else if (LOWORD(wParam) == IDM_DEVMODE)     // Properties selection
-		{
-			GetMenuString(hMenu, nCurrentDevice, szDevice,
-				_countof(szDevice), MF_BYCOMMAND);
+         if ( OpenPrinterW(device, &print, NULL) )
+         {
+            PrinterProperties(hwnd, print);
+            ClosePrinter(print);
+         }
+      }
+      else                               // info menu items
+      {
+         CheckMenuItem(menu, currentInfo, MF_UNCHECKED);
+         currentInfo = LOWORD(wParam);
+         CheckMenuItem(menu, currentInfo, MF_CHECKED);
+      }
+      InvalidateRect(hwnd, NULL, TRUE);
+      return 0;
 
-			if (OpenPrinter(szDevice, &hPrint, NULL))
-			{
-				PrinterProperties(hwnd, hPrint);
-				ClosePrinter(hPrint);
-			}
-		}
-		else                               // info menu items
-		{
-			CheckMenuItem(hMenu, nCurrentInfo, MF_UNCHECKED);
-			nCurrentInfo = LOWORD(wParam);
-			CheckMenuItem(hMenu, nCurrentInfo, MF_CHECKED);
-		}
-		InvalidateRect(hwnd, NULL, TRUE);
-		return 0;
+   case WM_INITMENUPOPUP:
+      if ( lParam == 0 )
+      {
+         EnableMenuItem(GetMenu(hwnd), IDM_DEVMODE,
+                        currentDevice == IDM_SCREEN ? MF_GRAYED : MF_ENABLED);
+      }
+      return 0;
 
-	case WM_INITMENUPOPUP:
-		if (lParam == 0)
-			EnableMenuItem(GetMenu(hwnd), IDM_DEVMODE,
-				nCurrentDevice == IDM_SCREEN ? MF_GRAYED : MF_ENABLED);
-		return 0;
+   case WM_PAINT:
+      lstrcpyW(windowText, L"Device Capabilities: ");
 
-	case WM_PAINT:
-		lstrcpy(szWindowText, TEXT("Device Capabilities: "));
+      if ( currentDevice == IDM_SCREEN )
+      {
+         lstrcpyW(device, L"DISPLAY");
+         dcInfo = CreateICW(device, NULL, NULL, NULL);
+      }
+      else
+      {
+         menu = GetMenu(hwnd);
+         GetMenuStringW(menu, currentDevice, device,
+                        sizeof(device), MF_BYCOMMAND);
+         dcInfo = CreateICW(NULL, device, NULL, NULL);
+      }
 
-		if (nCurrentDevice == IDM_SCREEN)
-		{
-			lstrcpy(szDevice, TEXT("DISPLAY"));
-			hdcInfo = CreateIC(szDevice, NULL, NULL, NULL);
-		}
-		else
-		{
-			hMenu = GetMenu(hwnd);
-			GetMenuString(hMenu, nCurrentDevice, szDevice,
-				sizeof(szDevice), MF_BYCOMMAND);
-			hdcInfo = CreateIC(NULL, szDevice, NULL, NULL);
-		}
+      lstrcat(windowText, device);
+      SetWindowText(hwnd, windowText);
 
-		lstrcat(szWindowText, szDevice);
-		SetWindowText(hwnd, szWindowText);
+      dc = BeginPaint(hwnd, &ps);
+      SelectObject(dc, GetStockObject(SYSTEM_FIXED_FONT));
 
-		hdc = BeginPaint(hwnd, &ps);
-		SelectObject(hdc, GetStockObject(SYSTEM_FIXED_FONT));
+      if ( dcInfo )
+      {
+         switch ( currentInfo )
+         {
+         case IDM_BASIC:
+            DoBasicInfo(dc, dcInfo, xChar, yChar);
+            break;
 
-		if (hdcInfo)
-		{
-			switch (nCurrentInfo)
-			{
-			case IDM_BASIC:
-				DoBasicInfo(hdc, hdcInfo, cxChar, cyChar);
-				break;
+         case IDM_OTHER:
+            DoOtherInfo(dc, dcInfo, xChar, yChar);
+            break;
 
-			case IDM_OTHER:
-				DoOtherInfo(hdc, hdcInfo, cxChar, cyChar);
-				break;
+         case IDM_CURVE:
+         case IDM_LINE:
+         case IDM_POLY:
+         case IDM_TEXT:
+            DoBitCodedCaps(dc, dcInfo, xChar, yChar,
+                           currentInfo - IDM_CURVE);
+            break;
+         }
+         DeleteDC(dcInfo);
+      }
 
-			case IDM_CURVE:
-			case IDM_LINE:
-			case IDM_POLY:
-			case IDM_TEXT:
-				DoBitCodedCaps(hdc, hdcInfo, cxChar, cyChar,
-					nCurrentInfo - IDM_CURVE);
-				break;
-			}
-			DeleteDC(hdcInfo);
-		}
+      EndPaint(hwnd, &ps);
+      return 0;
 
-		EndPaint(hwnd, &ps);
-		return 0;
-
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hwnd, message, wParam, lParam);
+   case WM_DESTROY:
+      PostQuitMessage(0);
+      return 0;
+   }
+   return DefWindowProcW(hwnd, message, wParam, lParam);
 }
 
 void DoBasicInfo(HDC hdc, HDC hdcInfo, int cxChar, int cyChar)
 {
-	static struct
-	{
-		int     nIndex;
-		TCHAR* szDesc;
-	}
-	info[] =
-	{
-		{HORZSIZE,        TEXT("HORZSIZE        Width in millimeters:")},
-		{VERTSIZE,        TEXT("VERTSIZE        Height in millimeters:")},
-		{HORZRES,         TEXT("HORZRES         Width in pixels:")},
-		{VERTRES,         TEXT("VERTRES         Height in raster lines:")},
-		{BITSPIXEL,       TEXT("BITSPIXEL       Color bits per pixel:")},
-		{PLANES,          TEXT("PLANES          Number of color planes:")},
-		{NUMBRUSHES,      TEXT("NUMBRUSHES      Number of device brushes:")},
-		{NUMPENS,         TEXT("NUMPENS         Number of device pens:")},
-		{NUMMARKERS,      TEXT("NUMMARKERS      Number of device markers:")},
-		{NUMFONTS,        TEXT("NUMFONTS        Number of device fonts:")},
-		{NUMCOLORS,       TEXT("NUMCOLORS       Number of device colors:")},
-		{PDEVICESIZE,     TEXT("PDEVICESIZE     Size of device structure:")},
-		{ASPECTX,         TEXT("ASPECTX         Relative width of pixel:")},
-		{ASPECTY,         TEXT("ASPECTY         Relative height of pixel:")},
-		{ASPECTXY,        TEXT("ASPECTXY        Relative diagonal of pixel:")},
-		{LOGPIXELSX,      TEXT("LOGPIXELSX      Horizontal dots per inch:")},
-		{LOGPIXELSY,      TEXT("LOGPIXELSY      Vertical dots per inch:")},
-		{SIZEPALETTE,     TEXT("SIZEPALETTE     Number of palette entries:")},
-		{NUMRESERVED,     TEXT("NUMRESERVED     Reserved palette entries:")},
-		{COLORRES,        TEXT("COLORRES        Actual color resolution:")},
-		{PHYSICALWIDTH,   TEXT("PHYSICALWIDTH   Printer page pixel width:")},
-		{PHYSICALHEIGHT,  TEXT("PHYSICALHEIGHT  Printer page pixel height:")},
-		{PHYSICALOFFSETX, TEXT("PHYSICALOFFSETX Printer page x offset:")},
-		{PHYSICALOFFSETY, TEXT("PHYSICALOFFSETY Printer page y offset:")}
-	};
-	TCHAR szBuffer[80];
+   static struct
+   {
+      int    index;
+      PCWSTR desc;
+   }
+   info[ ] = { {HORZSIZE,        L"HORZSIZE        Width in millimeters:"},
+               {VERTSIZE,        L"VERTSIZE        Height in millimeters:"},
+               {HORZRES,         L"HORZRES         Width in pixels:"},
+               {VERTRES,         L"VERTRES         Height in raster lines:"},
+               {BITSPIXEL,       L"BITSPIXEL       Color bits per pixel:"},
+               {PLANES,          L"PLANES          Number of color planes:"},
+               {NUMBRUSHES,      L"NUMBRUSHES      Number of device brushes:"},
+               {NUMPENS,         L"NUMPENS         Number of device pens:"},
+               {NUMMARKERS,      L"NUMMARKERS      Number of device markers:"},
+               {NUMFONTS,        L"NUMFONTS        Number of device fonts:"},
+               {NUMCOLORS,       L"NUMCOLORS       Number of device colors:"},
+               {PDEVICESIZE,     L"PDEVICESIZE     Size of device structure:"},
+               {ASPECTX,         L"ASPECTX         Relative width of pixel:"},
+               {ASPECTY,         L"ASPECTY         Relative height of pixel:"},
+               {ASPECTXY,        L"ASPECTXY        Relative diagonal of pixel:"},
+               {LOGPIXELSX,      L"LOGPIXELSX      Horizontal dots per inch:"},
+               {LOGPIXELSY,      L"LOGPIXELSY      Vertical dots per inch:"},
+               {SIZEPALETTE,     L"SIZEPALETTE     Number of palette entries:"},
+               {NUMRESERVED,     L"NUMRESERVED     Reserved palette entries:"},
+               {COLORRES,        L"COLORRES        Actual color resolution:"},
+               {PHYSICALWIDTH,   L"PHYSICALWIDTH   Printer page pixel width:"},
+               {PHYSICALHEIGHT,  L"PHYSICALHEIGHT  Printer page pixel height:"},
+               {PHYSICALOFFSETX, L"PHYSICALOFFSETX Printer page x offset:"},
+               {PHYSICALOFFSETY, L"PHYSICALOFFSETY Printer page y offset:"} };
+   WCHAR buffer[ 80 ];
 
-	for (unsigned i = 0; i < _countof(info); i++)
-		TextOut(hdc, cxChar, (i + 1) * cyChar, szBuffer,
-			wsprintf(szBuffer, TEXT("%-45s%8d"), info[i].szDesc,
-				GetDeviceCaps(hdcInfo, info[i].nIndex)));
+   for ( unsigned i = 0; i < _countof(info); i++ )
+   {
+      TextOutW(hdc, cxChar, (i + 1)* cyChar, buffer,
+               wsprintfW(buffer, L"%-45s%8d", info[ i ].desc,
+                         GetDeviceCaps(hdcInfo, info[ i ].index)));
+   }
 }
 
-void DoOtherInfo(HDC hdc, HDC hdcInfo, int cxChar, int cyChar)
+void DoOtherInfo(HDC dc, HDC dcInfo, int xChar, int yChar)
 {
-	static BITS clip[] =
-	{
-		{CP_RECTANGLE,    TEXT("CP_RECTANGLE    Can Clip To Rectangle:")}
-	};
+   static BITS clip[ ] =
+   {
+      {CP_RECTANGLE,    L"CP_RECTANGLE    Can Clip To Rectangle:"}
+   };
 
-	static BITS raster[] =
-	{
-		{RC_BITBLT,       TEXT("RC_BITBLT       Capable of simple BitBlt:")},
-		{RC_BANDING,      TEXT("RC_BANDING      Requires banding support:")},
-		{RC_SCALING,      TEXT("RC_SCALING      Requires scaling support:")},
-		{RC_BITMAP64,     TEXT("RC_BITMAP64     Supports bitmaps >64K:")},
-		{RC_GDI20_OUTPUT, TEXT("RC_GDI20_OUTPUT Has 2.0 output calls:")},
-		{RC_DI_BITMAP,    TEXT("RC_DI_BITMAP    Supports DIB to memory:")},
-		{RC_PALETTE,      TEXT("RC_PALETTE      Supports a palette:")},
-		{RC_DIBTODEV,     TEXT("RC_DIBTODEV     Supports bitmap conversion:")},
-		{RC_BIGFONT,      TEXT("RC_BIGFONT      Supports fonts >64K:")},
-		{RC_STRETCHBLT,   TEXT("RC_STRETCHBLT   Supports StretchBlt:")},
-		{RC_FLOODFILL,    TEXT("RC_FLOODFILL    Supports FloodFill:")},
-		{RC_STRETCHDIB,   TEXT("RC_STRETCHDIB   Supports StretchDIBits:")}
-	};
+   static BITS raster[ ] =
+   {
+      {RC_BITBLT,       L"RC_BITBLT       Capable of simple BitBlt:"},
+      {RC_BANDING,      L"RC_BANDING      Requires banding support:"},
+      {RC_SCALING,      L"RC_SCALING      Requires scaling support:"},
+      {RC_BITMAP64,     L"RC_BITMAP64     Supports bitmaps >64K:"},
+      {RC_GDI20_OUTPUT, L"RC_GDI20_OUTPUT Has 2.0 output calls:"},
+      {RC_DI_BITMAP,    L"RC_DI_BITMAP    Supports DIB to memory:"},
+      {RC_PALETTE,      L"RC_PALETTE      Supports a palette:"},
+      {RC_DIBTODEV,     L"RC_DIBTODEV     Supports bitmap conversion:"},
+      {RC_BIGFONT,      L"RC_BIGFONT      Supports fonts >64K:"},
+      {RC_STRETCHBLT,   L"RC_STRETCHBLT   Supports StretchBlt:"},
+      {RC_FLOODFILL,    L"RC_FLOODFILL    Supports FloodFill:"},
+      {RC_STRETCHDIB,   L"RC_STRETCHDIB   Supports StretchDIBits:"}
+   };
 
-	static TCHAR* szTech[] = {
-		TEXT("DT_PLOTTER (Vector plotter)"),
-		TEXT("DT_RASDISPLAY (Raster display)"),
-		TEXT("DT_RASPRINTER (Raster printer)"),
-		TEXT("DT_RASCAMERA (Raster camera)"),
-		TEXT("DT_CHARSTREAM (Character stream)"),
-		TEXT("DT_METAFILE (Metafile)"),
-		TEXT("DT_DISPFILE (Display file)")
-	};
-	TCHAR          szBuffer[80];
+   static PCWSTR tech[ ] =
+   {
+      L"DT_PLOTTER (Vector plotter)",
+      L"DT_RASDISPLAY (Raster display)",
+      L"DT_RASPRINTER (Raster printer)",
+      L"DT_RASCAMERA (Raster camera)",
+      L"DT_CHARSTREAM (Character stream)",
+      L"DT_METAFILE (Metafile)",
+      L"DT_DISPFILE (Display file)"
+   };
+   WCHAR          buffer[ 80 ];
 
-	TextOut(hdc, cxChar, cyChar, szBuffer,
-		wsprintf(szBuffer, TEXT("%-24s%04XH"), TEXT("DRIVERVERSION:"),
-			GetDeviceCaps(hdcInfo, DRIVERVERSION)));
+   TextOutW(dc, xChar, yChar, buffer,
+            wsprintfW(buffer, L"%-24s%04XH", L"DRIVERVERSION:",
+                      GetDeviceCaps(dcInfo, DRIVERVERSION)));
 
-	TextOut(hdc, cxChar, 2 * cyChar, szBuffer,
-		wsprintf(szBuffer, TEXT("%-24s%-40s"), TEXT("TECHNOLOGY:"),
-			szTech[GetDeviceCaps(hdcInfo, TECHNOLOGY)]));
+   TextOutW(dc, xChar, 2 * yChar, buffer,
+            wsprintfW(buffer, L"%-24s%-40s", L"TECHNOLOGY:",
+                      tech[ GetDeviceCaps(dcInfo, TECHNOLOGY) ]));
 
-	TextOut(hdc, cxChar, 4 * cyChar, szBuffer,
-		wsprintf(szBuffer, TEXT("CLIPCAPS (Clipping capabilities)")));
+   TextOutW(dc, xChar, 4 * yChar, buffer,
+            wsprintfW(buffer, L"CLIPCAPS (Clipping capabilities)"));
 
-	for (unsigned i = 0; i < _countof(clip); i++)
-		TextOut(hdc, 9 * cxChar, (i + 6) * cyChar, szBuffer,
-			wsprintf(szBuffer, TEXT("%-45s %3s"), clip[i].szDesc,
-				GetDeviceCaps(hdcInfo, CLIPCAPS) & clip[i].iMask ?
-				TEXT("Yes") : TEXT("No")));
+   for ( unsigned i = 0; i < _countof(clip); i++ )
+   {
+      TextOutW(dc, 9 * xChar, (i + 6) * yChar, buffer,
+               wsprintfW(buffer, L"%-45s %3s", clip[ i ].desc,
+                         GetDeviceCaps(dcInfo, CLIPCAPS) & clip[ i ].mask ?
+                         L"Yes" : L"No"));
+   }
 
-	TextOut(hdc, cxChar, 8 * cyChar, szBuffer,
-		wsprintf(szBuffer, TEXT("RASTERCAPS (Raster capabilities)")));
+   TextOutW(dc, xChar, 8 * yChar, buffer,
+            wsprintfW(buffer, L"RASTERCAPS (Raster capabilities)"));
 
-	for (unsigned i = 0; i < _countof(raster); i++)
-		TextOut(hdc, 9 * cxChar, (i + 10) * cyChar, szBuffer,
-			wsprintf(szBuffer, TEXT("%-45s %3s"), raster[i].szDesc,
-				GetDeviceCaps(hdcInfo, RASTERCAPS) & raster[i].iMask ?
-				TEXT("Yes") : TEXT("No")));
+   for ( unsigned i = 0; i < _countof(raster); i++ )
+   {
+      TextOutW(dc, 9 * xChar, (i + 10) * yChar, buffer,
+               wsprintfW(buffer, L"%-45s %3s", raster[ i ].desc,
+                         GetDeviceCaps(dcInfo, RASTERCAPS) & raster[ i ].mask ?
+                         L"Yes" : L"No"));
+   }
 }
 
-void DoBitCodedCaps(HDC hdc, HDC hdcInfo, int cxChar, int cyChar, int iType)
+void DoBitCodedCaps(HDC dc, HDC dcInfo, int xChar, int yChar, int type)
 {
-	static BITS curves[] =
-	{
-		{ CC_CIRCLES,    TEXT("CC_CIRCLES    Can do circles:")                 },
-		{ CC_PIE,        TEXT("CC_PIE        Can do pie wedges:")              },
-		{ CC_CHORD,      TEXT("CC_CHORD      Can do chord arcs:")              },
-		{ CC_ELLIPSES,   TEXT("CC_ELLIPSES   Can do ellipses:")                },
-		{ CC_WIDE,       TEXT("CC_WIDE       Can do wide borders:")            },
-		{ CC_STYLED,     TEXT("CC_STYLED     Can do styled borders:")          },
-		{ CC_WIDESTYLED, TEXT("CC_WIDESTYLED Can do wide and styled borders:") },
-		{ CC_INTERIORS,  TEXT("CC_INTERIORS  Can do interiors:")               }
-	};
+   static BITS curves[ ] =
+   {
+      { CC_CIRCLES,    L"CC_CIRCLES    Can do circles:"                 },
+      { CC_PIE,        L"CC_PIE        Can do pie wedges:"              },
+      { CC_CHORD,      L"CC_CHORD      Can do chord arcs:"              },
+      { CC_ELLIPSES,   L"CC_ELLIPSES   Can do ellipses:"                },
+      { CC_WIDE,       L"CC_WIDE       Can do wide borders:"            },
+      { CC_STYLED,     L"CC_STYLED     Can do styled borders:"          },
+      { CC_WIDESTYLED, L"CC_WIDESTYLED Can do wide and styled borders:" },
+      { CC_INTERIORS,  L"CC_INTERIORS  Can do interiors:"               }
+   };
 
-	static BITS lines[] =
-	{
-		{ LC_POLYLINE,   TEXT("LC_POLYLINE   Can do polyline:")              },
-		{ LC_MARKER,     TEXT("LC_MARKER     Can do markers:")               },
-		{ LC_POLYMARKER, TEXT("LC_POLYMARKER Can do polymarkers")            },
-		{ LC_WIDE,       TEXT("LC_WIDE       Can do wide lines:")            },
-		{ LC_STYLED,     TEXT("LC_STYLED     Can do styled lines:")          },
-		{ LC_WIDESTYLED, TEXT("LC_WIDESTYLED Can do wide and styled lines:") },
-		{ LC_INTERIORS,  TEXT("LC_INTERIORS  Can do interiors:")             }
-	};
+   static BITS lines[ ] =
+   {
+      { LC_POLYLINE,   L"LC_POLYLINE   Can do polyline:"              },
+      { LC_MARKER,     L"LC_MARKER     Can do markers:"               },
+      { LC_POLYMARKER, L"LC_POLYMARKER Can do polymarkers"            },
+      { LC_WIDE,       L"LC_WIDE       Can do wide lines:"            },
+      { LC_STYLED,     L"LC_STYLED     Can do styled lines:"          },
+      { LC_WIDESTYLED, L"LC_WIDESTYLED Can do wide and styled lines:" },
+      { LC_INTERIORS,  L"LC_INTERIORS  Can do interiors:"             }
+   };
 
-	static BITS poly[] =
-	{
-		{ PC_POLYGON,     TEXT("PC_POLYGON     Can do alternate fill polygon:")      },
-		{ PC_RECTANGLE,   TEXT("PC_RECTANGLE   Can do rectangle:")                   },
-		{ PC_WINDPOLYGON, TEXT("PC_WINDPOLYGON Can do winding number fill polygon:") },
-		{ PC_SCANLINE,    TEXT("PC_SCANLINE    Can do scanlines:")                   },
-		{ PC_WIDE,        TEXT("PC_WIDE        Can do wide borders:")                },
-		{ PC_STYLED,      TEXT("PC_STYLED      Can do styled borders:")              },
-		{ PC_WIDESTYLED,  TEXT("PC_WIDESTYLED  Can do wide and styled borders:")     },
-		{ PC_INTERIORS,   TEXT("PC_INTERIORS   Can do interiors:")                   }
-	};
+   static BITS poly[ ] =
+   {
+      { PC_POLYGON,     L"PC_POLYGON     Can do alternate fill polygon:"      },
+      { PC_RECTANGLE,   L"PC_RECTANGLE   Can do rectangle:"                   },
+      { PC_WINDPOLYGON, L"PC_WINDPOLYGON Can do winding number fill polygon:" },
+      { PC_SCANLINE,    L"PC_SCANLINE    Can do scanlines:"                   },
+      { PC_WIDE,        L"PC_WIDE        Can do wide borders:"                },
+      { PC_STYLED,      L"PC_STYLED      Can do styled borders:"              },
+      { PC_WIDESTYLED,  L"PC_WIDESTYLED  Can do wide and styled borders:"     },
+      { PC_INTERIORS,   L"PC_INTERIORS   Can do interiors:"                   }
+   };
 
-	static BITS text[] =
-	{
-		{ TC_OP_CHARACTER, TEXT("TC_OP_CHARACTER Can do character output precision:")      },
-		{ TC_OP_STROKE,    TEXT("TC_OP_STROKE    Can do stroke output precision:")         },
-		{ TC_CP_STROKE,    TEXT("TC_CP_STROKE    Can do stroke clip precision:")           },
-		{ TC_CR_90,        TEXT("TC_CP_90        Can do 90 degree character rotation:")    },
-		{ TC_CR_ANY,       TEXT("TC_CR_ANY       Can do any character rotation:")          },
-		{ TC_SF_X_YINDEP,  TEXT("TC_SF_X_YINDEP  Can do scaling independent of X and Y:")  },
-		{ TC_SA_DOUBLE,    TEXT("TC_SA_DOUBLE    Can do doubled character for scaling:")   },
-		{ TC_SA_INTEGER,   TEXT("TC_SA_INTEGER   Can do integer multiples for scaling:")   },
-		{ TC_SA_CONTIN,    TEXT("TC_SA_CONTIN    Can do any multiples for exact scaling:") },
-		{ TC_EA_DOUBLE,    TEXT("TC_EA_DOUBLE    Can do double weight characters:")        },
-		{ TC_IA_ABLE,      TEXT("TC_IA_ABLE      Can do italicizing:")                     },
-		{ TC_UA_ABLE,      TEXT("TC_UA_ABLE      Can do underlining:")                     },
-		{ TC_SO_ABLE,      TEXT("TC_SO_ABLE      Can do strikeouts:")                      },
-		{ TC_RA_ABLE,      TEXT("TC_RA_ABLE      Can do raster fonts:")                    },
-		{ TC_VA_ABLE,      TEXT("TC_VA_ABLE      Can do vector fonts:")                    }
-	};
+   static BITS text[ ] =
+   {
+      { TC_OP_CHARACTER, L"TC_OP_CHARACTER Can do character output precision:"      },
+      { TC_OP_STROKE,    L"TC_OP_STROKE    Can do stroke output precision:"         },
+      { TC_CP_STROKE,    L"TC_CP_STROKE    Can do stroke clip precision:"           },
+      { TC_CR_90,        L"TC_CP_90        Can do 90 degree character rotation:"    },
+      { TC_CR_ANY,       L"TC_CR_ANY       Can do any character rotation:"          },
+      { TC_SF_X_YINDEP,  L"TC_SF_X_YINDEP  Can do scaling independent of X and Y:"  },
+      { TC_SA_DOUBLE,    L"TC_SA_DOUBLE    Can do doubled character for scaling:"   },
+      { TC_SA_INTEGER,   L"TC_SA_INTEGER   Can do integer multiples for scaling:"   },
+      { TC_SA_CONTIN,    L"TC_SA_CONTIN    Can do any multiples for exact scaling:" },
+      { TC_EA_DOUBLE,    L"TC_EA_DOUBLE    Can do double weight characters:"        },
+      { TC_IA_ABLE,      L"TC_IA_ABLE      Can do italicizing:"                     },
+      { TC_UA_ABLE,      L"TC_UA_ABLE      Can do underlining:"                     },
+      { TC_SO_ABLE,      L"TC_SO_ABLE      Can do strikeouts:"                      },
+      { TC_RA_ABLE,      L"TC_RA_ABLE      Can do raster fonts:"                    },
+      { TC_VA_ABLE,      L"TC_VA_ABLE      Can do vector fonts:"                    }
+   };
 
-	static struct
-	{
-		int     iIndex;
-		TCHAR* szTitle;
-		BITS(*pbits)[];
-		int     iSize;
-	}
-	bitinfo[] =
-	{
-		{ CURVECAPS,     TEXT("CURVCAPS (Curve Capabilities)"),          (BITS(*)[]) curves, _countof(curves) },
-		{ LINECAPS,      TEXT("LINECAPS (Line Capabilities)"),           (BITS(*)[]) lines,  _countof(lines)  },
-		{ POLYGONALCAPS, TEXT("POLYGONALCAPS (Polygonal Capabilities)"), (BITS(*)[]) poly,   _countof(poly)   },
-		{ TEXTCAPS,      TEXT("TEXTCAPS (Text Capabilities)"),           (BITS(*)[]) text,   _countof(text)   }
-	};
+   static struct
+   {
+      int    index;
+      PCWSTR title;
+      BITS   (*pbits)[ ];
+      int    size;
+   }
+   bitinfo[ ] =
+   {
+      { CURVECAPS,     L"CURVCAPS (Curve Capabilities)",          (BITS(*)[ ]) curves, _countof(curves) },
+      { LINECAPS,      L"LINECAPS (Line Capabilities)",           (BITS(*)[ ]) lines,  _countof(lines)  },
+      { POLYGONALCAPS, L"POLYGONALCAPS (Polygonal Capabilities)", (BITS(*)[ ]) poly,   _countof(poly)   },
+      { TEXTCAPS,      L"TEXTCAPS (Text Capabilities)",           (BITS(*)[ ]) text,   _countof(text)   }
+   };
 
-	static TCHAR szBuffer[80];
-	BITS(*pbits)[] = bitinfo[iType].pbits;
-	int          i, iDevCaps = GetDeviceCaps(hdcInfo, bitinfo[iType].iIndex);
+   static WCHAR buffer[ 80 ];
+   BITS         (*pbits)[ ] = bitinfo[ type ].pbits;
+   int          i;
+   int          iDevCaps    = GetDeviceCaps(dcInfo, bitinfo[ type ].index);
 
-	TextOut(hdc, cxChar, cyChar, bitinfo[iType].szTitle,
-		lstrlen(bitinfo[iType].szTitle));
+   TextOutW(dc, xChar, yChar, bitinfo[ type ].title,
+            lstrlenW(bitinfo[ type ].title));
 
-	for (i = 0; i < bitinfo[iType].iSize; i++)
-		TextOut(hdc, cxChar, (i + 3) * cyChar, szBuffer,
-			wsprintf(szBuffer, TEXT("%-55s %3s"), (*pbits)[i].szDesc,
-				iDevCaps & (*pbits)[i].iMask ? TEXT("Yes") : TEXT("No")));
+   for ( i = 0; i < bitinfo[ type ].size; i++ )
+   {
+      TextOutW(dc, xChar, (i + 3) * yChar, buffer,
+              wsprintfW(buffer, L"%-55s %3s", (*pbits)[ i ].desc,
+                       iDevCaps & (*pbits)[ i ].mask ? L"Yes" : L"No"));
+   }
 }
