@@ -1,0 +1,101 @@
+#include <windows.h>
+#include "Resource.h"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+ABOUTBOX DIALOG DISCARDABLE  32, 32, 180, 100
+STYLE DS_MODALFRAME | WS_POPUP
+FONT 8, "MS Sans Serif"
+{
+    DEFPUSHBUTTON   "OK", IDOK, 66, 80, 50, 14
+    ICON            "POPPAD", IDC_STATIC, 7, 7, 20, 20
+    CTEXT           "PopPad3", IDC_STATIC, 40, 12, 100, 8
+    CTEXT           "Popup Editor for Windows", IDC_STATIC, 7, 40, 166, 8
+    CTEXT           "(c) Charles Petzold, 1998", IDC_STATIC,7, 52, 166, 8
+}
+
+PRINTDLGBOX DIALOG DISCARDABLE  32, 32, 186, 95
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "PopPad3"
+FONT 8, "MS Sans Serif"
+{
+    PUSHBUTTON      "Cancel", IDCANCEL, 67, 74, 50, 14
+    CTEXT           "Sending", IDC_STATIC, 8, 8, 172, 8
+    CTEXT           "", IDC_FILENAME, 8, 28, 172, 8
+    CTEXT           "to print spooler.", IDC_STATIC, 8, 48, 172, 8
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+POPPAD MENU DISCARDABLE
+{
+    POPUP "&File"
+    {
+        MENUITEM "&New\tCtrl+N",                IDM_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            IDM_FILE_OPEN
+        MENUITEM "&Save\tCtrl+S",               IDM_FILE_SAVE
+        MENUITEM "Save &As...",                 IDM_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "&Print\tCtrl+P",              IDM_FILE_PRINT
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       IDM_APP_EXIT
+    }
+    POPUP "&Edit"
+    {
+        MENUITEM "&Undo\tCtrl+Z",               IDM_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                IDM_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               IDM_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              IDM_EDIT_PASTE
+        MENUITEM "De&lete\tDel",                IDM_EDIT_CLEAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Select All",                 IDM_EDIT_SELECT_ALL
+    }
+    POPUP "&Search"
+    {
+        MENUITEM "&Find...\tCtrl+F",            IDM_SEARCH_FIND
+        MENUITEM "Find &Next\tF3",              IDM_SEARCH_NEXT
+        MENUITEM "&Replace...\tCtrl+R",         IDM_SEARCH_REPLACE
+    }
+    POPUP "F&ormat"
+    {
+        MENUITEM "&Font...",                    IDM_FORMAT_FONT
+    }
+    POPUP "&Help"
+    {
+        MENUITEM "&Help",                       IDM_HELP
+        MENUITEM "&About PopPad3...",            IDM_APP_ABOUT
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+POPPAD ACCELERATORS DISCARDABLE
+{
+    VK_BACK,        IDM_EDIT_UNDO,          VIRTKEY, ALT, NOINVERT
+    VK_DELETE,      IDM_EDIT_CLEAR,         VIRTKEY, NOINVERT
+    VK_DELETE,      IDM_EDIT_CUT,           VIRTKEY, SHIFT, NOINVERT
+    VK_F1,          IDM_HELP,               VIRTKEY, NOINVERT
+    VK_F3,          IDM_SEARCH_NEXT,        VIRTKEY, NOINVERT
+    VK_INSERT,      IDM_EDIT_COPY,          VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      IDM_EDIT_PASTE,         VIRTKEY, SHIFT, NOINVERT
+    "^C",           IDM_EDIT_COPY,          ASCII,  NOINVERT
+    "^F",           IDM_SEARCH_FIND,        ASCII,  NOINVERT
+    "^N",           IDM_FILE_NEW,           ASCII,  NOINVERT
+    "^O",           IDM_FILE_OPEN,          ASCII,  NOINVERT
+    "^P",           IDM_FILE_PRINT,         ASCII,  NOINVERT
+    "^R",           IDM_SEARCH_REPLACE,     ASCII,  NOINVERT
+    "^S",           IDM_FILE_SAVE,          ASCII,  NOINVERT
+    "^V",           IDM_EDIT_PASTE,         ASCII,  NOINVERT
+    "^X",           IDM_EDIT_CUT,           ASCII,  NOINVERT
+    "^Z",           IDM_EDIT_UNDO,          ASCII,  NOINVERT
+}
