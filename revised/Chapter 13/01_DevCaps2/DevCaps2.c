@@ -37,15 +37,15 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    MSG           msg;
    WNDCLASSW     wc;
 
-   wc.style = CS_HREDRAW | CS_VREDRAW;
-   wc.lpfnWndProc = WndProc;
-   wc.cbClsExtra = 0;
-   wc.cbWndExtra = 0;
-   wc.hInstance = inst;
-   wc.hIcon = (HICON) LoadImageW(inst, appName, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
-   wc.hCursor = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
-   wc.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
-   wc.lpszMenuName = appName;
+   wc.style         = CS_HREDRAW | CS_VREDRAW;
+   wc.lpfnWndProc   = WndProc;
+   wc.cbClsExtra    = 0;
+   wc.cbWndExtra    = 0;
+   wc.hInstance     = inst;
+   wc.hIcon         = (HICON)   LoadImageW(inst, appName, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+   wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
+   wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
+   wc.lpszMenuName  = appName;
    wc.lpszClassName = appName;
 
    if ( !RegisterClassW(&wc) )
