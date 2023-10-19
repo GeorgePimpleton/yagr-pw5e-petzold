@@ -1,19 +1,19 @@
 /*--------------------------------------------------------------
    HelloMsg.c -- Displays "Hello, Windows 98!" in a message box
-             (c) Charles Petzold, 1998
+                 (c) Charles Petzold, 1998
   --------------------------------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
 
 #include <windows.h>
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(instance);
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(inst);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
    UNREFERENCED_PARAMETER(showCmd);
 
