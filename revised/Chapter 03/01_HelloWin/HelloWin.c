@@ -9,10 +9,10 @@
 #include <windowsx.h>
 #include <mmsystem.h>
 
-// make sure the Windows multi-media library DLL is loaded for use
+// add the Windows multi-media library is added to the linker
 #pragma comment(lib, "winmm.lib")
 
-LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI wWinMain(_In_     HINSTANCE inst,
                     _In_opt_ HINSTANCE prevInst,
@@ -24,7 +24,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
 
    static PCWSTR clsName  = L"HelloWin";
    static PCWSTR appTitle = L"The Hello Program";
-   WNDCLASSEX    wc;
+   WNDCLASSEX    wc       = { 0 };
 
    wc.cbSize        = sizeof(WNDCLASSEXW);
    wc.hInstance     = inst;
@@ -55,11 +55,11 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
                           inst,                 // program instance handle
                           NULL);                // creation parameters
 
-   if ( 0 == wnd ) { return 0;  /* premature exit*/ }
+   if ( 0 == wnd ) { return 0;  /* premature exit */ }
 
    ShowWindow(wnd, showCmd);
 
-   if ( 0 == UpdateWindow(wnd) ) { return 0;  /* premature exit*/ }
+   if ( 0 == UpdateWindow(wnd) ) { return 0;  /* premature exit */ }
 
    MSG  msg;
    BOOL ret;  // three states: -1, 0 or non-zero
