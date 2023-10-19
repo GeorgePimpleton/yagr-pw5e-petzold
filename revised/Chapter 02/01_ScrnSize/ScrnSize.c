@@ -11,7 +11,7 @@
 
 int CDECL MessageBoxPrintf(_In_opt_z_ PCWSTR caption,
                            _In_z_     PCWSTR format,
-                                      ...)
+                           ...)
 {
    WCHAR   buffer[ 1024 ];
    va_list argList;
@@ -29,13 +29,13 @@ int CDECL MessageBoxPrintf(_In_opt_z_ PCWSTR caption,
    return MessageBoxW(NULL, buffer, caption, MB_OK);
 }
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(instance);
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(inst);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
    UNREFERENCED_PARAMETER(showCmd);
 
