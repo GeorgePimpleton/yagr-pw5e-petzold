@@ -8,9 +8,9 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include "SysMets.h"  // from 01_SysMets1
+#include "SysMets.h"
 
-LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI wWinMain(_In_     HINSTANCE inst,
                     _In_opt_ HINSTANCE prevInst,
@@ -21,9 +21,9 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR appName = L"SysMets2";
+   static PCWSTR appName  = L"SysMets2";
    static PCWSTR appTitle = L"Get System Metrics No. 2";
-   WNDCLASSW     wc;
+   WNDCLASSW     wc       = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -71,7 +71,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
    HDC         dc;
    int         y;
    PAINTSTRUCT ps;
-   WCHAR       buffer[ 10 ];
+   WCHAR       buffer[ 10 ] = { 0 };
    TEXTMETRICW tm;
 
    switch ( msg )

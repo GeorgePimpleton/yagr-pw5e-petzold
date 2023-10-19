@@ -10,27 +10,27 @@
 
 #include "SysMets.h"
 
-LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
+int WINAPI wWinMain(_In_     HINSTANCE inst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR appName  = L"SysMets1";
    static PCWSTR appTitle = L"Get System Metrics No. 1";
    HWND          wnd;
    MSG           msg;
-   WNDCLASSW     wc;
+   WNDCLASSW     wc = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
@@ -47,7 +47,7 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
                        WS_OVERLAPPEDWINDOW,
                        CW_USEDEFAULT, CW_USEDEFAULT,
                        CW_USEDEFAULT, CW_USEDEFAULT,
-                       NULL, NULL, instance, NULL);
+                       NULL, NULL, inst, NULL);
 
    ShowWindow(wnd, showCmd);
    UpdateWindow(wnd);
@@ -60,17 +60,17 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    return (int) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND wnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static int  xChar;
    static int  xCaps;
    static int  yChar;
    HDC         dc;
    PAINTSTRUCT ps;
-   WCHAR       buffer[ 10 ];
+   WCHAR       buffer[ 10 ] = { L"" };
    TEXTMETRICW tm;
 
-   switch ( message )
+   switch ( msg )
    {
    case WM_CREATE:
       dc = GetDC(wnd);
@@ -113,5 +113,5 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT message, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   return DefWindowProcW(wnd, message, wParam, lParam);
+   return DefWindowProcW(wnd, msg, wParam, lParam);
 }
