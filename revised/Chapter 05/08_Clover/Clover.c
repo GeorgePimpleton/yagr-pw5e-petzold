@@ -23,10 +23,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  appName = L"Clover";
-   HWND           wnd;
-   MSG            msg;
-   WNDCLASSW      wc;
+   static PCWSTR appName = L"Clover";
+   HWND          wnd;
+   MSG           msg;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -72,7 +72,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
    double      radius;
    HCURSOR     cursor;
    HDC         dc;
-   HRGN        rgnTemp[ 6 ];
+   HRGN        rgnTemp[ 6 ] = { 0 };
    int         i;
    PAINTSTRUCT ps;
 

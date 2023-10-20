@@ -12,7 +12,7 @@
 #include <math.h>
 
 #define NUM    1000
-#define TWOPI  (2 * M_PI)
+#define TWOPI  (2.0 * M_PI)
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -27,7 +27,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    static PCWSTR appName = L"SineWave";
    HWND          wnd;
    MSG           msg;
-   WNDCLASSW     wc;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -71,7 +71,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
    HDC         dc;
    int         i;
    PAINTSTRUCT ps;
-   POINT       apt[ NUM ];
+   POINT       apt[ NUM ] = { 0 };
 
    switch ( msg )
    {
@@ -89,7 +89,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
       for ( i = 0; i < NUM; i++ )
       {
          apt[ i ].x = i * xClient / NUM;
-         apt[ i ].y = (int) (yClient / 2 * (1 - sin(TWOPI * i / NUM)));
+         apt[ i ].y = (int) (yClient / 2.0 * (1 - sin(TWOPI * i / NUM)));
       }
 
       Polyline(dc, apt, NUM);

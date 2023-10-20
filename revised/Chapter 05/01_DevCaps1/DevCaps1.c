@@ -15,7 +15,7 @@ struct
    PCWSTR label;
    PCWSTR desc;
 }
-devcaps[] =
+devcaps[ ] =
 {
    {HORZSIZE,      L"HORZSIZE",     L"Width in millimeters:"},
    {VERTSIZE,      L"VERTSIZE",     L"Height in millimeters:"},
@@ -39,7 +39,7 @@ devcaps[] =
    {COLORRES,      L"COLORRES",     L"Actual color resolution:"}
 };
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI wWinMain(_In_     HINSTANCE inst,
                     _In_opt_ HINSTANCE prevInst,
@@ -50,7 +50,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR appName = L"DevCaps1";
-   WNDCLASSW     wc;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -94,7 +94,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
    static int  xChar;
    static int  xCaps;
    static int  yChar;
-   WCHAR       buffer[ 10 ];
+   WCHAR       buffer[ 10 ] = { L"" };
    HDC         dc;
    PAINTSTRUCT ps;
    TEXTMETRICW tm;

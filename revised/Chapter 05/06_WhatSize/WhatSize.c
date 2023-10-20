@@ -17,10 +17,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  appName = L"WhatSize";
-   HWND           wnd;
-   MSG            msg;
-   WNDCLASSW      wc;
+   static PCWSTR appName = L"WhatSize";
+   HWND          wnd;
+   MSG           msg;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -57,28 +57,28 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    return (int) msg.wParam;
 }
 
-void Show(HWND wnd, HDC dc, int xText, int yText, int iMapMode, PCWSTR szMapMode)
+void Show(HWND wnd, HDC dc, int xText, int yText, int mapMode, PCWSTR textMapMode)
 {
-   WCHAR buffer[ 60 ];
+   WCHAR buffer[ 60 ] = { L"" };
    RECT  rect;
 
    SaveDC(dc);
 
-   SetMapMode(dc, iMapMode);
+   SetMapMode(dc, mapMode);
    GetClientRect(wnd, &rect);
    DPtoLP(dc, (PPOINT) &rect, 2);
 
    RestoreDC(dc, -1);
 
    TextOutW(dc, xText, yText, buffer,
-            wsprintfW(buffer, L"%-20s %7d %7d %7d %7d", szMapMode,
+            wsprintfW(buffer, L"%-20s %7d %7d %7d %7d", textMapMode,
                       rect.left, rect.right, rect.top, rect.bottom));
 }
 
 LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   static PCWSTR heading   = L"Mapping Mode Left Right Top Bottom";
-   static PCWSTR underline = L"------------ ---- ----- --- ------";
+   static PCWSTR heading   = L"Mapping Mode            Left   Right     Top  Bottom";
+   static PCWSTR underline = L"------------            ----   -----     ---  ------";
    static int    xChar;
    static int    yChar;
    HDC           dc;

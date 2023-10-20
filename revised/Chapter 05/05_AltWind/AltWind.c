@@ -18,10 +18,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  appName = L"AltWind";
-   HWND           wnd;
-   MSG            msg;
-   WNDCLASSW      wc;
+   static PCWSTR appName = L"AltWind";
+   HWND          wnd;
+   MSG           msg;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -67,7 +67,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
    HDC          dc;
    int          i;
    PAINTSTRUCT  ps;
-   POINT        apt[ 10 ];
+   POINT        apt[ 10 ] = { 0 };
 
    switch ( msg )
    {
