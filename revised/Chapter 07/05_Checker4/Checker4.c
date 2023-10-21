@@ -23,10 +23,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  appName = L"Checker4";
-   HWND           wnd;
-   MSG            msg;
-   WNDCLASSW      wc;
+   static PCWSTR appName = L"Checker4";
+   HWND          wnd;
+   MSG           msg;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -153,7 +153,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 LRESULT CALLBACK ChildWndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   HDC         hdc;
+   HDC         dc;
    PAINTSTRUCT ps;
    RECT        rect;
 
@@ -191,18 +191,18 @@ LRESULT CALLBACK ChildWndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
       return 0;
 
    case WM_PAINT:
-      hdc = BeginPaint(wnd, &ps);
+      dc = BeginPaint(wnd, &ps);
 
       GetClientRect(wnd, &rect);
-      Rectangle(hdc, 0, 0, rect.right, rect.bottom);
+      Rectangle(dc, 0, 0, rect.right, rect.bottom);
 
       // draw the "x" mark
       if ( GetWindowLongPtrW(wnd, GWLP_USERDATA) )
       {
-         MoveToEx(hdc, 0, 0, NULL);
-         LineTo(hdc, rect.right, rect.bottom);
-         MoveToEx(hdc, 0, rect.bottom, NULL);
-         LineTo(hdc, rect.right, 0);
+         MoveToEx(dc, 0, 0, NULL);
+         LineTo(dc, rect.right, rect.bottom);
+         MoveToEx(dc, 0, rect.bottom, NULL);
+         LineTo(dc, rect.right, 0);
       }
 
       // draw the "focus" rectangle
@@ -213,10 +213,10 @@ LRESULT CALLBACK ChildWndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
          rect.top    += rect.bottom / 10;
          rect.bottom -= rect.top;
 
-         SelectObject(hdc, GetStockObject(NULL_BRUSH));
-         SelectObject(hdc, CreatePen(PS_DASH, 0, 0));
-         Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom);
-         DeleteObject(SelectObject(hdc, GetStockObject(BLACK_PEN)));
+         SelectObject(dc, GetStockObject(NULL_BRUSH));
+         SelectObject(dc, CreatePen(PS_DASH, 0, 0));
+         Rectangle(dc, rect.left, rect.top, rect.right, rect.bottom);
+         DeleteObject(SelectObject(dc, GetStockObject(BLACK_PEN)));
       }
 
       EndPaint(wnd, &ps);

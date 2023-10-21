@@ -19,10 +19,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  appName = L"Checker1";
-   HWND           wnd;
-   MSG            msg;
-   WNDCLASSW      wc;
+   static PCWSTR appName = L"Checker1";
+   HWND          wnd;
+   MSG           msg;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -68,7 +68,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    int         x;
    int         y;
    PAINTSTRUCT ps;
-   RECT        rect;
+   RECT        rect = { 0 };
 
    switch ( message )
    {

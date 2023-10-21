@@ -19,10 +19,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  appName = L"Checker2";
-   HWND           wnd;
-   MSG            msg;
-   WNDCLASSW      wc;
+   static PCWSTR appName = L"Checker2";
+   HWND          wnd;
+   MSG           msg;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -69,7 +69,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    int         y;
    PAINTSTRUCT ps;
    POINT       point;
-   RECT        rect;
+   RECT        rect = { 0 };
 
    switch ( message )
    {
@@ -158,6 +158,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       dc = BeginPaint(hwnd, &ps);
 
       for ( x = 0; x < DIVISIONS; x++ )
+      {
          for ( y = 0; y < DIVISIONS; y++ )
          {
             Rectangle(dc, x * xBlock, y * yBlock,
@@ -171,6 +172,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                LineTo(dc, (x + 1) * xBlock, y * yBlock);
             }
          }
+      }
+
       EndPaint(hwnd, &ps);
       return 0;
 

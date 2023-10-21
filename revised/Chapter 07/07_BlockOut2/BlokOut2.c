@@ -20,7 +20,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    static PCWSTR  appName = L"BlokOut2";
    HWND           wnd;
    MSG            msg;
-   WNDCLASSW      wc;
+   WNDCLASSW      wc = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -58,9 +58,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
 
 void DrawBoxOutline(HWND wnd, POINT beg, POINT end)
 {
-   HDC dc;
-
-   dc = GetDC(wnd);
+   HDC dc = GetDC(wnd);
 
    SetROP2(dc, R2_NOT);
    SelectObject(dc, GetStockObject(NULL_BRUSH));
