@@ -22,7 +22,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    static PCWSTR  appName = L"KeyView2";
    HWND           wnd;
    MSG            msg;
-   WNDCLASSW      wc;
+   WNDCLASSW      wc = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -92,7 +92,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    int            i;
    int            type;
    PAINTSTRUCT    ps;
-   WCHAR          buffer[ 128 ];
+   WCHAR          buffer[ 128 ] = { L"" };
    WCHAR          keyName[ 32 ];
    TEXTMETRICW    tm;
 

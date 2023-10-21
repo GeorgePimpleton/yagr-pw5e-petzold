@@ -9,7 +9,7 @@
 #include <windowsx.h>
 #include <malloc.h>
 
-#define BUFFER(x,y) *(buffer + y * xBuffer + x)
+#define BUFFER(x, y) *(buffer + y * xBuffer + x)
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -21,10 +21,10 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    UNREFERENCED_PARAMETER(prevInstance);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  appName = L"Typer";
-   HWND           hwnd;
-   MSG            msg;
-   WNDCLASSW      wc;
+   static PCWSTR appName = L"Typer";
+   HWND          hwnd;
+   MSG           msg;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -123,7 +123,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       {
          for ( x = 0; x < xBuffer; x++ )
          {
-            BUFFER(x, y) = ' ';
+            BUFFER(x, y) = L' ';
          }
       }
 

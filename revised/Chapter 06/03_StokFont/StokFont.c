@@ -21,7 +21,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    static PCWSTR appName = L"StokFont";
    HWND          wnd;
    MSG           msg;
-   WNDCLASSW     wc;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -83,7 +83,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
    int         yGrid;
    PAINTSTRUCT ps;
    WCHAR       faceName[ LF_FACESIZE ];
-   WCHAR       buffer[ LF_FACESIZE + 64 ];
+   WCHAR       buffer[ LF_FACESIZE + 64 ] = { L"" };
    TEXTMETRICW tm;
 
    switch ( msg )

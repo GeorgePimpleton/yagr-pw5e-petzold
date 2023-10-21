@@ -8,7 +8,7 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include "SysMets.h"  // from Chapter 04
+#include "SysMets.h"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -21,10 +21,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  appName = L"SysMets4";
-   HWND           wnd;
-   MSG            msg;
-   WNDCLASSW      wc;
+   static PCWSTR appName = L"SysMets4";
+   HWND          wnd;
+   MSG           msg;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -79,8 +79,8 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
    int         paintBeg;
    int         paintEnd;
    PAINTSTRUCT ps;
-   SCROLLINFO  si;
-   WCHAR       buffer[ 10 ];
+   SCROLLINFO si           = { 0 };
+   WCHAR      buffer[ 10 ] = { L"" };
    TEXTMETRICW tm;
 
    switch ( msg )
