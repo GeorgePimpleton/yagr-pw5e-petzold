@@ -24,10 +24,10 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    UNREFERENCED_PARAMETER(prevInstance);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  appName = L"Clock";
-   HWND           wnd;
-   MSG            msg;
-   WNDCLASSW      wc;
+   static PCWSTR appName = L"Clock";
+   HWND          wnd;
+   MSG           msg;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -75,7 +75,7 @@ void SetIsotropic(HDC dc, int xClient, int yClient)
 void RotatePoint(POINT pt[], int num, int angle)
 {
    int   i;
-   POINT temp;
+   POINT temp = { 0 };
 
    for ( i = 0; i < num; i++ )
    {
@@ -92,7 +92,7 @@ void RotatePoint(POINT pt[], int num, int angle)
 void DrawClock(HDC dc)
 {
    int   angle;
-   POINT pt[ 3 ];
+   POINT pt[ 3 ] = { 0 };
 
    for ( angle = 0; angle < 360; angle += 6 )
    {
@@ -121,7 +121,7 @@ void DrawHands(HDC dc, SYSTEMTIME* sysTime, BOOL change)
                                  {{0, -200}, { 50, 0}, {0, 800}, { -50, 0}, {0, -200}},
                                  {{0,    0}, {  0, 0}, {0,   0}, {   0, 0}, {0,  800} } };
    int          i;
-   int          angle[ 3 ];
+   int          angle[ 3 ] = { 0 };
    POINT        temp[ 3 ][ 5 ];
 
    angle[ 0 ] = (sysTime->wHour * 30) % 360 + sysTime->wMinute / 2;
