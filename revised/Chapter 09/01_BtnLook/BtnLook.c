@@ -40,7 +40,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    static PCWSTR appName = L"BtnLook";
    HWND          wnd;
    MSG           msg;
-   WNDCLASSW     wc;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -80,9 +80,11 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    static HWND   wndButton[ NUM ];
    static RECT   rect;
+
    static PCWSTR top    = L"message wParam lParam";
    static PCWSTR und    = L"_______ ______ ______";
    static PCWSTR format = L"%-16s%04X-%04X %04X-%04X";
+
    static WCHAR  buffer[ 50 ];
    static int    xChar;
    static int    yChar;

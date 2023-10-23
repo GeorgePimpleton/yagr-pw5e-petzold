@@ -34,7 +34,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    static PCWSTR appName = L"head";
    HWND          wnd;
    MSG           msg;
-   WNDCLASSW     wc;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -77,8 +77,8 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
    static HWND  list;
    static HWND  text;
    static RECT  rect;
-   static WCHAR file[ MAX_PATH + 1 ];
-   HANDLE       hFile;
+   static WCHAR fileLoc[ MAX_PATH + 1 ];
+   HANDLE       file;
    HDC          dc;
    int          xChar;
    int          yChar;
@@ -140,13 +140,13 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
          ListBox_GetText(list, i, Buffer);
 
-         hFile = CreateFileW(Buffer, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+         file = CreateFileW(Buffer, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 
-         if ( INVALID_HANDLE_VALUE != hFile )
+         if ( INVALID_HANDLE_VALUE != file )
          {
-            CloseHandle(hFile);
+            CloseHandle(file);
             validFile = TRUE;
-            lstrcpyW(file, Buffer);
+            lstrcpyW(fileLoc, Buffer);
             GetCurrentDirectoryW(MAX_PATH + 1, Buffer);
 
             if ( Buffer[ lstrlenW(Buffer) - 1 ] != '\\' )
@@ -154,7 +154,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
                lstrcatW(Buffer, L"\\");
             }
 
-            SetWindowTextW(text, lstrcatW(Buffer, file));
+            SetWindowTextW(text, lstrcatW(Buffer, fileLoc));
          }
          else
          {
@@ -186,25 +186,25 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
          break;
       }
 
-      hFile = CreateFileW(file, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+      file = CreateFileW(fileLoc, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 
-      if ( INVALID_HANDLE_VALUE == hFile )
+      if ( INVALID_HANDLE_VALUE == file )
       {
          validFile = FALSE;
          break;
       }
 
-      ReadFile(hFile, buffer, MAXREAD, &bytesRead, NULL);
-      CloseHandle(hFile);
+      ReadFile(file, buffer, MAXREAD, &bytesRead, NULL);
+      CloseHandle(file);
 
       // i now equals the number of bytes in buffer.
-      // Commence getting a device context for displaying text.
+      // commence getting a device context for displaying text.
       dc = BeginPaint(wnd, &ps);
       SelectFont(dc, GetStockFont(SYSTEM_FIXED_FONT));
       SetTextColor(dc, GetSysColor(COLOR_BTNTEXT));
       SetBkColor(dc, GetSysColor(COLOR_BTNFACE));
 
-      // assume the file is ascii
+      // assume the file is ASCII
       DrawTextA(dc, buffer, bytesRead, &rect, DTFLAGS);
 
       EndPaint(wnd, &ps);

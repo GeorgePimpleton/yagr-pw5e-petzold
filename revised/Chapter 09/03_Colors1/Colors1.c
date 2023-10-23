@@ -1,6 +1,6 @@
 /*----------------------------------------
    COLORS1.C -- Colors Using Scroll Bars
-            (c) Charles Petzold, 1998
+                (c) Charles Petzold, 1998
   ----------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
@@ -16,7 +16,7 @@ LRESULT CALLBACK ScrollProc(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
 
 #define N (3)  // Number of colors.
 
-int focus;
+int g_focus;
 
 int WINAPI wWinMain(_In_     HINSTANCE inst,
                     _In_opt_ HINSTANCE prevInst,
@@ -26,10 +26,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static PCWSTR  appName = L"Colors1";
-   HWND           wnd;
-   MSG            msg;
-   WNDCLASSW      wc;
+   static PCWSTR appName = L"Colors1";
+   HWND          wnd;
+   MSG           msg;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -162,11 +162,11 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
       return 0;
 
    case WM_SETFOCUS:
-      SetFocus(scroll[ focus ]);
+      SetFocus(scroll[ g_focus ]);
       return 0;
 
    case WM_VSCROLL:
-      i = (int) GetWindowLongPtrW((HWND) lParam, GWLP_ID);
+      i = (int) GetWindowID((HWND) lParam);
 
       switch ( LOWORD(wParam) )
       {
@@ -214,11 +214,11 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
       return 0;
 
    case WM_CTLCOLORSCROLLBAR:
-      i = (int) GetWindowLongPtrW((HWND) lParam, GWLP_ID);
+      i = (int) GetWindowID((HWND) lParam);
       return (LRESULT) brush[ i ];
 
    case WM_CTLCOLORSTATIC:
-      i = (int) GetWindowLongPtrW((HWND) lParam, GWLP_ID);
+      i = (int) GetWindowID((HWND) lParam);
 
       if ( i >= N && i <= 8 )    // static text controls
       {
@@ -260,7 +260,7 @@ LRESULT CALLBACK ScrollProc(HWND      wnd,
    UNREFERENCED_PARAMETER(subclass);
    UNREFERENCED_PARAMETER(refData);
 
-   int id = (int) GetWindowLongPtrW(wnd, GWLP_ID);
+   int id = (int) GetWindowID(wnd);
 
    switch ( msg )
    {
@@ -276,7 +276,7 @@ LRESULT CALLBACK ScrollProc(HWND      wnd,
       break;
 
    case WM_SETFOCUS:
-      focus = id;
+      g_focus = id;
       break;
    }
    return DefSubclassProc(wnd, msg, wParam, lParam);

@@ -25,7 +25,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    static PCWSTR appName = L"Environ";
    HWND          wnd;
    MSG           msg;
-   WNDCLASSW     wc;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -71,7 +71,7 @@ void FillListBox(HWND wndList)
    WCHAR* varEnd;
    WCHAR* varName;
 
-   EBlock = (WCHAR*) GetEnvironmentStringsW( );  // Get pointer to environment block
+   EBlock   = (WCHAR*) GetEnvironmentStringsW( );  // Get pointer to environment block
    varBlock = EBlock;
 
    while ( *varBlock )
@@ -85,7 +85,6 @@ void FillListBox(HWND wndList)
 
          // Allocate memory for the variable name and terminating
          // zero. Copy the variable name and append a zero.
-
          varName = (WCHAR*) calloc(length + 1, sizeof(WCHAR));
          CopyMemory(varName, varBeg, length * sizeof(WCHAR));
          varName[ length ] = L'\0';
@@ -107,8 +106,8 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
    int         length;
    int         xChar;
    int         yChar;
-   WCHAR* varName;
-   WCHAR* varValue;
+   WCHAR*      varName;
+   WCHAR*      varValue;
 
    switch ( msg )
    {
@@ -117,7 +116,6 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
       yChar = HIWORD(GetDialogBaseUnits( ));
 
       // Create listbox and static text windows.
-
       list = CreateWindowW(L"listbox", NULL,
                            WS_CHILD | WS_VISIBLE | LBS_STANDARD,
                            xChar, yChar * 3,
@@ -146,20 +144,18 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
       if ( LOWORD(wParam) == ID_LIST && HIWORD(wParam) == LBN_SELCHANGE )
       {
          // Get current selection.
-
-         index = ListBox_GetCurSel(list);
-         length = ListBox_GetTextLen(list, index) + 1;
+         index   = ListBox_GetCurSel(list);
+         length  = ListBox_GetTextLen(list, index) + 1;
          varName = (WCHAR*) calloc(length, sizeof(WCHAR));
+
          ListBox_GetText(list, index, varName);
 
          // Get environment string.
-
-         length = GetEnvironmentVariableW(varName, NULL, 0);
+         length   = GetEnvironmentVariableW(varName, NULL, 0);
          varValue = (WCHAR*) calloc(length, sizeof(WCHAR));
          GetEnvironmentVariableW(varName, varValue, length);
 
          // Show it in window.
-
          SetWindowTextW(text, varValue);
          free(varName);
          free(varValue);

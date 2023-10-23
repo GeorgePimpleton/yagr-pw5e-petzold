@@ -12,7 +12,7 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-PCWSTR appName = L"PopPad1";
+PCWSTR g_appName = L"PopPad1";
 
 int WINAPI wWinMain(_In_     HINSTANCE inst,
                     _In_opt_ HINSTANCE prevInst,
@@ -24,7 +24,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
 
    HWND      wnd;
    MSG       msg;
-   WNDCLASSW wc;
+   WNDCLASSW wc = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -35,15 +35,15 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
    wc.lpszMenuName  = NULL;
-   wc.lpszClassName = appName;
+   wc.lpszClassName = g_appName;
 
    if ( !RegisterClassW(&wc) )
    {
-      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
+      MessageBoxW(NULL, L"This program requires Windows NT!", g_appName, MB_ICONERROR);
       return 0;
    }
 
-   wnd = CreateWindowW(appName, appName,
+   wnd = CreateWindowW(g_appName, g_appName,
                        WS_OVERLAPPEDWINDOW,
                        CW_USEDEFAULT, CW_USEDEFAULT,
                        CW_USEDEFAULT, CW_USEDEFAULT,
@@ -71,7 +71,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
                            WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | WS_BORDER |
                            ES_LEFT | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL,
                            0, 0, 0, 0, wnd, (HMENU) ID_EDIT,
-                           ((LPCREATESTRUCT) lParam)->hInstance, NULL);
+                           ((LPCREATESTRUCTW) lParam)->hInstance, NULL);
       return 0;
 
    case WM_SETFOCUS:
@@ -88,7 +88,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
          if ( HIWORD(wParam) == EN_ERRSPACE ||
               HIWORD(wParam) == EN_MAXTEXT )
          {
-            MessageBoxW(wnd, L"Edit control out of space.", appName, MB_OK | MB_ICONSTOP);
+            MessageBoxW(wnd, L"Edit control out of space.", g_appName, MB_OK | MB_ICONSTOP);
          }
       }
       return 0;

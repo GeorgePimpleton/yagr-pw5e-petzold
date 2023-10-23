@@ -16,26 +16,26 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-HINSTANCE inst;
+HINSTANCE g_inst;
 
-int WINAPI wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prevInstance,
-                    _In_ PWSTR     cmdLine,  _In_     int       showCmd)
+int WINAPI wWinMain(_In_ HINSTANCE inst,    _In_opt_ HINSTANCE prevInst,
+                    _In_ PWSTR     cmdLine, _In_     int       showCmd)
 {
-   UNREFERENCED_PARAMETER(prevInstance);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
    static PCWSTR appName = L"OwnDraw";
    MSG           msg;
    HWND          wnd;
-   WNDCLASSW     wc;
+   WNDCLASSW     wc      = { 0 };
 
-   inst = instance;
+   g_inst = inst;
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
-   wc.hInstance     = instance;
+   wc.hInstance     = inst;
    wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  GetStockBrush(WHITE_BRUSH);
@@ -52,7 +52,7 @@ int WINAPI wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prevInstance,
                        WS_OVERLAPPEDWINDOW,
                        CW_USEDEFAULT, CW_USEDEFAULT,
                        CW_USEDEFAULT, CW_USEDEFAULT,
-                       NULL, NULL, instance, NULL);
+                       NULL, NULL, inst, NULL);
 
    ShowWindow(wnd, showCmd);
    UpdateWindow(wnd);
@@ -83,7 +83,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
    int              x;
    int              y;
    LPDRAWITEMSTRUCT is;
-   POINT            pt[ 3 ];
+   POINT            pt[ 3 ] = { 0 };
    RECT             rc;
 
    switch ( msg )
@@ -96,12 +96,12 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
       smaller = CreateWindowW(L"button", L"",
                               WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
                               0, 0, BTN_WIDTH, BTN_HEIGHT,
-                              wnd, (HMENU) ID_SMALLER, inst, NULL);
+                              wnd, (HMENU) ID_SMALLER, g_inst, NULL);
 
       larger = CreateWindowW(L"button", L"",
                              WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
                              0, 0, BTN_WIDTH, BTN_HEIGHT,
-                             wnd, (HMENU) ID_LARGER, inst, NULL);
+                             wnd, (HMENU) ID_LARGER, g_inst, NULL);
       return 0;
 
    case WM_SIZE:
@@ -218,9 +218,9 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
       // draw a focus rectangle if the button has the focus
       if ( is->itemState & ODS_FOCUS )
       {
-         is->rcItem.left += x / 16;
-         is->rcItem.top += y / 16;
-         is->rcItem.right -= x / 16;
+         is->rcItem.left   += x / 16;
+         is->rcItem.top    += y / 16;
+         is->rcItem.right  -= x / 16;
          is->rcItem.bottom -= y / 16;
 
          DrawFocusRect(is->hDC, &is->rcItem);
