@@ -7,6 +7,7 @@
 
 #include <windows.h>
 #include <windowsx.h>
+
 #include "Resource.h"
 
 #define ID_TIMER 1
@@ -25,7 +26,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
 
    HWND      wnd;
    MSG       msg;
-   WNDCLASSW wc;
+   WNDCLASSW wc = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -94,7 +95,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
          MessageBeep(0);
          return 0;
 
-      case IDM_BKGND_WHITE:         // Note: Logic below
+      case IDM_BKGND_WHITE:         // note: logic below
       case IDM_BKGND_LTGRAY:        //   assumes that IDM_WHITE
       case IDM_BKGND_GRAY:          //   through IDM_BLACK are
       case IDM_BKGND_DKGRAY:        //   consecutive numbers in

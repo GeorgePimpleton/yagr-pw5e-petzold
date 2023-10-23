@@ -1,18 +1,19 @@
 /*----------------------------------------
    POPMENU.C -- Popup Menu Demonstration
-            (c) Charles Petzold, 1998
+                (c) Charles Petzold, 1998
   ----------------------------------------*/
 
 #define WIN32_LEAN_AND_MEAN
 
 #include <windows.h>
 #include <windowsx.h>
+
 #include "Resource.h"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 HINSTANCE g_inst;
-PCWSTR    appName = L"PopMenu";
+PCWSTR    g_appName = L"PopMenu";
 
 int WINAPI wWinMain(_In_     HINSTANCE inst,
                     _In_opt_ HINSTANCE prevInst,
@@ -24,7 +25,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
 
    HWND      wnd;
    MSG       msg;
-   WNDCLASSW wc;
+   WNDCLASSW wc = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -35,17 +36,17 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
    wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
    wc.lpszMenuName  = NULL;
-   wc.lpszClassName = appName;
+   wc.lpszClassName = g_appName;
 
    if ( !RegisterClassW(&wc) )
    {
-      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
+      MessageBoxW(NULL, L"This program requires Windows NT!", g_appName, MB_ICONERROR);
       return 0;
    }
 
    g_inst = inst;
 
-   wnd = CreateWindowW(appName, L"Popup Menu Demonstration",
+   wnd = CreateWindowW(g_appName, L"Popup Menu Demonstration",
                        WS_OVERLAPPEDWINDOW,
                        CW_USEDEFAULT, CW_USEDEFAULT,
                        CW_USEDEFAULT, CW_USEDEFAULT,
@@ -67,13 +68,13 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
    static HMENU menu;
    static int   color[ 5 ] = { WHITE_BRUSH, LTGRAY_BRUSH, GRAY_BRUSH, DKGRAY_BRUSH, BLACK_BRUSH };
    static int   selection  = IDM_BKGND_WHITE;
-   POINT        point;
+   POINT        point      = { 0 };
    int          id;
 
    switch ( msg )
    {
    case WM_CREATE:
-      menu = LoadMenuW(g_inst, appName);
+      menu = LoadMenuW(g_inst, g_appName);
       menu = GetSubMenu(menu, 0);
       return 0;
 
@@ -101,7 +102,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
          MessageBeep(0);
          return 0;
 
-      case IDM_BKGND_WHITE:         // Note: Logic below
+      case IDM_BKGND_WHITE:         // note: logic below
       case IDM_BKGND_LTGRAY:        //   assumes that IDM_WHITE
       case IDM_BKGND_GRAY:          //   through IDM_BLACK are
       case IDM_BKGND_DKGRAY:        //   consecutive numbers in
@@ -119,8 +120,8 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
       case IDM_APP_ABOUT:
          MessageBoxW(wnd, L"Popup Menu Demonstration Program\n"
-                     L"(c) Charles Petzold, 1998",
-                     appName, MB_ICONINFORMATION | MB_OK);
+                          L"(c) Charles Petzold, 1998",
+                          g_appName, MB_ICONINFORMATION | MB_OK);
          return 0;
 
       case IDM_APP_EXIT:
@@ -129,7 +130,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
       case IDM_APP_HELP:
          MessageBoxW(wnd, L"Help not yet implemented!",
-                     appName, MB_ICONEXCLAMATION | MB_OK);
+                     g_appName, MB_ICONEXCLAMATION | MB_OK);
          return 0;
       }
       break;

@@ -6,8 +6,6 @@
 // Icon
 //
 
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
 POPPAD2                 ICON    DISCARDABLE     "poppad2.ico"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -16,9 +14,9 @@ POPPAD2                 ICON    DISCARDABLE     "poppad2.ico"
 //
 
 POPPAD2 MENU DISCARDABLE
-BEGIN
+{
     POPUP "&File"
-    BEGIN
+    {
         MENUITEM "&New",                        IDM_FILE_NEW
         MENUITEM "&Open...",                    IDM_FILE_OPEN
         MENUITEM "&Save",                       IDM_FILE_SAVE
@@ -27,9 +25,9 @@ BEGIN
         MENUITEM "&Print",                      IDM_FILE_PRINT
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       IDM_APP_EXIT
-    END
+    }
     POPUP "&Edit"
-    BEGIN
+    {
         MENUITEM "&Undo\tCtrl+Z",               IDM_EDIT_UNDO
         MENUITEM SEPARATOR
         MENUITEM "Cu&t\tCtrl+X",                IDM_EDIT_CUT
@@ -38,13 +36,13 @@ BEGIN
         MENUITEM "De&lete\tDel",                IDM_EDIT_CLEAR
         MENUITEM SEPARATOR
         MENUITEM "&Select All",                 IDM_EDIT_SELECT_ALL
-    END
+    }
     POPUP "&Help"
-    BEGIN
+    {
         MENUITEM "&Help...",                    IDM_HELP_HELP
         MENUITEM "&About PopPad2...",           IDM_APP_ABOUT
-    END
-END
+    }
+}
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -52,7 +50,7 @@ END
 //
 
 POPPAD2 ACCELERATORS DISCARDABLE
-BEGIN
+{
     VK_BACK,        IDM_EDIT_UNDO,          VIRTKEY, ALT, NOINVERT
     VK_DELETE,      IDM_EDIT_CLEAR,         VIRTKEY, NOINVERT
     VK_DELETE,      IDM_EDIT_CUT,           VIRTKEY, SHIFT, NOINVERT
@@ -63,4 +61,4 @@ BEGIN
     "^V",           IDM_EDIT_PASTE,         ASCII,  NOINVERT
     "^X",           IDM_EDIT_CUT,           ASCII,  NOINVERT
     "^Z",           IDM_EDIT_UNDO,          ASCII,  NOINVERT
-END
+}

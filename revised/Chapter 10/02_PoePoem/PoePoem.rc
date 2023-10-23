@@ -12,8 +12,6 @@ ANNABELLEE              TEXT    DISCARDABLE     "poepoem.txt"
 // Icon
 //
 
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
 POEPOEM                 ICON    DISCARDABLE     "poepoem.ico"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -22,8 +20,8 @@ POEPOEM                 ICON    DISCARDABLE     "poepoem.ico"
 //
 
 STRINGTABLE DISCARDABLE
-BEGIN
+{
     IDS_APPNAME             "PoePoem"
     IDS_CAPTION             """Annabel Lee"" by Edgar Allan Poe"
     IDS_ERRMSG              "This program requires Windows NT!"
-END
+}

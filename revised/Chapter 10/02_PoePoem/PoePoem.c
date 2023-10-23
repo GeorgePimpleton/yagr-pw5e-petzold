@@ -22,12 +22,12 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   WCHAR     appName[ 16 ];
-   WCHAR     caption[ 64 ];
-   WCHAR     errMsg[ 64 ];
+   WCHAR     appName[ 16 ] = { L"" };
+   WCHAR     caption[ 64 ] = { L"" };
+   WCHAR     errMsg[ 64 ]  = { L"" };
    HWND      wnd;
    MSG       msg;
-   WNDCLASSW wc;
+   WNDCLASSW wc            = { 0 };
 
    LoadStringW(inst, IDS_APPNAME, appName, _countof(appName));
 
