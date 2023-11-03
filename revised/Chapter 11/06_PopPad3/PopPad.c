@@ -17,7 +17,7 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 
-// Global variables
+// global variables
 static HWND  dlgModeless;
 static TCHAR appName[ ] = L"PopPad";
 
@@ -31,7 +31,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    MSG       msg;
    HWND      wnd;
    HACCEL    accel;
-   WNDCLASS  wc;
+   WNDCLASS  wc = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -222,7 +222,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
       switch ( LOWORD(wParam) )
       {
-         // Messages from File menu
+      // Messages from File menu
       case IDM_FILE_NEW:
          if ( needSave && IDCANCEL == AskAboutSave(wnd, titleName) )
          {
@@ -271,6 +271,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
          }
          // fall through
+
       case IDM_FILE_SAVE_AS:
          if ( PopFileSaveDlg(wnd, fileName, titleName) )
          {
@@ -301,8 +302,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
          SendMessageW(wnd, WM_CLOSE, 0, 0);
          return 0;
 
-         // Messages from Edit menu
-
+      // Messages from Edit menu
       case IDM_EDIT_UNDO:
          SendMessageW(wndEdit, WM_UNDO, 0, 0);
          return 0;
@@ -327,8 +327,7 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
          SendMessageW(wndEdit, EM_SETSEL, 0, -1);
          return 0;
 
-         // Messages from Search menu
-
+      // Messages from Search menu
       case IDM_SEARCH_FIND:
          SendMessageW(wndEdit, EM_GETSEL, 0, (LPARAM) &offset);
          dlgModeless = PopFindFindDlg(wnd);

@@ -23,10 +23,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static WCHAR appName[ ] = L"About2";
-   MSG          msg;
-   HWND         wnd;
-   WNDCLASSW    wc;
+   PCWSTR    appName = L"About2";
+   MSG       msg;
+   HWND      wnd;
+   WNDCLASSW wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -74,7 +74,9 @@ void PaintWindow(HWND wnd, int color, int figure)
    RECT   rect;
 
    dc = GetDC(wnd);
+
    GetClientRect(wnd, &rect);
+
    brush = CreateSolidBrush(crColor[ color - IDC_BLACK ]);
    brush = (HBRUSH) SelectObject(dc, brush);
 

@@ -61,19 +61,13 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
 
 LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   static HINSTANCE inst;
-
    switch ( msg )
    {
-   case WM_CREATE:
-      inst = GetWindowInstance(wnd);
-      return 0;
-
    case WM_COMMAND:
       switch ( LOWORD(wParam) )
       {
       case IDM_APP_ABOUT:
-         DialogBoxParamW(inst, L"AboutBox", wnd, AboutDlgProc, 0L);
+         DialogBoxParamW(GetWindowInstance(wnd), L"AboutBox", wnd, AboutDlgProc, 0L);
          break;
       }
       return 0;

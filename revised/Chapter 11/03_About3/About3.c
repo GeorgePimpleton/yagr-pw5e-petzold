@@ -21,10 +21,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static WCHAR appName[ ] = L"About3";
-   MSG          msg;
-   HWND         wnd;
-   WNDCLASS     wc;
+   PCWSTR   appName = L"About3";
+   MSG      msg;
+   HWND     wnd;
+   WNDCLASS wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;

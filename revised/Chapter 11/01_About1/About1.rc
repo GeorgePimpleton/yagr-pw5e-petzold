@@ -1,5 +1,4 @@
-#include <windows.h> // needed for resource script types such as DIALOG, MENU, etc.
-
+#include <windows.h>
 #include "Resource.h"
 
 /////////////////////////////////////////////////////////////////////////////

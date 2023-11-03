@@ -59,7 +59,6 @@ BOOL PopFindFindText(HWND wndEdit, int* searchOffset, LPFINDREPLACEW fr)
    PWSTR strPos;
 
    // Read in the edit document
-
    length = GetWindowTextLengthW(wndEdit);
 
    if ( NULL == (strDoc = (PWSTR) malloc((length + 1) * sizeof(WCHAR))) )
@@ -70,7 +69,6 @@ BOOL PopFindFindText(HWND wndEdit, int* searchOffset, LPFINDREPLACEW fr)
    GetWindowTextW(wndEdit, strDoc, length + 1);
 
    // Search the document for the find string
-
    strPos = wcsstr(strDoc + *searchOffset, fr->lpstrFindWhat);
 
    // Return an error code if the string cannot be found
@@ -81,12 +79,10 @@ BOOL PopFindFindText(HWND wndEdit, int* searchOffset, LPFINDREPLACEW fr)
    }
 
    // Find the position in the document and the new start offset
-
    pos           = strPos - strDoc;
    *searchOffset = pos + lstrlenW(fr-> lpstrFindWhat);
 
    // Select the found text
-
    SendMessageW(wndEdit, EM_SETSEL, pos, *searchOffset);
    SendMessageW(wndEdit, EM_SCROLLCARET, 0, 0);
 
@@ -107,14 +103,12 @@ BOOL PopFindNextText(HWND wndEdit, int* searchOffset)
 BOOL PopFindReplaceText(HWND wndEdit, int* searchOffset, LPFINDREPLACEW fr)
 {
    // Find the text
-
    if ( !PopFindFindText(wndEdit, searchOffset, fr) )
    {
       return FALSE;
    }
 
    // Replace it
-
    SendMessageW(wndEdit, EM_REPLACESEL, 0, (LPARAM) fr->lpstrReplaceWith);
 
    return TRUE;

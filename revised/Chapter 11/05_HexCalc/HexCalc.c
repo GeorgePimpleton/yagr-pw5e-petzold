@@ -17,10 +17,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static WCHAR appName[ ] = L"HexCalc";
-   HWND         wnd;
-   MSG          msg;
-   WNDCLASS     wc;
+   PCWSTR   appName = L"HexCalc";
+   HWND     wnd;
+   MSG      msg;
+   WNDCLASS wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -53,10 +53,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
 
 void ShowNumber(HWND wnd, UINT number)
 {
-   WCHAR szBuffer[ 20 ];
+   WCHAR buffer[ 20 ];
 
-   wsprintfW(szBuffer, L"%X", number);
-   SetDlgItemTextW(wnd, VK_ESCAPE, szBuffer);
+   wsprintfW(buffer, L"%X", number);
+   SetDlgItemTextW(wnd, VK_ESCAPE, buffer);
 }
 
 DWORD CalcIt(UINT firstNum, int operation, UINT num)
@@ -97,16 +97,16 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
       // fall through
 
    case WM_CHAR:
-      if ( (wParam = (WPARAM) CharUpper((TCHAR*) wParam)) == VK_RETURN )
+      if ( (wParam = (WPARAM) CharUpperW((TCHAR*) wParam)) == VK_RETURN )
       {
          wParam = '=';
       }
 
       if ( button = GetDlgItem(wnd, wParam) )
       {
-         SendMessage(button, BM_SETSTATE, 1, 0);
+         SendMessageW(button, BM_SETSTATE, 1, 0);
          Sleep(100);
-         SendMessage(button, BM_SETSTATE, 0, 0);
+         SendMessageW(button, BM_SETSTATE, 0, 0);
       }
       else
       {
