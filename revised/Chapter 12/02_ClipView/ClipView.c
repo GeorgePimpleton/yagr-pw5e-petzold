@@ -16,10 +16,10 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
 {
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static TCHAR appName[ ] = TEXT("ClipView");
-   HWND         wnd;
-   MSG          msg;
-   WNDCLASS     wc;
+   PCWSTR    appName = L"ClipView";
+   HWND      wnd;
+   MSG       msg;
+   WNDCLASSW wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;

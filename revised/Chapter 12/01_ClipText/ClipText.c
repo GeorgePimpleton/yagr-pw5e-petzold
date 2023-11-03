@@ -11,8 +11,8 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-WCHAR defaultText[ ] = L"Default Text";
-WCHAR caption[ ]     = L"Clipboard Text Transfers";
+PCWSTR defaultText = L"Default Text";
+PCWSTR caption     = L"Clipboard Text Transfers";
 
 int WINAPI wWinMain(_In_     HINSTANCE inst,
                     _In_opt_ HINSTANCE prevInst,
@@ -21,11 +21,11 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
 {
    UNREFERENCED_PARAMETER(cmdLine);
 
-   static WCHAR appName[ ] = L"ClipText";
-   HACCEL       accel;
-   HWND         wnd;
-   MSG          msg;
-   WNDCLASSW    wc;
+   PCWSTR    appName = L"ClipText";
+   HACCEL    accel;
+   HWND      wnd;
+   MSG       msg;
+   WNDCLASSW wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -154,8 +154,8 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
             text = NULL;
          }
 
-         text = (PWSTR) malloc((lstrlen(defaultText) + 1) * sizeof(TCHAR));
-         lstrcpy(text, defaultText);
+         text = (PWSTR) malloc((lstrlenW(defaultText) + 1) * sizeof(TCHAR));
+         lstrcpyW(text, defaultText);
          InvalidateRect(wnd, NULL, TRUE);
          return 0;
       }
