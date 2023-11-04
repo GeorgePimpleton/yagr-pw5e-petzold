@@ -82,7 +82,7 @@ BOOL PopFileRead(HWND wndEdit, PWSTR fileName)
    // Add an extra two bytes for zero termination.
 
    fileLength = GetFileSize(file, NULL);
-   buffer     = malloc(fileLength + 2);
+   buffer     = (PBYTE) malloc(fileLength + 2);
 
    // Read file and put terminating zeros at end.
 
@@ -111,10 +111,12 @@ BOOL PopFileRead(HWND wndEdit, PWSTR fileName)
       }
 
       // Allocate memory for possibly converted string
-      conv = malloc(fileLength + 2);
+
+      conv = (PBYTE) malloc(fileLength + 2);
 
       // If the edit control is not Unicode, convert Unicode text to
       // non-Unicode (ie, in general, wide character).
+
 #ifndef UNICODE
       WideCharToMultiByte(CP_ACP, 0, (PWSTR) text, -1, conv,
                           fileLength + 2, NULL, NULL);
@@ -131,11 +133,12 @@ BOOL PopFileRead(HWND wndEdit, PWSTR fileName)
 
       // Allocate memory for possibly converted string.
 
-      conv = malloc(2 * fileLength + 2);
+      conv = (PBYTE) malloc(2 * fileLength + 2);
 
       // If the edit control is Unicode, convert ASCII text.
+
 #ifdef UNICODE
-      MultiByteToWideChar(CP_ACP, 0, text, -1, (PWSTR) conv,
+      MultiByteToWideChar(CP_ACP, 0, (LPCCH) text, -1, (PWSTR) conv,
                           fileLength + 1);
 
       // If not, just copy buffer
@@ -169,6 +172,7 @@ BOOL PopFileWrite(HWND wndEdit, PTSTR fileName)
 
    // Get the number of characters in the edit control and allocate
    // memory for them.
+
    length = GetWindowTextLengthW(wndEdit);
    buffer = (PWSTR) malloc((length + 1) * sizeof(TCHAR));
 
@@ -180,11 +184,13 @@ BOOL PopFileWrite(HWND wndEdit, PTSTR fileName)
 
    // If the edit control will return Unicode text, write the
    // byte order mark to the file.
+
 #ifdef UNICODE
    WriteFile(file, &byteOrderMark, 2, &bytesWritten, NULL);
 #endif
 
    // Get the edit buffer and write that out to the file.
+
    GetWindowTextW(wndEdit, buffer, length + 1);
    WriteFile(file, buffer, length * sizeof(TCHAR),
              &bytesWritten, NULL);

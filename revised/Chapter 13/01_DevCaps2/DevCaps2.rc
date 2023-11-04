@@ -8,18 +8,18 @@
 
 DEVCAPS2 MENU DISCARDABLE
 {
-    POPUP "&Device"
-    {
-        MENUITEM "&Screen",                     IDM_SCREEN, CHECKED
-    }
+   POPUP "&Device"
+   {
+      MENUITEM "&Screen",                     IDM_SCREEN, CHECKED
+   }
 
-    POPUP "&Capabilities"
-    {
-        MENUITEM "&Basic Information",          IDM_BASIC
-        MENUITEM "&Other Information",          IDM_OTHER
-        MENUITEM "&Curve Capabilities",         IDM_CURVE
-        MENUITEM "&Line Capabilities",          IDM_LINE
-        MENUITEM "&Polygonal Capabilities",     IDM_POLY
-        MENUITEM "&Text Capabilities",          IDM_TEXT
-    }
+   POPUP "&Capabilities"
+   {
+      MENUITEM "&Basic Information",          IDM_BASIC
+      MENUITEM "&Other Information",          IDM_OTHER
+      MENUITEM "&Curve Capabilities",         IDM_CURVE
+      MENUITEM "&Line Capabilities",          IDM_LINE
+      MENUITEM "&Polygonal Capabilities",     IDM_POLY
+      MENUITEM "&Text Capabilities",          IDM_TEXT
+   }
 }

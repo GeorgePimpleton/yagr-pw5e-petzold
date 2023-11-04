@@ -2,7 +2,7 @@
 
 /*---------------------------------------
    POPPAD.H -- Popup Editor
-               (c) Charles Petzold, 1998
+   (c) Charles Petzold, 1998
   ---------------------------------------*/
 
 #include <windows.h>
@@ -29,5 +29,5 @@ BOOL PopFontChooseFont(HWND);
 void PopFontSetFont(HWND);
 void PopFontDeinitialize(void);
 
-// Functions in POPPRNT(NULL).C
+// Functions in POPPRNT.C
 BOOL PopPrntPrintFile(HINSTANCE, HWND, HWND, PWSTR);

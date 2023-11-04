@@ -17,7 +17,7 @@ HDC GetPrinterDC(void)
 
    EnumPrintersW(PRINTER_ENUM_LOCAL, NULL, 4, NULL, 0, &needed, &returned);
 
-   PRINTER_INFO_4* pinfo4 = (PRINTER_INFO_4 *) malloc(needed);
+   PRINTER_INFO_4* pinfo4 = (PRINTER_INFO_4*) malloc(needed);
 
    EnumPrintersW(PRINTER_ENUM_LOCAL, NULL, 4, (PBYTE)pinfo4, needed, &needed, &returned);
 

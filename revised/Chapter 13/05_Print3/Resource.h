@@ -1,3 +1,3 @@
 #pragma once
 
-#define IDC_STATIC                      -1
+#define IDC_STATIC   -1

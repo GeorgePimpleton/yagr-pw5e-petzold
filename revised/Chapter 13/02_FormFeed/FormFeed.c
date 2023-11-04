@@ -10,12 +10,12 @@
 HDC GetPrinterDC(void);
 
 int WINAPI wWinMain(_In_     HINSTANCE inst,
-                    _In_opt_ HINSTANCE orevInst,
+                    _In_opt_ HINSTANCE prevInst,
                     _In_     PWSTR     cmdLine,
                     _In_     int       showCmd)
 {
    UNREFERENCED_PARAMETER(inst);
-   UNREFERENCED_PARAMETER(orevInst);
+   UNREFERENCED_PARAMETER(prevInst);
    UNREFERENCED_PARAMETER(cmdLine);
    UNREFERENCED_PARAMETER(showCmd);
 

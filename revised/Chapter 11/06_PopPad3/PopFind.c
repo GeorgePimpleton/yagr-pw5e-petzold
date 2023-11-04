@@ -72,7 +72,6 @@ BOOL PopFindFindText(HWND wndEdit, int* searchOffset, LPFINDREPLACEW fr)
    strPos = wcsstr(strDoc + *searchOffset, fr->lpstrFindWhat);
 
    // Return an error code if the string cannot be found
-
    if ( strPos == NULL )
    {
       return FALSE;

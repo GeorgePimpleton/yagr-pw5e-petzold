@@ -23,7 +23,7 @@ int WINAPI wWinMain(_In_     HINSTANCE inst,
 
    HWND     wnd;
    MSG      msg;
-   WNDCLASS wc;
+   WNDCLASS wc = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
