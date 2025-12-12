@@ -11,15 +11,15 @@
 
 #define BUFFER(x, y) *(buffer + y * xBuffer + x)
 
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK WndProc( HWND, UINT, WPARAM, LPARAM );
 
-int WINAPI wWinMain(_In_     HINSTANCE instance,
-                    _In_opt_ HINSTANCE prevInstance,
-                    _In_     PWSTR     cmdLine,
-                    _In_     int       showCmd)
+int WINAPI wWinMain( _In_     HINSTANCE instance,
+                     _In_opt_ HINSTANCE prevInstance,
+                     _In_     PWSTR     cmdLine,
+                     _In_     int       showCmd )
 {
-   UNREFERENCED_PARAMETER(prevInstance);
-   UNREFERENCED_PARAMETER(cmdLine);
+   UNREFERENCED_PARAMETER( prevInstance );
+   UNREFERENCED_PARAMETER( cmdLine );
 
    static PCWSTR appName = L"Typer";
    HWND          hwnd;
@@ -31,37 +31,37 @@ int WINAPI wWinMain(_In_     HINSTANCE instance,
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
    wc.hInstance     = instance;
-   wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
-   wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
-   wc.hbrBackground = (HBRUSH)  (COLOR_WINDOW + 1);
+   wc.hIcon         = ( HICON ) LoadImageW( NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR );
+   wc.hCursor       = ( HCURSOR ) LoadImageW( NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED );
+   wc.hbrBackground = ( HBRUSH ) ( COLOR_WINDOW + 1 );
    wc.lpszMenuName  = NULL;
    wc.lpszClassName = appName;
 
-   if ( !RegisterClassW(&wc) )
+   if ( !RegisterClassW( &wc ) )
    {
-      MessageBoxW(NULL, L"This program requires Windows NT!",
-                  appName, MB_ICONERROR);
+      MessageBoxW( NULL, L"This program requires Windows NT!",
+                   appName, MB_ICONERROR );
       return 0;
    }
 
-   hwnd = CreateWindowW(appName, L"Typing Program",
-                        WS_OVERLAPPEDWINDOW,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        CW_USEDEFAULT, CW_USEDEFAULT,
-                        NULL, NULL, instance, NULL);
+   hwnd = CreateWindowW( appName, L"Typing Program",
+                         WS_OVERLAPPEDWINDOW,
+                         CW_USEDEFAULT, CW_USEDEFAULT,
+                         CW_USEDEFAULT, CW_USEDEFAULT,
+                         NULL, NULL, instance, NULL );
 
-   ShowWindow(hwnd, showCmd);
-   UpdateWindow(hwnd);
+   ShowWindow( hwnd, showCmd );
+   UpdateWindow( hwnd );
 
-   while ( GetMessage(&msg, NULL, 0, 0) )
+   while ( GetMessage( &msg, NULL, 0, 0 ) )
    {
-      TranslateMessage(&msg);
-      DispatchMessageW(&msg);
+      TranslateMessage( &msg );
+      DispatchMessageW( &msg );
    }
-   return (int) msg.wParam;
+   return ( int ) msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
    static DWORD charSet = DEFAULT_CHARSET;
    static int   xChar;
@@ -72,7 +72,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    static int   yBuffer;
    static int   xCaret;
    static int   yCaret;
-   static PWSTR buffer   = NULL;
+   static PWSTR buffer  = NULL;
    HDC          dc;
    int          x;
    int          y;
@@ -83,47 +83,47 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    switch ( message )
    {
    case WM_INPUTLANGCHANGE:
-      charSet = (DWORD) wParam;
+      charSet = ( DWORD ) wParam;
       // fall through
 
    case WM_CREATE:
-      dc = GetDC(hwnd);
-      SelectObject(dc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
-                                    charSet, 0, 0, 0, FIXED_PITCH, NULL));
+      dc = GetDC( hwnd );
+      SelectObject( dc, CreateFontW( 0, 0, 0, 0, 0, 0, 0, 0,
+                    charSet, 0, 0, 0, FIXED_PITCH, NULL ) );
 
-      GetTextMetricsW(dc, &tm);
+      GetTextMetricsW( dc, &tm );
       xChar = tm.tmAveCharWidth;
       yChar = tm.tmHeight;
 
-      DeleteObject(SelectObject(dc, GetStockObject(SYSTEM_FONT)));
-      ReleaseDC(hwnd, dc);
+      DeleteObject( SelectObject( dc, GetStockObject( SYSTEM_FONT ) ) );
+      ReleaseDC( hwnd, dc );
       // fall through
 
    case WM_SIZE:
       // obtain window size in pixels
       if ( message == WM_SIZE )
       {
-         xClient = GET_X_LPARAM(lParam);
-         yClient = GET_Y_LPARAM(lParam);
+         xClient = GET_X_LPARAM( lParam );
+         yClient = GET_Y_LPARAM( lParam );
       }
 
       // calculate window size in characters
-      xBuffer = max(1, xClient / xChar);
-      yBuffer = max(1, yClient / yChar);
+      xBuffer = max( 1, xClient / xChar );
+      yBuffer = max( 1, yClient / yChar );
 
       // allocate memory for buffer and clear it
       if ( buffer != NULL )
       {
-         free(buffer);
+         free( buffer );
       }
 
-      buffer = (PWSTR) malloc(xBuffer * yBuffer * sizeof(WCHAR));
+      buffer = ( PWSTR ) malloc( xBuffer * yBuffer * sizeof( WCHAR ) );
 
       for ( y = 0; y < yBuffer; y++ )
       {
          for ( x = 0; x < xBuffer; x++ )
          {
-            BUFFER(x, y) = L' ';
+            BUFFER( x, y ) = L' ';
          }
       }
 
@@ -134,23 +134,23 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
       if ( hwnd == GetFocus( ) )
       {
-         SetCaretPos(xCaret * xChar, yCaret * yChar);
+         SetCaretPos( xCaret * xChar, yCaret * yChar );
       }
 
-      InvalidateRect(hwnd, NULL, TRUE);
+      InvalidateRect( hwnd, NULL, TRUE );
       return 0;
 
    case WM_SETFOCUS:
       // create and show the caret
-      CreateCaret(hwnd, NULL, xChar, yChar);
-      SetCaretPos(xCaret * xChar, yCaret * yChar);
-      ShowCaret(hwnd);
+      CreateCaret( hwnd, NULL, xChar, yChar );
+      SetCaretPos( xCaret * xChar, yCaret * yChar );
+      ShowCaret( hwnd );
       return 0;
 
    case WM_KILLFOCUS:
       // hide and destroy the caret
-      HideCaret(hwnd);
-      DestroyCaret();
+      HideCaret( hwnd );
+      DestroyCaret( );
       return 0;
 
    case WM_KEYDOWN:
@@ -173,49 +173,49 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          break;
 
       case VK_LEFT:
-         xCaret = max(xCaret - 1, 0);
+         xCaret = max( xCaret - 1, 0 );
          break;
 
       case VK_RIGHT:
-         xCaret = min(xCaret + 1, xBuffer - 1);
+         xCaret = min( xCaret + 1, xBuffer - 1 );
          break;
 
       case VK_UP:
-         yCaret = max(yCaret - 1, 0);
+         yCaret = max( yCaret - 1, 0 );
          break;
 
       case VK_DOWN:
-         yCaret = min(yCaret + 1, yBuffer - 1);
+         yCaret = min( yCaret + 1, yBuffer - 1 );
          break;
 
       case VK_DELETE:
          for ( x = xCaret; x < xBuffer - 1; x++ )
          {
-            BUFFER(x, yCaret) = BUFFER(x + 1, yCaret);
+            BUFFER( x, yCaret ) = BUFFER( x + 1, yCaret );
          }
 
-         BUFFER(xBuffer - 1, yCaret) = ' ';
+         BUFFER( xBuffer - 1, yCaret ) = ' ';
 
-         HideCaret(hwnd);
-         dc = GetDC(hwnd);
+         HideCaret( hwnd );
+         dc = GetDC( hwnd );
 
-         SelectObject(dc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
-                                      charSet, 0, 0, 0, FIXED_PITCH, NULL));
+         SelectObject( dc, CreateFontW( 0, 0, 0, 0, 0, 0, 0, 0,
+                       charSet, 0, 0, 0, FIXED_PITCH, NULL ) );
 
-         TextOutW(dc, xCaret * xChar, yCaret * yChar,
-                  &BUFFER(xCaret, yCaret),
-                  xBuffer - xCaret);
+         TextOutW( dc, xCaret * xChar, yCaret * yChar,
+                   &BUFFER( xCaret, yCaret ),
+                   xBuffer - xCaret );
 
-         DeleteObject(SelectObject(dc, GetStockObject(SYSTEM_FONT)));
-         ReleaseDC(hwnd, dc);
-         ShowCaret(hwnd);
+         DeleteObject( SelectObject( dc, GetStockObject( SYSTEM_FONT ) ) );
+         ReleaseDC( hwnd, dc );
+         ShowCaret( hwnd );
          break;
       }
-      SetCaretPos(xCaret * xChar, yCaret * yChar);
+      SetCaretPos( xCaret * xChar, yCaret * yChar );
       return 0;
 
    case WM_CHAR:
-      for ( i = 0; i < (int) LOWORD(lParam); i++ )
+      for ( i = 0; i < ( int ) LOWORD( lParam ); i++ )
       {
          switch ( wParam )
          {
@@ -223,15 +223,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             if ( xCaret > 0 )
             {
                xCaret--;
-               SendMessageW(hwnd, WM_KEYDOWN, VK_DELETE, 1);
+               SendMessageW( hwnd, WM_KEYDOWN, VK_DELETE, 1 );
             }
             break;
 
          case '\t':  // tab
             do
             {
-               SendMessageW(hwnd, WM_CHAR, ' ', 1);
-            } while ( xCaret % 8 != 0 );
+               SendMessageW( hwnd, WM_CHAR, ' ', 1 );
+            }
+            while ( xCaret % 8 != 0 );
             break;
 
          case '\n':  // line feed
@@ -255,32 +256,32 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
                for ( x = 0; x < xBuffer; x++ )
                {
-                  BUFFER(x, y) = ' ';
+                  BUFFER( x, y ) = ' ';
                }
             }
 
             xCaret = 0;
             yCaret = 0;
 
-            InvalidateRect(hwnd, NULL, FALSE);
+            InvalidateRect( hwnd, NULL, FALSE );
             break;
 
          default:                      // character codes
-            BUFFER(xCaret, yCaret) = (WCHAR) wParam;
+            BUFFER( xCaret, yCaret ) = ( WCHAR ) wParam;
 
-            HideCaret(hwnd);
-            dc = GetDC(hwnd);
+            HideCaret( hwnd );
+            dc = GetDC( hwnd );
 
-            SelectObject(dc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
-                                          charSet, 0, 0, 0, FIXED_PITCH, NULL));
+            SelectObject( dc, CreateFontW( 0, 0, 0, 0, 0, 0, 0, 0,
+                          charSet, 0, 0, 0, FIXED_PITCH, NULL ) );
 
-            TextOutW(dc, xCaret* xChar, yCaret* yChar,
-                     &BUFFER(xCaret, yCaret), 1);
+            TextOutW( dc, xCaret * xChar, yCaret * yChar,
+                      &BUFFER( xCaret, yCaret ), 1 );
 
             DeleteObject(
-               SelectObject(dc, GetStockObject(SYSTEM_FONT)));
-            ReleaseDC(hwnd, dc);
-            ShowCaret(hwnd);
+               SelectObject( dc, GetStockObject( SYSTEM_FONT ) ) );
+            ReleaseDC( hwnd, dc );
+            ShowCaret( hwnd );
 
             if ( ++xCaret == xBuffer )
             {
@@ -296,28 +297,28 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          }
       }
 
-      SetCaretPos(xCaret * xChar, yCaret * yChar);
+      SetCaretPos( xCaret * xChar, yCaret * yChar );
       return 0;
 
    case WM_PAINT:
-      dc = BeginPaint(hwnd, &ps);
+      dc = BeginPaint( hwnd, &ps );
 
-      SelectObject(dc, CreateFontW(0, 0, 0, 0, 0, 0, 0, 0,
-                                   charSet, 0, 0, 0, FIXED_PITCH, NULL));
+      SelectObject( dc, CreateFontW( 0, 0, 0, 0, 0, 0, 0, 0,
+                    charSet, 0, 0, 0, FIXED_PITCH, NULL ) );
 
       for ( y = 0; y < yBuffer; y++ )
       {
-         TextOutW(dc, 0, y * yChar, &BUFFER(0, y), xBuffer);
+         TextOutW( dc, 0, y * yChar, &BUFFER( 0, y ), xBuffer );
       }
 
-      DeleteObject(SelectObject(dc, GetStockObject(SYSTEM_FONT)));
-      EndPaint(hwnd, &ps);
+      DeleteObject( SelectObject( dc, GetStockObject( SYSTEM_FONT ) ) );
+      EndPaint( hwnd, &ps );
       return 0;
 
    case WM_DESTROY:
-      PostQuitMessage(0);
+      PostQuitMessage( 0 );
       return 0;
    }
 
-   return DefWindowProcW(hwnd, message, wParam, lParam);
+   return DefWindowProcW( hwnd, message, wParam, lParam );
 }
