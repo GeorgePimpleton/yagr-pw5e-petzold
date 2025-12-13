@@ -14,15 +14,15 @@
 #define BTN_WIDTH  (8 * xChar)
 #define BTN_HEIGHT (4 * yChar)
 
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK WndProc( HWND, UINT, WPARAM, LPARAM );
 
 HINSTANCE g_inst;
 
-int WINAPI wWinMain(_In_ HINSTANCE inst,    _In_opt_ HINSTANCE prevInst,
-                    _In_ PWSTR     cmdLine, _In_     int       showCmd)
+int WINAPI wWinMain( _In_ HINSTANCE inst,    _In_opt_ HINSTANCE prevInst,
+                     _In_ PWSTR     cmdLine, _In_     int       showCmd )
 {
-   UNREFERENCED_PARAMETER(prevInst);
-   UNREFERENCED_PARAMETER(cmdLine);
+   UNREFERENCED_PARAMETER( prevInst );
+   UNREFERENCED_PARAMETER( cmdLine );
 
    static PCWSTR appName = L"OwnDraw";
    MSG           msg;
@@ -36,43 +36,43 @@ int WINAPI wWinMain(_In_ HINSTANCE inst,    _In_opt_ HINSTANCE prevInst,
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
    wc.hInstance     = inst;
-   wc.hIcon         = (HICON)   LoadImageW(NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
-   wc.hCursor       = (HCURSOR) LoadImageW(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
-   wc.hbrBackground = (HBRUSH)  GetStockBrush(WHITE_BRUSH);
+   wc.hIcon         = ( HICON ) LoadImageW( NULL, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR );
+   wc.hCursor       = ( HCURSOR ) LoadImageW( NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED );
+   wc.hbrBackground = ( HBRUSH ) GetStockBrush( WHITE_BRUSH );
    wc.lpszMenuName  = appName;
    wc.lpszClassName = appName;
 
-   if ( !RegisterClassW(&wc) )
+   if ( !RegisterClassW( &wc ) )
    {
-      MessageBoxW(NULL, L"This program requires Windows NT!", appName, MB_ICONERROR);
+      MessageBoxW( NULL, L"This program requires Windows NT!", appName, MB_ICONERROR );
       return 0;
    }
 
-   wnd = CreateWindowW(appName, L"Owner-Draw Button Demo",
-                       WS_OVERLAPPEDWINDOW,
-                       CW_USEDEFAULT, CW_USEDEFAULT,
-                       CW_USEDEFAULT, CW_USEDEFAULT,
-                       NULL, NULL, inst, NULL);
+   wnd = CreateWindowW( appName, L"Owner-Draw Button Demo",
+                        WS_OVERLAPPEDWINDOW,
+                        CW_USEDEFAULT, CW_USEDEFAULT,
+                        CW_USEDEFAULT, CW_USEDEFAULT,
+                        NULL, NULL, inst, NULL );
 
-   ShowWindow(wnd, showCmd);
-   UpdateWindow(wnd);
+   ShowWindow( wnd, showCmd );
+   UpdateWindow( wnd );
 
-   while ( GetMessageW(&msg, NULL, 0, 0) )
+   while ( GetMessageW( &msg, NULL, 0, 0 ) )
    {
-      TranslateMessage(&msg);
-      DispatchMessageW(&msg);
+      TranslateMessage( &msg );
+      DispatchMessageW( &msg );
    }
-   return (int) msg.wParam;
+   return ( int ) msg.wParam;
 }
 
-void Triangle(HDC dc, POINT pt[ ])
+void Triangle( HDC dc, POINT pt[ ] )
 {
-   SelectBrush(dc, GetStockBrush(BLACK_BRUSH));
-   Polygon(dc, pt, 3);
-   SelectBrush(dc, GetStockBrush(WHITE_BRUSH));
+   SelectBrush( dc, GetStockBrush( BLACK_BRUSH ) );
+   Polygon( dc, pt, 3 );
+   SelectBrush( dc, GetStockBrush( WHITE_BRUSH ) );
 }
 
-LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc( HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam )
 {
    static HWND      smaller;
    static HWND      larger;
@@ -83,43 +83,43 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
    int              x;
    int              y;
    LPDRAWITEMSTRUCT is;
-   POINT            pt[ 3 ] = { 0 };
+   POINT            pt[3] = { 0 };
    RECT             rc;
 
    switch ( msg )
    {
    case WM_CREATE:
-      xChar = LOWORD(GetDialogBaseUnits( ));
-      yChar = HIWORD(GetDialogBaseUnits( ));
+      xChar = LOWORD( GetDialogBaseUnits( ) );
+      yChar = HIWORD( GetDialogBaseUnits( ) );
 
       // create the owner-draw pushbuttons
-      smaller = CreateWindowW(L"button", L"",
+      smaller = CreateWindowW( L"button", L"",
+                               WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
+                               0, 0, BTN_WIDTH, BTN_HEIGHT,
+                               wnd, ( HMENU ) ID_SMALLER, g_inst, NULL );
+
+      larger = CreateWindowW( L"button", L"",
                               WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
                               0, 0, BTN_WIDTH, BTN_HEIGHT,
-                              wnd, (HMENU) ID_SMALLER, g_inst, NULL);
-
-      larger = CreateWindowW(L"button", L"",
-                             WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
-                             0, 0, BTN_WIDTH, BTN_HEIGHT,
-                             wnd, (HMENU) ID_LARGER, g_inst, NULL);
+                              wnd, ( HMENU ) ID_LARGER, g_inst, NULL );
       return 0;
 
    case WM_SIZE:
-      xClient = GET_X_LPARAM(lParam);
-      yClient = GET_Y_LPARAM(lParam);
+      xClient = GET_X_LPARAM( lParam );
+      yClient = GET_Y_LPARAM( lParam );
 
       // move the buttons to the new center
-      MoveWindow(smaller, xClient / 2 - 3 * BTN_WIDTH / 2,
-                          yClient / 2 - BTN_HEIGHT / 2,
-                          BTN_WIDTH, BTN_HEIGHT, TRUE);
+      MoveWindow( smaller, xClient / 2 - 3 * BTN_WIDTH / 2,
+                  yClient / 2 - BTN_HEIGHT / 2,
+                  BTN_WIDTH, BTN_HEIGHT, TRUE );
 
-      MoveWindow(larger, xClient / 2 + BTN_WIDTH / 2,
-                         yClient / 2 - BTN_HEIGHT / 2,
-                         BTN_WIDTH, BTN_HEIGHT, TRUE);
+      MoveWindow( larger, xClient / 2 + BTN_WIDTH / 2,
+                  yClient / 2 - BTN_HEIGHT / 2,
+                  BTN_WIDTH, BTN_HEIGHT, TRUE );
       return 0;
 
    case WM_COMMAND:
-      GetWindowRect(wnd, &rc);
+      GetWindowRect( wnd, &rc );
 
       // make the window 10% smaller or larger
       switch ( wParam )
@@ -139,16 +139,16 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
          break;
       }
 
-      MoveWindow(wnd, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, TRUE);
+      MoveWindow( wnd, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, TRUE );
       return 0;
 
    case WM_DRAWITEM:
-      is = (LPDRAWITEMSTRUCT) lParam;
+      is = ( LPDRAWITEMSTRUCT ) lParam;
 
       // fill area with white and frame it black
-      FillRect(is->hDC, &is->rcItem, GetStockBrush(WHITE_BRUSH));
+      FillRect( is->hDC, &is->rcItem, GetStockBrush( WHITE_BRUSH ) );
 
-      FrameRect(is->hDC, &is->rcItem, GetStockBrush(BLACK_BRUSH));
+      FrameRect( is->hDC, &is->rcItem, GetStockBrush( BLACK_BRUSH ) );
 
       // draw inward and outward black triangles
       x = is->rcItem.right - is->rcItem.left;
@@ -157,62 +157,62 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
       switch ( is->CtlID )
       {
       case ID_SMALLER:
-         pt[ 0 ].x = 3 * x / 8;  pt[ 0 ].y = 1 * y / 8;
-         pt[ 1 ].x = 5 * x / 8;  pt[ 1 ].y = 1 * y / 8;
-         pt[ 2 ].x = 4 * x / 8;  pt[ 2 ].y = 3 * y / 8;
+         pt[0].x = 3 * x / 8;  pt[0].y = 1 * y / 8;
+         pt[1].x = 5 * x / 8;  pt[1].y = 1 * y / 8;
+         pt[2].x = 4 * x / 8;  pt[2].y = 3 * y / 8;
 
-         Triangle(is->hDC, pt);
+         Triangle( is->hDC, pt );
 
-         pt[ 0 ].x = 7 * x / 8;  pt[ 0 ].y = 3 * y / 8;
-         pt[ 1 ].x = 7 * x / 8;  pt[ 1 ].y = 5 * y / 8;
-         pt[ 2 ].x = 5 * x / 8;  pt[ 2 ].y = 4 * y / 8;
+         pt[0].x = 7 * x / 8;  pt[0].y = 3 * y / 8;
+         pt[1].x = 7 * x / 8;  pt[1].y = 5 * y / 8;
+         pt[2].x = 5 * x / 8;  pt[2].y = 4 * y / 8;
 
-         Triangle(is->hDC, pt);
+         Triangle( is->hDC, pt );
 
-         pt[ 0 ].x = 5 * x / 8;  pt[ 0 ].y = 7 * y / 8;
-         pt[ 1 ].x = 3 * x / 8;  pt[ 1 ].y = 7 * y / 8;
-         pt[ 2 ].x = 4 * x / 8;  pt[ 2 ].y = 5 * y / 8;
+         pt[0].x = 5 * x / 8;  pt[0].y = 7 * y / 8;
+         pt[1].x = 3 * x / 8;  pt[1].y = 7 * y / 8;
+         pt[2].x = 4 * x / 8;  pt[2].y = 5 * y / 8;
 
-         Triangle(is->hDC, pt);
+         Triangle( is->hDC, pt );
 
-         pt[ 0 ].x = 1 * x / 8;  pt[ 0 ].y = 5 * y / 8;
-         pt[ 1 ].x = 1 * x / 8;  pt[ 1 ].y = 3 * y / 8;
-         pt[ 2 ].x = 3 * x / 8;  pt[ 2 ].y = 4 * y / 8;
+         pt[0].x = 1 * x / 8;  pt[0].y = 5 * y / 8;
+         pt[1].x = 1 * x / 8;  pt[1].y = 3 * y / 8;
+         pt[2].x = 3 * x / 8;  pt[2].y = 4 * y / 8;
 
-         Triangle(is->hDC, pt);
+         Triangle( is->hDC, pt );
          break;
 
       case ID_LARGER:
-         pt[ 0 ].x = 5 * x / 8;  pt[ 0 ].y = 3 * y / 8;
-         pt[ 1 ].x = 3 * x / 8;  pt[ 1 ].y = 3 * y / 8;
-         pt[ 2 ].x = 4 * x / 8;  pt[ 2 ].y = 1 * y / 8;
+         pt[0].x = 5 * x / 8;  pt[0].y = 3 * y / 8;
+         pt[1].x = 3 * x / 8;  pt[1].y = 3 * y / 8;
+         pt[2].x = 4 * x / 8;  pt[2].y = 1 * y / 8;
 
-         Triangle(is->hDC, pt);
+         Triangle( is->hDC, pt );
 
-         pt[ 0 ].x = 5 * x / 8;  pt[ 0 ].y = 5 * y / 8;
-         pt[ 1 ].x = 5 * x / 8;  pt[ 1 ].y = 3 * y / 8;
-         pt[ 2 ].x = 7 * x / 8;  pt[ 2 ].y = 4 * y / 8;
+         pt[0].x = 5 * x / 8;  pt[0].y = 5 * y / 8;
+         pt[1].x = 5 * x / 8;  pt[1].y = 3 * y / 8;
+         pt[2].x = 7 * x / 8;  pt[2].y = 4 * y / 8;
 
-         Triangle(is->hDC, pt);
+         Triangle( is->hDC, pt );
 
-         pt[ 0 ].x = 3 * x / 8;  pt[ 0 ].y = 5 * y / 8;
-         pt[ 1 ].x = 5 * x / 8;  pt[ 1 ].y = 5 * y / 8;
-         pt[ 2 ].x = 4 * x / 8;  pt[ 2 ].y = 7 * y / 8;
+         pt[0].x = 3 * x / 8;  pt[0].y = 5 * y / 8;
+         pt[1].x = 5 * x / 8;  pt[1].y = 5 * y / 8;
+         pt[2].x = 4 * x / 8;  pt[2].y = 7 * y / 8;
 
-         Triangle(is->hDC, pt);
+         Triangle( is->hDC, pt );
 
-         pt[ 0 ].x = 3 * x / 8;  pt[ 0 ].y = 3 * y / 8;
-         pt[ 1 ].x = 3 * x / 8;  pt[ 1 ].y = 5 * y / 8;
-         pt[ 2 ].x = 1 * x / 8;  pt[ 2 ].y = 4 * y / 8;
+         pt[0].x = 3 * x / 8;  pt[0].y = 3 * y / 8;
+         pt[1].x = 3 * x / 8;  pt[1].y = 5 * y / 8;
+         pt[2].x = 1 * x / 8;  pt[2].y = 4 * y / 8;
 
-         Triangle(is->hDC, pt);
+         Triangle( is->hDC, pt );
          break;
       }
 
       // invert the rectangle if the button is selected
       if ( is->itemState & ODS_SELECTED )
       {
-         InvertRect(is->hDC, &is->rcItem);
+         InvertRect( is->hDC, &is->rcItem );
       }
 
       // draw a focus rectangle if the button has the focus
@@ -223,14 +223,14 @@ LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
          is->rcItem.right  -= x / 16;
          is->rcItem.bottom -= y / 16;
 
-         DrawFocusRect(is->hDC, &is->rcItem);
+         DrawFocusRect( is->hDC, &is->rcItem );
       }
       return 0;
 
    case WM_DESTROY:
-      PostQuitMessage(0);
+      PostQuitMessage( 0 );
       return 0;
    }
 
-   return DefWindowProcW(wnd, msg, wParam, lParam);
+   return DefWindowProcW( wnd, msg, wParam, lParam );
 }
