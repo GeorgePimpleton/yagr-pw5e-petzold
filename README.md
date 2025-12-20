@@ -7,7 +7,7 @@ A github repository of revised C source code for Charles Petzold's Programming W
 
 A lot has changed since then, including the underlying core Windows API technology and programming philosophy.  This repository is an attempt to update the code to modern coding practices, while still retaining the Desktop programming idea.
 
-A newer edition (6th) was published that was targeted for newer WinAPI technologies, devices other than desktop PCs and Windows 8.  Using XAML and C#, with several examples rewritten in C++.  The 5th Edition was the last to be pure C based.
+A newer edition (6th) was published that was targeted for newer WinAPI technologies, devices other than desktop PCs and focusing on Windows 8.  Using XAML and C#, with several examples rewritten in C++.  The 5th Edition was the last to be pure C based.
 
 Many programmers learned Windows programming using these books, and are still used as a decent start for learning.
 
@@ -53,7 +53,12 @@ The book's chapters are:
 23. A Taste of the Internet
 
 ## Programming Windows using MFC
-There is a companion book to Petzold's PW5E that shows how to code the Win9X Win32 API utilizing MFC and C++, encapsulating the WinAPI in C++ classes.  This repo doesn't use that technology.
+There is a companion book to Petzold's PW5E that shows how to code the Win9X Win32 API utilizing MFC and C++, encapsulating the WinAPI in C++ classes.  This repo doesn't use that programming technology.
 
 ## Notes
 There may be links to websites or internet sources in this repo. Links can  go stale. A search engine is your friend.
+
+### Post-script
+The code as as orginally written \****is***\* compileable as written as long as the code isn't compiled using the Unicode/wide character set. With a modern compiler If someone compiled the code using the Multi-byte character set the code needs zero modification.
+
+Using a modern compiler such as 2022 or 2026 (really recommended for Desktop WinAPI code), compiling using the Multi-byte character set both x64 and x86 are doable.  There will be at least two warnings compiling the unmodified code this way, there should be no errors.
