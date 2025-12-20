@@ -1,5 +1,7 @@
 # yagr-pw5e-petzold (Yet Another github repository for Charles Petzold's "Programming Windows", 5th Edition)
-A github repository of revised C source code for Charles Petzold's Programming Windows 5th Edition ISBN-10 157231995X, adapting to the modern WinAPI
+A github repository of revised C source code for Charles Petzold's Programming Windows 5th Edition ISBN-10 157231995X, adapting to the modern WinAPI.
+
+No representation is made that the source code belongs to me, it's simply reproduced here for convenience (so you don't need to dig up the physical media of the book) and remains the copyright of Charles Petzold.
 
 ----
 
@@ -22,7 +24,7 @@ Most of the samples after modernizing still work, a credit on Microsoft and and 
 
 Several of the samples require a bit more work, some samples AFAIK won't execute no matter what.  Chapter 16 in particular because of the use of 256-bit display palletes, a bygone relic of archaic computing hardware that was common in the Win9X days.
 
-The sources were adapted and compiled using Visual Studio 2022, the Community edition.  It is free for non-commercial use.
+The sources were adapted and compiled using Visual Studio 2022 & 2026, the Community edition.  It is free for non-commercial use.
 
 ## Contents of this repository
 There is an archive of the original sources from the CD that was included with the book when purchased, and (of course) the revised/modernized sources.  I've renamed to folders containing the sources to better reflect the orders the code was talked about in the book.
@@ -53,12 +55,12 @@ The book's chapters are:
 23. A Taste of the Internet
 
 ## Programming Windows using MFC
-There is a companion book to Petzold's PW5E that shows how to code the Win9X Win32 API utilizing MFC and C++, encapsulating the WinAPI in C++ classes.  This repo doesn't use that programming technology.
+There is a 'companion' book to Petzold's PW5E (though not written by Petzold) that shows how to code for the Win9X Win32 API utilizing MFC and C\++, encapsulating the WinAPI in C++ classes.  This repo doesn't use that programming technology.
 
 ## Notes
 There may be links to websites or internet sources in this repo. Links can  go stale. A search engine is your friend.
 
 ### Post-script
-The code as as orginally written \****is***\* compileable as written as long as the code isn't compiled using the Unicode/wide character set. With a modern compiler If someone compiled the code using the Multi-byte character set the code needs zero modification.
+The code as orginally written \****is***\* compileable as written as long as the code isn't compiled using the Unicode/wide character set. With a modern compiler If someone compiled the code using the Multi-byte character set the code needs zero modification.
 
 Using a modern compiler such as 2022 or 2026 (really recommended for Desktop WinAPI code), compiling using the Multi-byte character set both x64 and x86 are doable.  There will be at least two warnings compiling the unmodified code this way, there should be no errors.
