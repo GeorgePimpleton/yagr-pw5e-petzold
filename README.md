@@ -11,7 +11,7 @@ A lot has changed since then, including the underlying core Windows API technolo
 
 A newer edition (6th) was published that was targeted for newer WinAPI technologies, devices other than desktop PCs and focusing on Windows 8.  Using XAML and C#, with several examples rewritten in C++.  The 5th Edition was the last to be pure C based.
 
-Many programmers learned Windows programming using these books, and are still used as a decent start for learning.
+Many programmers learned Windows programming using this 5th edition book, and is still used as a decent start for learning.  I have not really done much with the 6th edition.
 
 ## Changes to sources
 Win9X was a hybrid OS that combined 16-bit functionality with 32-bit.  WinNT was pure 32-bit.  16-bit functions are ANSI, 32-bit are now classified as Unicode.  Modern Windows with WinXP and later is now pure Unicode, running on both 32- and 64-bit CPUs.  The two biggest changes I make are:
