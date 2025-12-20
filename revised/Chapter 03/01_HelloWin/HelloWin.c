@@ -9,7 +9,8 @@
 #include <windowsx.h>
 #include <mmsystem.h>
 
-  // add the Windows multi-media library is added to the linker
+  // add the Windows multi-media library so it is added to the linker
+  // instead of manually editing the project settings
 #pragma comment(lib, "winmm.lib")
 
 LRESULT CALLBACK WndProc( HWND, UINT, WPARAM, LPARAM );
