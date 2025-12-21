@@ -50,7 +50,7 @@ int WINAPI wWinMain( _In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER( cmdLine );
 
    static PCWSTR appName = L"DevCaps1";
-   WNDCLASSW     wc = { 0 };
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
