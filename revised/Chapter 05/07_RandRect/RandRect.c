@@ -109,7 +109,7 @@ void DrawRectangle( HWND wnd )
    }
 
    SetRect( &rect, rand( ) % xClient, rand( ) % yClient,
-            rand( ) % xClient, rand( ) % yClient );
+                   rand( ) % xClient, rand( ) % yClient );
 
    brush = CreateSolidBrush( RGB( rand( ) % 256, rand( ) % 256, rand( ) % 256 ) );
 
