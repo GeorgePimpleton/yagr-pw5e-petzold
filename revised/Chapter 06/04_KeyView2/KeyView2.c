@@ -19,10 +19,10 @@ int WINAPI wWinMain( _In_     HINSTANCE inst,
    UNREFERENCED_PARAMETER( prevInst );
    UNREFERENCED_PARAMETER( cmdLine );
 
-   static PCWSTR  appName = L"KeyView2";
-   HWND           wnd;
-   MSG            msg;
-   WNDCLASSW      wc = { 0 };
+   static PCWSTR appName = L"KeyView2";
+   HWND          wnd;
+   MSG           msg;
+   WNDCLASSW     wc      = { 0 };
 
    wc.style         = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
@@ -61,22 +61,22 @@ int WINAPI wWinMain( _In_     HINSTANCE inst,
 
 LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
-   static DWORD   charSet = DEFAULT_CHARSET;
-   static int     xClientMax;
-   static int     yClientMax;
-   static int     xClient;
-   static int     yClient;
-   static int     xChar;
-   static int     yChar;
-   static int     linesMax;
-   static int     lines;
-   static PMSG    pmsg;
-   static RECT    rectScroll;
+   static DWORD charSet = DEFAULT_CHARSET;
+   static int   xClientMax;
+   static int   yClientMax;
+   static int   xClient;
+   static int   yClient;
+   static int   xChar;
+   static int   yChar;
+   static int   linesMax;
+   static int   lines;
+   static PMSG  pmsg;
+   static RECT  rectScroll;
 
-   static PCWSTR  top = L"Message        Key       Char     Repeat Scan Ext ALT Prev Tran";
-   static PCWSTR  und = L"_______        ___       ____     ______ ____ ___ ___ ____ ____";
+   static PCWSTR top = L"Message        Key       Char     Repeat Scan Ext ALT Prev Tran";
+   static PCWSTR und = L"_______        ___       ____     ______ ____ ___ ___ ____ ____";
 
-   static PCWSTR  format[ 2 ] = { L"%-13s %3d %-15s%c%6u %4d %3s %3s %4s %4s",
+   static PCWSTR format[ 2 ] = { L"%-13s %3d %-15s%c%6u %4d %3s %3s %4s %4s",
                                   L"%-13s            0x%04X%1s%c %6u %4d %3s %3s %4s %4s" };
 
    static PCWSTR yes  = L"Yes";
@@ -88,13 +88,13 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
                                 L"WM_CHAR",       L"WM_DEADCHAR",
                                 L"WM_SYSKEYDOWN", L"WM_SYSKEYUP",
                                 L"WM_SYSCHAR",    L"WM_SYSDEADCHAR" };
-   HDC            dc;
-   int            i;
-   int            type;
-   PAINTSTRUCT    ps;
-   WCHAR          buffer[128] = { L"" };
-   WCHAR          keyName[32];
-   TEXTMETRICW    tm;
+   HDC         dc;
+   int         i;
+   int         type;
+   PAINTSTRUCT ps;
+   WCHAR       buffer[128] = { L"" };
+   WCHAR       keyName[32];
+   TEXTMETRICW tm;
 
    switch ( message )
    {
@@ -129,8 +129,8 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
       }
 
       linesMax = yClientMax / yChar;
-      pmsg = ( PMSG ) malloc( linesMax * sizeof( MSG ) );
-      lines = 0;
+      pmsg     = ( PMSG ) malloc( linesMax * sizeof( MSG ) );
+      lines    = 0;
 
       // fall through
 

@@ -65,7 +65,7 @@ LRESULT CALLBACK WndProc( HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam )
       int    idStockFont;
       PCWSTR stockFont;
    }
-   stockfont[ ] = { { OEM_FIXED_FONT,       L"OEM_FIXED_FONT"     },
+   stockfont[ ] = { { OEM_FIXED_FONT,      L"OEM_FIXED_FONT"     },
                     { ANSI_FIXED_FONT,     L"ANSI_FIXED_FONT"     },
                     { ANSI_VAR_FONT,       L"ANSI_VAR_FONT"       },
                     { SYSTEM_FONT,         L"SYSTEM_FONT"         },

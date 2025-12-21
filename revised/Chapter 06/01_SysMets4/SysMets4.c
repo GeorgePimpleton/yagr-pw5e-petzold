@@ -123,7 +123,7 @@ LRESULT CALLBACK WndProc( HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam )
    case WM_VSCROLL:
       // get all the vertical scroll bar information
       si.cbSize = sizeof( si );
-      si.fMask = SIF_ALL;
+      si.fMask  = SIF_ALL;
       GetScrollInfo( wnd, SB_VERT, &si );
 
       // save the position for comparison later on
@@ -172,8 +172,7 @@ LRESULT CALLBACK WndProc( HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam )
       // if the position has changed, scroll the window and update it
       if ( si.nPos != vertPos )
       {
-         ScrollWindow( wnd, 0, yChar * ( vertPos - si.nPos ),
-                       NULL, NULL );
+         ScrollWindow( wnd, 0, yChar * ( vertPos - si.nPos ), NULL, NULL );
          UpdateWindow( wnd );
       }
       return 0;
@@ -181,7 +180,7 @@ LRESULT CALLBACK WndProc( HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam )
    case WM_HSCROLL:
       // get all the vertical scroll bar information
       si.cbSize = sizeof( si );
-      si.fMask = SIF_ALL;
+      si.fMask  = SIF_ALL;
 
       // save the position for comparison later on
       GetScrollInfo( wnd, SB_HORZ, &si );
@@ -278,8 +277,7 @@ LRESULT CALLBACK WndProc( HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam )
 
       // find painting limits
       paintBeg = max( 0, vertPos + ps.rcPaint.top / yChar );
-      paintEnd = min( NUMLINES - 1,
-                      vertPos + ps.rcPaint.bottom / yChar );
+      paintEnd = min( NUMLINES - 1, vertPos + ps.rcPaint.bottom / yChar );
 
       for ( i = paintBeg; i <= paintEnd; i++ )
       {

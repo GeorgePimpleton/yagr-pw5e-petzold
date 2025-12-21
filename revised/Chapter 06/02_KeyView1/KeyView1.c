@@ -24,7 +24,7 @@ int WINAPI wWinMain( _In_     HINSTANCE inst,
    MSG           msg;
    WNDCLASSW     wc        = { 0 };
 
-   wc.style         = CS_HREDRAW | CS_VREDRAW;
+   wc.style = CS_HREDRAW | CS_VREDRAW;
    wc.lpfnWndProc   = WndProc;
    wc.cbClsExtra    = 0;
    wc.cbWndExtra    = 0;
@@ -76,7 +76,7 @@ LRESULT CALLBACK WndProc( HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam )
    static PCWSTR und = L"_______        ___       ____     ______ ____ ___ ___ ____ ____";
 
    static PCWSTR format[2] = { L"%-13s %3d %-15s%c%6u %4d %3s %3s %4s %4s",
-                                 L"%-13s            0x%04X%1s%c %6u %4d %3s %3s %4s %4s" };
+                               L"%-13s            0x%04X%1s%c %6u %4d %3s %3s %4s %4s" };
 
    static PCWSTR yes  = L"Yes";
    static PCWSTR no   = L"No";
@@ -84,9 +84,9 @@ LRESULT CALLBACK WndProc( HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam )
    static PCWSTR up   = L"Up";
 
    static PCWSTR msgList[ ] = { L"WM_KEYDOWN",    L"WM_KEYUP",
-                               L"WM_CHAR",       L"WM_DEADCHAR",
-                               L"WM_SYSKEYDOWN", L"WM_SYSKEYUP",
-                               L"WM_SYSCHAR",    L"WM_SYSDEADCHAR" };
+                                L"WM_CHAR",       L"WM_DEADCHAR",
+                                L"WM_SYSKEYDOWN", L"WM_SYSKEYUP",
+                                L"WM_SYSCHAR",    L"WM_SYSDEADCHAR" };
    HDC           dc;
    int           i;
    int           type;
@@ -120,7 +120,7 @@ LRESULT CALLBACK WndProc( HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam )
       }
 
       linesMax = yClientMax / yChar;
-      pmsg = ( PMSG ) malloc( linesMax * sizeof( MSG ) );
+      pmsg     = ( PMSG ) malloc( linesMax * sizeof( MSG ) );
       lines = 0;
 
       // fall through
