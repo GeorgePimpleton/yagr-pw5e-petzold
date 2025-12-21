@@ -123,7 +123,7 @@ LRESULT CALLBACK WndProc( HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam )
       {
          MoveToEx( dc, 0, 0, NULL );
          LineTo( dc, ( int ) ( radius * cos( angle ) + 0.5 ),
-                 ( int ) ( -radius * sin( angle ) + 0.5 ) );
+                     ( int ) ( -radius * sin( angle ) + 0.5 ) );
       }
       EndPaint( wnd, &ps );
       return 0;
