@@ -14,4 +14,6 @@ I've also modified the directory structure to better reflect the progression of 
 
 This is older Windows Desktop WinAPI code, for modern Windows systems (10 & 11) it can be reported as being incompatible even though it runs without problems.c  The highest compatible system is Win 8.
 
-There is a profound caveat when compiling the original source code, though. **C4996** error code.  Unsafe C library function rears its ugly head.  To disable this particular error code is a must.
+There is a profound caveat when compiling some of the original source code, though. **C4996** error code.  Unsafe C library function rears its ugly head.  To disable this particular error code is a must.  Or use the safe version of the C library function.
+
+I personally prefer to disable the error.  YMMV.
