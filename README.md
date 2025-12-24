@@ -63,4 +63,6 @@ There may be links to websites or internet sources in this repo. Links can  go s
 ### Post-script
 The code as orginally written \****is***\* compileable as written as long as the code isn't compiled using the Unicode/wide character set. With a modern compiler If someone compiled the code using the Multi-byte character set the code needs zero modification.
 
-Using a modern compiler such as 2022 or 2026 (really recommended for Desktop WinAPI code), compiling using the Multi-byte character set both x64 and x86 are doable.  There will be at least two warnings compiling the unmodified code this way, there should be no errors.
+Using a modern compiler such as 2022 or 2026 (really recommended for Desktop WinAPI code), compiling using the Multi-byte character set both x64 and x86 are doable.  There will be at least one *warning* when compiling the unmodified code as x64 with the Multi-Byte character set, there should be no errors.  Debug or Release compile.
+
+If you were wondering, the warning is **warning C4244: 'return': conversion from 'WPARAM' to 'int', possible loss of data**.
