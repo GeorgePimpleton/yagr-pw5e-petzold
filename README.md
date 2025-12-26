@@ -5,26 +5,27 @@ No representation is made that the source code belongs to me, it's simply reprod
 
 ----
 
-"Programming Windows" 5th Edition was originally published in 1998, when Windows 9X, Windows NT, 16- & 32-bit CPUs and Internet Explorer were in common use.  PW5E was considered by many to be **The Bible** for learning Windows programming.
+"Programming Windows" 5th Edition was originally published in 1998, when Windows 9X, Windows NT, 16- & 32-bit CPUs and Internet Explorer were in common use.  PW5E was considered by many to be **The Bible** for learning Desktop Windows programming.
 
-A lot has changed since then, including the underlying core Windows API technology and programming philosophy.  This repository is an attempt to update the code to modern coding practices, while still retaining the Desktop programming idea.
+A lot has changed since then, including the underlying core Desktop Windows API technology and programming philosophy.  This repository is an attempt to update the code to modern coding practices, while still retaining the Desktop programming idea.
 
-A newer edition (6th) was published that was targeted for newer WinAPI technologies, devices other than desktop PCs and focusing on Windows 8.  Using XAML and C#, with several examples rewritten in C++.  The 5th Edition was the last to be pure C based.
+A newer edition (6th) was published that was targeted for newer WinAPI technologies, devices other than desktop PCs and focusing on supporting Windows 8.  Using XAML and C#, with several examples rewritten in C++.  The 5th Edition was the last to be pure C based.
 
-Many programmers learned Windows programming using this 5th edition book, and is still used as a decent start for learning.  I have not really done much with the 6th edition.
+Many programmers learned Desktop Windows programming using this 5th edition book, it is still used as a decent start for learning IMO.  I have not really done much with the 6th edition.
 
 ## Changes to sources
-Win9X was a hybrid OS that combined 16-bit functionality with 32-bit.  WinNT was pure 32-bit.  16-bit functions are ANSI, 32-bit are now classified as Unicode.  Modern Windows with WinXP and later is now pure Unicode, running on both 32- and 64-bit CPUs.  The two biggest changes I make are:
+Win9X/Me was a hybrid OS that combined 16-bit functionality with 32-bit.  WinNT was pure 32-bit.  16-bit functions are ANSI, 32-bit are now classified as Unicode.  Modern Windows with WinXP and later is now pure Unicode, running on both 32- and 64-bit CPUs.  The biggest change I make is:
 
 1. Explicitly coding WinAPI functions so the Unicode versions are called.  A few samples require ANSI functionality be used for key parts, when dealing with text files.
-2. Adapting the code so it compiles (and runs) on x86 & x64 CPUs.  Leveraging a modern multi-core CPU is obviously not addressed since such a CPU didn't exist when the code was originally written, even though Windows can and did utilize multitasking and multithreading.
 
 ## Considerations on adapting old source code
-Most of the samples after modernizing still work, a credit on Microsoft and and their emphasis on backwards and forwards compatibility.
+Most of the samples before and after modernizing still work, a credit on Microsoft and and their emphasis on backwards and forwards compatibility.
 
 Several of the samples require a bit more work, some samples AFAIK won't execute no matter what.  Chapter 16 in particular because of the use of 256-bit display palletes, a bygone relic of archaic computing hardware that was common in the Win9X days.
 
-The sources were adapted and compiled using Visual Studio 2022 & 2026, the Community edition.  It is free for non-commercial use.
+The sources were adapted and compiled using Visual Studio 2022 & 2026, the Community editions.  The Community editions are free for non-commercial use.
+
+[Download Visual Studio 2026 Community](https://visualstudio.microsoft.com/downloads/)
 
 ## Contents of this repository
 There is an archive of the original sources from the CD that was included with the book when purchased, and (of course) the revised/modernized sources.  I've renamed to folders containing the sources to better reflect the orders the code was talked about in the book.
@@ -61,8 +62,8 @@ There is a 'companion' book to Petzold's PW5E (though not written by Petzold) th
 There may be links to websites or internet sources in this repo. Links can  go stale. A search engine is your friend.
 
 ### Post-script
-The code as orginally written \****is***\* compileable as written as long as the code isn't compiled using the Unicode/wide character set. With a modern compiler If someone compiled the code using the Multi-byte character set the code needs zero modification.
+The code as orginally written \****is***\* compileable as written, though several examples won't compile as x64.
 
-Using a modern compiler such as 2022 or 2026 (really recommended for Desktop WinAPI code), compiling using the Multi-byte character set both x64 and x86 are doable.  There will be at least one *warning* when compiling the unmodified code as x64 with the Multi-Byte character set, there should be no errors.  Debug or Release compile.
+Using a modern compiler such as 2022 or 2026 (really recommended for Desktop WinAPI code) there will be at least one *warning* when compiling the unmodified code as x64, there should be no errors.  Debug or Release compile.
 
-If you were wondering, the warning is **warning C4244: 'return': conversion from 'WPARAM' to 'int', possible loss of data**.
+If you were wondering, the warning is `warning C4244: 'return': conversion from 'WPARAM' to 'int', possible loss of data`.
